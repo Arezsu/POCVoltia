@@ -67,9 +67,9 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jTextFieldBuscar" min="-2" pref="36" max="-2" attributes="0"/>
-                  <Component id="jButtonBuscar" min="-2" pref="36" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="jTextFieldBuscar" pref="36" max="32767" attributes="0"/>
+                  <Component id="jButtonBuscar" pref="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -215,7 +215,7 @@
     <Component class="javax.swing.JButton" name="jButtonBuscar">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="2" name="C:\Users\arezs\Downloads\Buscar(5).png"/>
+          <Image iconType="3" name="/Buscar (2).png"/>
         </Property>
       </Properties>
       <Events>

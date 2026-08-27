@@ -52,7 +52,7 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jButtonBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Buscar Lavadora");
+        setTitle("Buscar Nevera");
 
         jLabel1.setText("Fecha de fabricacion:");
         jLabel1.setToolTipText("");
@@ -103,7 +103,7 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jTextFieldBuscar.setToolTipText("Escriba el Codigo de la lavadora");
         jTextFieldBuscar.addActionListener(this::jTextFieldBuscarActionPerformed);
 
-        jButtonBuscar.setIcon(new javax.swing.ImageIcon("C:\\Users\\arezs\\Downloads\\Buscar(5).png")); // NOI18N
+        jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
         jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
