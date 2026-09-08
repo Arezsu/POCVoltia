@@ -1,62 +1,72 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.arezsu.pocvoltia.model;
 
 import java.time.LocalDate;
 
-/**
- *
- * @author arezs
- */
 public class Nevera extends Electrodomestico implements ICongelable {
 
-    private int capacidadLitros;
-    private boolean tieneNoFrost;
+    private int volumenLitros;
+    private int numeroPuertas;
+    private boolean dispensadorAgua;
 
-    public Nevera(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, int capacidadLitros, boolean tieneNoFrost) throws Exception {
+    public Nevera(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, int volumenLitros, int numeroPuertas1, boolean dispensadorAgua) throws Exception {
         super(codigo, marca, fechaFabricacion, precioBase);
-        setCapacidadLitros(capacidadLitros);
-        this.tieneNoFrost = tieneNoFrost;
+        setVolumenLitros(volumenLitros);
+        setNumeroPuertas(numeroPuertas);
+        this.dispensadorAgua = dispensadorAgua;
     }
 
     @Override
     public double calcularPrecioFinal() {
         double precio = getPrecioBase();
-        if (tieneNoFrost) {
-            precio += 200000;
+        if (volumenLitros > 300) {
+            precio += 300000;
+        }
+        if (dispensadorAgua) {
+            precio += 150000;
         }
         return precio;
     }
 
-    public int getCapacidadLitros() {
-        return capacidadLitros;
+    public int getVolumenLitros() {
+        return volumenLitros;
     }
 
-    public void setCapacidadLitros(int capacidadLitros) throws Exception {
-        if (capacidadLitros > 0) {
-            this.capacidadLitros = capacidadLitros;
+    public void setVolumenLitros(int volumenLitros) throws Exception {
+        if (volumenLitros > 0) {
+            this.volumenLitros = volumenLitros;
         } else {
-            throw new Exception("Capacidad en litros menor o igual a 0");
+            throw new Exception("El volumen en litros debe ser mayor a 0");
         }
     }
 
-    public boolean isTieneNoFrost() {
-        return tieneNoFrost;
+    public int getNumeroPuertas() {
+        return numeroPuertas;
     }
 
-    public void setTieneNoFrost(boolean tieneNoFrost) {
-        this.tieneNoFrost = tieneNoFrost;
+    public void setNumeroPuertas(int numeroPuertas) throws Exception {
+        if (numeroPuertas > 0) {
+            this.numeroPuertas = numeroPuertas;
+        } else {
+            throw new Exception("El número de puertas debe ser al menos 1");
+        }
+    }
+
+    public boolean isDispensadorAgua() {
+        return dispensadorAgua;
+    }
+
+    public void setDispensadorAgua(boolean dispensadorAgua) {
+        this.dispensadorAgua = dispensadorAgua;
+    }
+
+    // Métodos de la interfaz IAplicable
+    @Override
+    public double aplicarDescuentoTemporada(double porcentaje) {
+        return calcularPrecioFinal() * (1 - (porcentaje / 100));
     }
 
     @Override
-    public void activarSuperCongelacion() {
-
-    }
-
-    @Override
-    public void activarModoVacacionesNevera() {
-
+    public String obtenerCertificadoGarantia() {
+        return "Certificado de Garantía Extendida Nevera POCVoltia";
     }
 }

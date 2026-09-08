@@ -45,22 +45,20 @@ public class GUIListarLavadora extends javax.swing.JFrame {
         setResizable(false);
 
         tblLavadora.setBackground(new java.awt.Color(204, 204, 255));
+        tblLavadora.setBorder(new javax.swing.border.MatteBorder(null));
         tblLavadora.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Codigo", "Marca", "Fecha Fab", "Precio Base", "Capacidad", "Secado", "Precio Final"
+                "Codigo", "Marca", "Fecha Fab", "Precio Base", "Capacidad", "Tecnologia Inverter", "Velocidad Centrifugado", "Programa Lavado", "Precio Final"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Double.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Integer.class, java.lang.String.class, java.lang.Double.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, true, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -83,7 +81,7 @@ public class GUIListarLavadora extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 508, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 667, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnListar)))
@@ -111,18 +109,23 @@ public class GUIListarLavadora extends javax.swing.JFrame {
 
         for (Map.Entry<Integer, Electrodomestico> emp : electrodomesticos.entrySet()) {
             Integer codigo = emp.getKey();
-            Electrodomestico obj = emp.getValue(); 
+            Electrodomestico obj = emp.getValue();
 
             if (obj instanceof Lavadora) {
-                Lavadora lav = (Lavadora) obj; 
+                Lavadora lav = (Lavadora) obj;
+
+                // Validar si tiene un programa de lavado asociado para mostrar el nombre
+                String nombrePrograma = (lav.getProgramaLavado() != null) ? lav.getProgramaLavado().getNombre() : "Sin programa";
 
                 Object[] fila = new Object[]{
                     codigo,
                     lav.getMarca(),
                     lav.getFechaFabricacion(),
                     lav.getPrecioBase(),
-                    lav.getCapacidadKilos(),
-                    lav.isFuncionSecado(),
+                    lav.getCapacidadCargaKilos(),
+                    lav.isTecnologiaInverter(),
+                    lav.getVelocidadCentrifugadoRPM(),
+                    nombrePrograma,
                     lav.calcularPrecioFinal()
                 };
 

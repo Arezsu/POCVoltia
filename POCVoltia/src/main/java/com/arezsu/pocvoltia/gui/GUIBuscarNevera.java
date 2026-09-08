@@ -40,16 +40,18 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
         txtMarca = new javax.swing.JTextField();
         txtFechaFab = new javax.swing.JTextField();
         txtPrecioBase = new javax.swing.JTextField();
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
-        jcbNoFrost = new javax.swing.JCheckBox();
         jTextFieldBuscar = new javax.swing.JTextField();
         jButtonBuscar = new javax.swing.JButton();
+        jLabel8 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
+        jcbDispenAgua = new javax.swing.JCheckBox();
+        txtNumPuertas = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Buscar Nevera");
@@ -66,11 +68,8 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jLabel4.setText("Precio base: ");
         jLabel4.setToolTipText("");
 
-        jLabel5.setText("Capacidad (Litro):");
+        jLabel5.setText("Volumen:");
         jLabel5.setToolTipText("");
-
-        jLabel6.setText("Tiene No Frost:");
-        jLabel6.setToolTipText("");
 
         txtCodigo.setEditable(false);
         txtCodigo.setActionCommand("<Not Set>");
@@ -95,16 +94,24 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jLabel7.setText("L");
         jLabel7.setToolTipText("");
 
-        jcbNoFrost.setText("Si");
-        jcbNoFrost.setBorder(new javax.swing.border.MatteBorder(null));
-        jcbNoFrost.setEnabled(false);
-        jcbNoFrost.addActionListener(this::jcbNoFrostActionPerformed);
-
         jTextFieldBuscar.setToolTipText("Escriba el Codigo de la lavadora");
         jTextFieldBuscar.addActionListener(this::jTextFieldBuscarActionPerformed);
 
         jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
         jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
+
+        jLabel8.setText("Numero de puertas");
+        jLabel8.setToolTipText("");
+
+        jLabel6.setText("Dispensador de agua");
+        jLabel6.setToolTipText("");
+
+        jcbDispenAgua.setText("Si");
+        jcbDispenAgua.setEnabled(false);
+        jcbDispenAgua.addActionListener(this::jcbDispenAguaActionPerformed);
+
+        txtNumPuertas.setEnabled(false);
+        txtNumPuertas.addActionListener(this::txtNumPuertasActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -120,25 +127,32 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(23, 23, 23)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel6))
-                        .addGap(35, 35, 35)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 1, Short.MAX_VALUE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(jLabel7))
-                                .addComponent(jcbNoFrost, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))))
-                .addContainerGap(44, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel5))
+                                .addGap(35, 35, 35)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(jLabel7))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel8))
+                                .addGap(37, 37, 37)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jcbDispenAgua))))))
+                .addGap(14, 44, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -169,19 +183,19 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel7)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel6)
-                    .addComponent(jcbNoFrost))
-                .addGap(39, 39, 39))
+                .addGap(18, 18, 18)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jcbDispenAgua)
+                    .addComponent(jLabel6))
+                .addContainerGap())
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jcbNoFrostActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbNoFrostActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jcbNoFrostActionPerformed
 
     private void jTextFieldBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldBuscarActionPerformed
 
@@ -195,14 +209,14 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
 
             if (e != null && e instanceof Nevera) {
                 Nevera nev = (Nevera) e;
-
-                // 3. Autocompletamos los campos de tu interfaz gráfica con los datos encontrados
+                
                 txtCodigo.setText(String.valueOf(nev.getCodigo()));
                 txtMarca.setText(nev.getMarca());
                 txtFechaFab.setText(String.valueOf(nev.getFechaFabricacion()));
                 txtPrecioBase.setText(String.valueOf(nev.getPrecioBase()));
-                txtCapacidad.setText(String.valueOf(nev.getCapacidadLitros()));
-                jcbNoFrost.setSelected(nev.isTieneNoFrost());
+                txtCapacidad.setText(String.valueOf(nev.getVolumenLitros()));
+                txtNumPuertas.setText(String.valueOf(nev.getNumeroPuertas())); 
+                jcbDispenAgua.setSelected(nev.isDispensadorAgua());
 
                 JOptionPane.showMessageDialog(this, "¡Nevera encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
@@ -216,6 +230,14 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonBuscarActionPerformed
+
+    private void jcbDispenAguaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbDispenAguaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbDispenAguaActionPerformed
+
+    private void txtNumPuertasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNumPuertasActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNumPuertasActionPerformed
 
     /**
      * @param args the command line arguments
@@ -251,12 +273,14 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JTextField jTextFieldBuscar;
-    private javax.swing.JCheckBox jcbNoFrost;
+    private javax.swing.JCheckBox jcbDispenAgua;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
     private javax.swing.JTextField txtFechaFab;
     private javax.swing.JTextField txtMarca;
+    private javax.swing.JTextField txtNumPuertas;
     private javax.swing.JTextField txtPrecioBase;
     // End of variables declaration//GEN-END:variables
 }

@@ -1,58 +1,64 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.arezsu.pocvoltia.model;
 
 import java.time.LocalDate;
 
-/**
- *
- * @author arezs
- */
 public class Lavadora extends Electrodomestico {
 
-    private double capacidadKilos;
-    private boolean funcionSecado;
-    private ProgramaLavado programaLavado; // Asociación con la clase D
+    private double capacidadCargaKilos;
+    private int velocidadCentrifugadoRPM;
+    private boolean tecnologiaInverter;
+    private ProgramaLavado programaLavado; // Asociación con la Clase D
 
-    public Lavadora(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, double capacidadKilos, boolean funcionSecado) throws Exception {
+    public Lavadora(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, double capacidadCargaKilos, int velocidadCentrifugadoRPM1, boolean tecnologiaInverter) throws Exception {
         super(codigo, marca, fechaFabricacion, precioBase);
-        setCapacidadKilos(capacidadKilos);
-        this.funcionSecado = funcionSecado;
-        this.programaLavado = new ProgramaLavado("Estándar", 30);
+        setCapacidadCargaKilos(capacidadCargaKilos);
+        setVelocidadCentrifugadoRPM(velocidadCentrifugadoRPM);
+        this.tecnologiaInverter = tecnologiaInverter;
+        this.programaLavado = new ProgramaLavado("Ciclo Rápido", 15);
     }
 
     @Override
     public double calcularPrecioFinal() {
         double precio = getPrecioBase();
-        if (capacidadKilos > 10) {
-            precio += 100000;
+        if (capacidadCargaKilos > 15) {
+            precio += 120000;
         }
-        if (funcionSecado) {
-            precio += 150000;
+        if (tecnologiaInverter) {
+            precio += 250000;
         }
         return precio;
     }
 
-    public double getCapacidadKilos() {
-        return capacidadKilos;
+    public double getCapacidadCargaKilos() {
+        return capacidadCargaKilos;
     }
 
-    public void setCapacidadKilos(double capacidadKilos) throws Exception {
-        if (capacidadKilos > 0) {
-            this.capacidadKilos = capacidadKilos;
+    public void setCapacidadCargaKilos(double capacidadCargaKilos) throws Exception {
+        if (capacidadCargaKilos > 0) {
+            this.capacidadCargaKilos = capacidadCargaKilos;
         } else {
-            throw new Exception("Capacidad menor o igual a 0");
+            throw new Exception("La capacidad de carga en kilos debe ser mayor a 0");
         }
     }
 
-    public boolean isFuncionSecado() {
-        return funcionSecado;
+    public int getVelocidadCentrifugadoRPM() {
+        return velocidadCentrifugadoRPM;
     }
 
-    public void setFuncionSecado(boolean funcionSecado) {
-        this.funcionSecado = funcionSecado;
+    public void setVelocidadCentrifugadoRPM(int velocidadCentrifugadoRPM) throws Exception {
+        if (velocidadCentrifugadoRPM >= 600) {
+            this.velocidadCentrifugadoRPM = velocidadCentrifugadoRPM;
+        } else {
+            throw new Exception("La velocidad de centrifugado mínima debe ser 600 RPM");
+        }
+    }
+
+    public boolean isTecnologiaInverter() {
+        return tecnologiaInverter;
+    }
+
+    public void setTecnologiaInverter(boolean tecnologiaInverter) {
+        this.tecnologiaInverter = tecnologiaInverter;
     }
 
     public ProgramaLavado getProgramaLavado() {

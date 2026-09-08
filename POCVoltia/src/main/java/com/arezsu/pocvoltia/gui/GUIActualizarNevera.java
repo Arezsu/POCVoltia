@@ -8,20 +8,21 @@ import com.arezsu.pocvoltia.model.Electrodomestico;
 import com.arezsu.pocvoltia.model.Lavadora;
 import com.arezsu.pocvoltia.model.Nevera;
 import com.arezsu.pocvoltia.servicios.ServicioElectrodomestico;
+import java.time.LocalDate;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author arezs
  */
-public class GUIEliminarNevera extends javax.swing.JFrame {
+public class GUIActualizarNevera extends javax.swing.JFrame {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIEliminarNevera.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIActualizarNevera.class.getName());
 
     /**
      * Creates new form GUIBuscarLavadora
      */
-    public GUIEliminarNevera() {
+    public GUIActualizarNevera() {
         initComponents();
         setLocationRelativeTo(this);
 
@@ -48,7 +49,7 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jTextFieldBuscar = new javax.swing.JTextField();
-        btnEliminarNevera = new javax.swing.JButton();
+        btnActualizarNevera = new javax.swing.JButton();
         txtNumPuertas = new javax.swing.JTextField();
         jcbDispenAgua = new javax.swing.JCheckBox();
         jLabel8 = new javax.swing.JLabel();
@@ -74,24 +75,24 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         jLabel5.setToolTipText("");
 
         txtCodigo.setEditable(false);
+        txtCodigo.setBackground(new java.awt.Color(255, 255, 255));
         txtCodigo.setActionCommand("<Not Set>");
-        txtCodigo.setEnabled(false);
 
         txtMarca.setEditable(false);
+        txtMarca.setBackground(new java.awt.Color(255, 255, 255));
         txtMarca.setActionCommand("<Not Set>");
-        txtMarca.setEnabled(false);
 
         txtFechaFab.setEditable(false);
+        txtFechaFab.setBackground(new java.awt.Color(255, 255, 255));
         txtFechaFab.setActionCommand("<Not Set>");
-        txtFechaFab.setEnabled(false);
 
         txtPrecioBase.setEditable(false);
+        txtPrecioBase.setBackground(new java.awt.Color(255, 255, 255));
         txtPrecioBase.setActionCommand("<Not Set>");
-        txtPrecioBase.setEnabled(false);
 
         txtCapacidad.setEditable(false);
+        txtCapacidad.setBackground(new java.awt.Color(255, 255, 255));
         txtCapacidad.setActionCommand("<Not Set>");
-        txtCapacidad.setEnabled(false);
         txtCapacidad.addActionListener(this::txtCapacidadActionPerformed);
 
         jLabel7.setText("L");
@@ -100,14 +101,13 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         jTextFieldBuscar.setToolTipText("Escriba el Codigo de la lavadora");
         jTextFieldBuscar.addActionListener(this::jTextFieldBuscarActionPerformed);
 
-        btnEliminarNevera.setText("Eliminar");
-        btnEliminarNevera.addActionListener(this::btnEliminarNeveraActionPerformed);
+        btnActualizarNevera.setText("Actualizar");
+        btnActualizarNevera.addActionListener(this::btnActualizarNeveraActionPerformed);
 
-        txtNumPuertas.setEnabled(false);
         txtNumPuertas.addActionListener(this::txtNumPuertasActionPerformed);
 
+        jcbDispenAgua.setBackground(new java.awt.Color(255, 255, 255));
         jcbDispenAgua.setText("Si");
-        jcbDispenAgua.setEnabled(false);
         jcbDispenAgua.addActionListener(this::jcbDispenAguaActionPerformed);
 
         jLabel8.setText("Numero de puertas");
@@ -160,7 +160,7 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                                     .addComponent(jcbDispenAgua)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(161, 161, 161)
-                        .addComponent(btnEliminarNevera)))
+                        .addComponent(btnActualizarNevera)))
                 .addContainerGap(38, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -201,7 +201,7 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                     .addComponent(jcbDispenAgua)
                     .addComponent(jLabel6))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
-                .addComponent(btnEliminarNevera)
+                .addComponent(btnActualizarNevera)
                 .addGap(22, 22, 22))
         );
 
@@ -216,38 +216,36 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCapacidadActionPerformed
 
-    private void btnEliminarNeveraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarNeveraActionPerformed
+    private void btnActualizarNeveraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarNeveraActionPerformed
         try {
-            // 1. Tomamos el código de la caja de texto
-            int codigoAEliminar = Integer.parseInt(txtCodigo.getText().trim());
+            int codigo = Integer.parseInt(txtCodigo.getText().trim());
 
-            // 2. Llamamos al método de eliminar de tu Servicio
-            boolean eliminado = ServicioElectrodomestico.eliminarElectrodomestico(codigoAEliminar);
+            // Verificamos si existe el electrodoméstico y si es una Nevera
+            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
 
-            if (eliminado) {
-                JOptionPane.showMessageDialog(this, "¡Electrodoméstico eliminado con éxito!", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
+            if (e != null && e instanceof Nevera) {
+                Nevera nev = (Nevera) e;
 
-                // 3. Limpiamos los campos de texto y controles
-                txtCodigo.setText("");
-                txtMarca.setText("");
-                txtPrecioBase.setText("");
-                txtCapacidad.setText("");
-                txtFechaFab.setText("");
+                // Actualizamos todos los atributos de la nevera
+                nev.setMarca(txtMarca.getText().trim());
+                nev.setFechaFabricacion(LocalDate.parse(txtFechaFab.getText().trim()));
+                nev.setPrecioBase(Double.parseDouble(txtPrecioBase.getText().trim()));
+                nev.setVolumenLitros(Integer.parseInt(txtCapacidad.getText().trim()));
+                nev.setNumeroPuertas(Integer.parseInt(txtNumPuertas.getText().trim()));
+                nev.setDispensadorAgua(jcbDispenAgua.isSelected()); // El checkbox del dispensador
 
-                // Limpiar campos adicionales si existen en esta vista (ej. RPM, puertas, etc.)
-                // txtNumPuertas.setText(""); 
-                // jcbDispenAgua.setSelected(false); // Corregido para desmarcar el checkbox
+                JOptionPane.showMessageDialog(this, "¡Nevera actualizada con éxito!", "Actualizado", JOptionPane.INFORMATION_MESSAGE);
+
             } else {
-                JOptionPane.showMessageDialog(this, "No se encontró ningún electrodoméstico con ese código.", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se encontró una nevera registrada con ese código para actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
             }
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Por favor, verifica que los campos numéricos tengan un formato válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Ocurrió un error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
-
-    }//GEN-LAST:event_btnEliminarNeveraActionPerformed
+    }//GEN-LAST:event_btnActualizarNeveraActionPerformed
 
     private void txtNumPuertasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNumPuertasActionPerformed
         // TODO add your handling code here:
@@ -309,11 +307,11 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new GUIEliminarNevera().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new GUIActualizarNevera().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnEliminarNevera;
+    private javax.swing.JButton btnActualizarNevera;
     private javax.swing.JButton jButtonBuscar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;

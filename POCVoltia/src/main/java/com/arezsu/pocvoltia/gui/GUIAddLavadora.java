@@ -48,7 +48,9 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         txtCapacidad = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jcbFunSecado = new javax.swing.JCheckBox();
+        jcbTecInve = new javax.swing.JCheckBox();
+        jLabel7 = new javax.swing.JLabel();
+        txtVelCentri = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Adicionar Lavadora");
@@ -80,11 +82,16 @@ public class GUIAddLavadora extends javax.swing.JFrame {
 
         txtCapacidad.addActionListener(this::txtCapacidadActionPerformed);
 
-        jLabel6.setText("Funcion de secado:");
+        jLabel6.setText("Tecnologia Inverter");
         jLabel6.setToolTipText("");
 
-        jcbFunSecado.setText("Si");
-        jcbFunSecado.addActionListener(this::jcbFunSecadoActionPerformed);
+        jcbTecInve.setText("Si");
+        jcbTecInve.addActionListener(this::jcbTecInveActionPerformed);
+
+        jLabel7.setText("Velocidad Centrifugado:");
+        jLabel7.setToolTipText("");
+
+        txtVelCentri.addActionListener(this::txtVelCentriActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -98,8 +105,9 @@ public class GUIAddLavadora extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(jLabel4)
                     .addComponent(jLabel5)
-                    .addComponent(jLabel6))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
@@ -112,7 +120,8 @@ public class GUIAddLavadora extends javax.swing.JFrame {
                         .addComponent(btnAceptar))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(6, 6, 6)
-                        .addComponent(jcbFunSecado)))
+                        .addComponent(jcbTecInve))
+                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(32, 32, 32))
         );
         layout.setVerticalGroup(
@@ -139,11 +148,15 @@ public class GUIAddLavadora extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(jcbFunSecado))
-                .addContainerGap(17, Short.MAX_VALUE))
+                    .addComponent(jcbTecInve))
+                .addGap(13, 13, 13))
         );
 
         pack();
@@ -154,28 +167,33 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         Electrodomestico lav;
         LocalDate fechaFabricacion;
         double precioBase;
-        double capacidadKilos;
-        boolean funcionSecado;
+        double capacidadCargaKilos;
+        int velocidadCentrifugadoRPM;
+        boolean tecnologiaInverter;
 
         try {
             String strCodigo = txtCodigo.getText().trim();
-            String marca = txtMarca.getText().trim(); // Leído desde caja de texto JTextField
+            String marca = txtMarca.getText().trim();
             String strFechaFabricacion = txtFechaFab.getText().trim();
             String strPrecioBase = txtPrecioBase.getText().trim();
             String strCapacidad = txtCapacidad.getText().trim();
+            String strRpm = txtVelCentri.getText().trim(); 
 
             codigo = Integer.parseInt(strCodigo);
             fechaFabricacion = LocalDate.parse(strFechaFabricacion);
             precioBase = Double.parseDouble(strPrecioBase);
-            capacidadKilos = Double.parseDouble(strCapacidad);
-            funcionSecado = jcbFunSecado.isSelected();
+            capacidadCargaKilos = Double.parseDouble(strCapacidad);
+            velocidadCentrifugadoRPM = Integer.parseInt(strRpm); // Convertir a entero
+            tecnologiaInverter = jcbTecInve.isSelected();
 
-            lav = new Lavadora(codigo, marca, fechaFabricacion, precioBase, capacidadKilos, funcionSecado);
+            // Instanciando con los nuevos parámetros de la clase Lavadora
+            lav = new Lavadora(codigo, marca, fechaFabricacion, precioBase, capacidadCargaKilos, velocidadCentrifugadoRPM, tecnologiaInverter);
+
             ServicioElectrodomestico.addElectrodomestico(lav);
-            JOptionPane.showMessageDialog(this, "¡Lavadora creada!");
+            JOptionPane.showMessageDialog(this, "¡Lavadora creada exitosamente!");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e);
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de validación", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAceptarActionPerformed
 
@@ -187,9 +205,13 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCapacidadActionPerformed
 
-    private void jcbFunSecadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbFunSecadoActionPerformed
+    private void jcbTecInveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbTecInveActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jcbFunSecadoActionPerformed
+    }//GEN-LAST:event_jcbTecInveActionPerformed
+
+    private void txtVelCentriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVelCentriActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtVelCentriActionPerformed
 
     /**
      * @param args the command line arguments
@@ -224,11 +246,13 @@ public class GUIAddLavadora extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JCheckBox jcbFunSecado;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JCheckBox jcbTecInve;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
     private javax.swing.JTextField txtFechaFab;
     private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtPrecioBase;
+    private javax.swing.JTextField txtVelCentri;
     // End of variables declaration//GEN-END:variables
 }

@@ -47,20 +47,20 @@ public class GUIListarNevera extends javax.swing.JFrame {
         tblNevera.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         tblNevera.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Codigo", "Marca", "Fecha Fab", "Precio Base", "Capacidad", "No Frost", "Precio FInal"
+                "Codigo", "Marca", "Fecha Fab", "Precio Base", "Volumen", "Num Puertas", "Disp Agua", "Precio FInal"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Double.class, java.lang.Boolean.class, java.lang.Double.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.Double.class, java.lang.Integer.class, java.lang.Integer.class, java.lang.Boolean.class, java.lang.Double.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false, false, false, false
+                false, false, false, false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -83,7 +83,7 @@ public class GUIListarNevera extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 508, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 568, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnListar)))
@@ -103,9 +103,10 @@ public class GUIListarNevera extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnListarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnListarActionPerformed
-        Map<Integer, Electrodomestico> electrodomesticos = ServicioElectrodomestico.getElectrodomesticos();
+        Map<Integer, Electrodomestico> electrodomesticos;
+        electrodomesticos = ServicioElectrodomestico.getElectrodomesticos();
 
-        DefaultTableModel modelo = (DefaultTableModel) tblNevera.getModel(); // o el nombre de tu tabla
+        DefaultTableModel modelo = (DefaultTableModel) tblNevera.getModel();
         modelo.setRowCount(0);
 
         for (Map.Entry<Integer, Electrodomestico> emp : electrodomesticos.entrySet()) {
@@ -113,15 +114,16 @@ public class GUIListarNevera extends javax.swing.JFrame {
             Electrodomestico obj = emp.getValue();
 
             if (obj instanceof Nevera) {
-                Nevera nev = (Nevera) obj; 
+                Nevera nev = (Nevera) obj;
 
                 Object[] fila = new Object[]{
                     codigo,
                     nev.getMarca(),
                     nev.getFechaFabricacion(),
                     nev.getPrecioBase(),
-                    nev.getCapacidadLitros(),
-                    nev.isTieneNoFrost(),
+                    nev.getVolumenLitros(),
+                    nev.getNumeroPuertas(),
+                    nev.isDispensadorAgua(),
                     nev.calcularPrecioFinal()
                 };
 

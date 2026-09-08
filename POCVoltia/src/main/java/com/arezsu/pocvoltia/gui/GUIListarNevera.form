@@ -30,7 +30,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jScrollPane1" pref="508" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" pref="568" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       <Component id="btnListar" min="-2" max="-2" attributes="0"/>
@@ -69,18 +69,24 @@
               <Font name="Tahoma" size="12" style="0"/>
             </Property>
             <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-              <Table columnCount="7" rowCount="4">
+              <Table columnCount="8" rowCount="4">
                 <Column editable="false" title="Codigo" type="java.lang.Integer"/>
                 <Column editable="false" title="Marca" type="java.lang.String"/>
                 <Column editable="false" title="Fecha Fab" type="java.lang.String"/>
                 <Column editable="false" title="Precio Base" type="java.lang.Double"/>
-                <Column editable="false" title="Capacidad" type="java.lang.Double"/>
-                <Column editable="false" title="No Frost" type="java.lang.Boolean"/>
+                <Column editable="false" title="Volumen" type="java.lang.Integer"/>
+                <Column editable="false" title="Num Puertas" type="java.lang.Integer"/>
+                <Column editable="false" title="Disp Agua" type="java.lang.Boolean"/>
                 <Column editable="false" title="Precio FInal" type="java.lang.Double"/>
               </Table>
             </Property>
             <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
               <TableColumnModel selectionModel="0">
+                <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                  <Title/>
+                  <Editor/>
+                  <Renderer/>
+                </Column>
                 <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                   <Title/>
                   <Editor/>

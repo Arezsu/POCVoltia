@@ -47,7 +47,9 @@ public class GUIAddNevera extends javax.swing.JFrame {
         jLabel5 = new javax.swing.JLabel();
         txtCapacidad = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
-        jcbNoFrost = new javax.swing.JCheckBox();
+        jcbDispenAgua = new javax.swing.JCheckBox();
+        jLabel7 = new javax.swing.JLabel();
+        txtNumPuertas = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Adicionar Nevera");
@@ -73,15 +75,21 @@ public class GUIAddNevera extends javax.swing.JFrame {
         jLabel4.setText("Precio base: ");
         jLabel4.setToolTipText("");
 
-        jLabel5.setText("Capacidad (Litro):");
+        jLabel5.setText("Volumen (L)");
         jLabel5.setToolTipText("");
 
         txtCapacidad.addActionListener(this::txtCapacidadActionPerformed);
 
-        jLabel6.setText("Tiene no Frost:");
+        jLabel6.setText("Dispensador de agua");
         jLabel6.setToolTipText("");
 
-        jcbNoFrost.setText("Si");
+        jcbDispenAgua.setText("Si");
+        jcbDispenAgua.addActionListener(this::jcbDispenAguaActionPerformed);
+
+        jLabel7.setText("Numero de puertas");
+        jLabel7.setToolTipText("");
+
+        txtNumPuertas.addActionListener(this::txtNumPuertasActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -95,9 +103,11 @@ public class GUIAddNevera extends javax.swing.JFrame {
                     .addComponent(jLabel1)
                     .addComponent(jLabel4)
                     .addComponent(jLabel5)
-                    .addComponent(jLabel6))
+                    .addComponent(jLabel6)
+                    .addComponent(jLabel7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jcbDispenAgua)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -107,9 +117,7 @@ public class GUIAddNevera extends javax.swing.JFrame {
                             .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGap(37, 37, 37)
                         .addComponent(btnAceptar))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jcbNoFrost)))
+                    .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(32, 32, 32))
         );
         layout.setVerticalGroup(
@@ -136,11 +144,15 @@ public class GUIAddNevera extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel7)
+                    .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel6)
-                    .addComponent(jcbNoFrost))
-                .addContainerGap(17, Short.MAX_VALUE))
+                    .addComponent(jcbDispenAgua)
+                    .addComponent(jLabel6))
+                .addGap(41, 41, 41))
         );
 
         pack();
@@ -151,8 +163,9 @@ public class GUIAddNevera extends javax.swing.JFrame {
         Electrodomestico nev;
         LocalDate fechaFabricacion;
         double precioBase;
-        int capacidadLitros;
-        boolean tieneNoFrost;
+        int volumenLitros;
+        int numeroPuertas;
+        boolean dispensadorAgua;
 
         try {
             String strCodigo = txtCodigo.getText().trim();
@@ -160,19 +173,22 @@ public class GUIAddNevera extends javax.swing.JFrame {
             String strFechaFabricacion = txtFechaFab.getText().trim();
             String strPrecioBase = txtPrecioBase.getText().trim();
             String strCapacidad = txtCapacidad.getText().trim();
+            String strNumPuertas = txtNumPuertas.getText().trim(); 
 
             codigo = Integer.parseInt(strCodigo);
             fechaFabricacion = LocalDate.parse(strFechaFabricacion);
             precioBase = Double.parseDouble(strPrecioBase);
-            capacidadLitros = Integer.parseInt(strCapacidad);
-            tieneNoFrost = jcbNoFrost.isSelected();
+            volumenLitros = Integer.parseInt(strCapacidad);
+            numeroPuertas = Integer.parseInt(strNumPuertas); // Convertir a entero
+            dispensadorAgua = jcbDispenAgua.isSelected(); // El checkbox del dispensador de agua
 
-            nev = new Nevera(codigo, marca, fechaFabricacion, precioBase, capacidadLitros, tieneNoFrost);
+            nev = new Nevera(codigo, marca, fechaFabricacion, precioBase, volumenLitros, numeroPuertas, dispensadorAgua);
+
             ServicioElectrodomestico.addElectrodomestico(nev);
-            JOptionPane.showMessageDialog(this, "¡Nevera creada!");
+            JOptionPane.showMessageDialog(this, "¡Nevera creada exitosamente!");
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e);
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de validación", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAceptarActionPerformed
 
@@ -183,6 +199,14 @@ public class GUIAddNevera extends javax.swing.JFrame {
     private void txtCapacidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCapacidadActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtCapacidadActionPerformed
+
+    private void jcbDispenAguaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbDispenAguaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbDispenAguaActionPerformed
+
+    private void txtNumPuertasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNumPuertasActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNumPuertasActionPerformed
 
     /**
      * @param args the command line arguments
@@ -217,11 +241,13 @@ public class GUIAddNevera extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JCheckBox jcbNoFrost;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JCheckBox jcbDispenAgua;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
     private javax.swing.JTextField txtFechaFab;
     private javax.swing.JTextField txtMarca;
+    private javax.swing.JTextField txtNumPuertas;
     private javax.swing.JTextField txtPrecioBase;
     // End of variables declaration//GEN-END:variables
 }

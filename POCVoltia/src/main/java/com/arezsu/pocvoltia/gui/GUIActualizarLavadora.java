@@ -8,20 +8,21 @@ import com.arezsu.pocvoltia.model.Electrodomestico;
 import com.arezsu.pocvoltia.model.Lavadora;
 import com.arezsu.pocvoltia.model.Nevera;
 import com.arezsu.pocvoltia.servicios.ServicioElectrodomestico;
+import java.time.LocalDate;
 import javax.swing.JOptionPane;
 
 /**
  *
  * @author arezs
  */
-public class GUIEliminarLavadora extends javax.swing.JFrame {
+public class GUIActualizarLavadora extends javax.swing.JFrame {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIEliminarLavadora.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIActualizarLavadora.class.getName());
 
     /**
      * Creates new form GUIBuscarLavadora
      */
-    public GUIEliminarLavadora() {
+    public GUIActualizarLavadora() {
         initComponents();
         setLocationRelativeTo(this);
 
@@ -48,12 +49,12 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jTextFieldBuscar = new javax.swing.JTextField();
-        jButtonBuscar = new javax.swing.JButton();
-        btnEliminarNevera = new javax.swing.JButton();
+        btnActualizarLavadora = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         txtVelCentri = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         jcbTecInve = new javax.swing.JCheckBox();
+        jButtonBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Eliminar Lavadora");
@@ -74,24 +75,24 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         jLabel5.setToolTipText("");
 
         txtCodigo.setEditable(false);
+        txtCodigo.setBackground(new java.awt.Color(255, 255, 255));
         txtCodigo.setActionCommand("<Not Set>");
-        txtCodigo.setEnabled(false);
 
         txtMarca.setEditable(false);
+        txtMarca.setBackground(new java.awt.Color(255, 255, 255));
         txtMarca.setActionCommand("<Not Set>");
-        txtMarca.setEnabled(false);
 
         txtFechaFab.setEditable(false);
+        txtFechaFab.setBackground(new java.awt.Color(255, 255, 255));
         txtFechaFab.setActionCommand("<Not Set>");
-        txtFechaFab.setEnabled(false);
 
         txtPrecioBase.setEditable(false);
+        txtPrecioBase.setBackground(new java.awt.Color(255, 255, 255));
         txtPrecioBase.setActionCommand("<Not Set>");
-        txtPrecioBase.setEnabled(false);
 
         txtCapacidad.setEditable(false);
+        txtCapacidad.setBackground(new java.awt.Color(255, 255, 255));
         txtCapacidad.setActionCommand("<Not Set>");
-        txtCapacidad.setEnabled(false);
         txtCapacidad.addActionListener(this::txtCapacidadActionPerformed);
 
         jLabel7.setText("Kg");
@@ -100,23 +101,22 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         jTextFieldBuscar.setToolTipText("Escriba el Codigo de la lavadora");
         jTextFieldBuscar.addActionListener(this::jTextFieldBuscarActionPerformed);
 
-        jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
-
-        btnEliminarNevera.setText("Eliminar");
-        btnEliminarNevera.addActionListener(this::btnEliminarNeveraActionPerformed);
+        btnActualizarLavadora.setText("Actualizar");
+        btnActualizarLavadora.addActionListener(this::btnActualizarLavadoraActionPerformed);
 
         jLabel8.setText("Velocidad Centrifugado:");
         jLabel8.setToolTipText("");
 
-        txtVelCentri.setEnabled(false);
         txtVelCentri.addActionListener(this::txtVelCentriActionPerformed);
 
         jLabel6.setText("Tecnologia Inverter");
         jLabel6.setToolTipText("");
 
         jcbTecInve.setText("Si");
-        jcbTecInve.setEnabled(false);
         jcbTecInve.addActionListener(this::jcbTecInveActionPerformed);
+
+        jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
+        jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -157,12 +157,12 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(59, 59, 59)
                         .addComponent(jTextFieldBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(152, 152, 152)
-                        .addComponent(btnEliminarNevera)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(btnActualizarLavadora)))
+                .addContainerGap(69, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -206,7 +206,7 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
                     .addComponent(jLabel6)
                     .addComponent(jcbTecInve))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(btnEliminarNevera)
+                .addComponent(btnActualizarLavadora)
                 .addContainerGap(14, Short.MAX_VALUE))
         );
 
@@ -217,62 +217,33 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         jButtonBuscarActionPerformed(evt);
     }//GEN-LAST:event_jTextFieldBuscarActionPerformed
 
-    private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
+    private void btnActualizarLavadoraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarLavadoraActionPerformed
         try {
-            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
+            int codigo = Integer.parseInt(txtCodigo.getText().trim());
 
-            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
+            // Verificamos si existe el electrodoméstico y si es una Lavadora
+            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
 
             if (e != null && e instanceof Lavadora) {
                 Lavadora lav = (Lavadora) e;
 
-                txtCodigo.setText(String.valueOf(lav.getCodigo()));
-                txtMarca.setText(lav.getMarca());
-                txtFechaFab.setText(String.valueOf(lav.getFechaFabricacion()));
-                txtPrecioBase.setText(String.valueOf(lav.getPrecioBase()));
-                txtCapacidad.setText(String.valueOf(lav.getCapacidadCargaKilos()));
-                jcbTecInve.setSelected(lav.isTecnologiaInverter());
+                // Actualizamos sus atributos con los nuevos valores de las cajas de texto
+                lav.setMarca(txtMarca.getText().trim());
+                lav.setPrecioBase(Double.parseDouble(txtPrecioBase.getText().trim()));
+                lav.setCapacidadCargaKilos(Double.parseDouble(txtCapacidad.getText().trim()));
+                lav.setVelocidadCentrifugadoRPM(Integer.parseInt(txtVelCentri.getText().trim()));
 
-                JOptionPane.showMessageDialog(this, "¡Lavadora encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "¡Lavadora actualizada con éxito!", "Actualizado", JOptionPane.INFORMATION_MESSAGE);
 
-            } else if (e != null) {
-                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una Lavadora.", "Aviso", JOptionPane.WARNING_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "No existe ningún electrodoméstico registrado con ese código.", "No encontrado", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se encontró una lavadora registrada con ese código para actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
             }
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_jButtonBuscarActionPerformed
-
-    private void btnEliminarNeveraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarNeveraActionPerformed
-        try {
-            // 1. Tomamos el código de la caja de texto superior (o la que uses para buscar/identificar)
-            int codigoAEliminar = Integer.parseInt(txtCodigo.getText().trim());
-
-            // 2. Llamamos al método de eliminar de tu Servicio (asumiendo que devuelve un boolean o elimina del HashMap)
-            boolean eliminado = ServicioElectrodomestico.eliminarElectrodomestico(codigoAEliminar);
-
-            if (eliminado) {
-                JOptionPane.showMessageDialog(this, "¡Electrodoméstico eliminado con éxito!", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
-
-                txtCodigo.setText("");
-                txtMarca.setText("");
-                txtPrecioBase.setText("");
-                txtCapacidad.setText("");
-                txtFechaFab.setText("");
-                jcbTecInve.setSelected(eliminado);
-            } else {
-                JOptionPane.showMessageDialog(this, "No se encontró ningún electrodoméstico con ese código.", "Error", JOptionPane.WARNING_MESSAGE);
-            }
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Por favor, verifica que los campos numéricos tengan un formato válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Ocurrió un error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_btnEliminarNeveraActionPerformed
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }    }//GEN-LAST:event_btnActualizarLavadoraActionPerformed
 
     private void txtCapacidadActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtCapacidadActionPerformed
         // TODO add your handling code here:
@@ -285,6 +256,40 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
     private void jcbTecInveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbTecInveActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jcbTecInveActionPerformed
+
+    private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
+        try {
+            int codigo = Integer.parseInt(txtCodigo.getText().trim());
+            
+            // Verificamos si existe el electrodoméstico y si es una Lavadora
+            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
+
+            if (e != null && e instanceof Lavadora) {
+                Lavadora lav = (Lavadora) e;
+
+                // Actualizamos todos los atributos de la lavadora
+                lav.setMarca(txtMarca.getText().trim());
+                lav.setFechaFabricacion(LocalDate.parse(txtFechaFab.getText().trim()));
+                lav.setPrecioBase(Double.parseDouble(txtPrecioBase.getText().trim()));
+                lav.setCapacidadCargaKilos(Double.parseDouble(txtCapacidad.getText().trim()));
+                lav.setVelocidadCentrifugadoRPM(Integer.parseInt(txtVelCentri.getText().trim()));
+                lav.setTecnologiaInverter(jcbTecInve.isSelected()); // El checkbox de tecnología inverter
+                
+                // Si también quieres actualizar el programa de lavado desde un combo u otra vista, lo agregas aquí
+                // lav.setProgramaLavado(...);
+
+                JOptionPane.showMessageDialog(this, "¡Lavadora actualizada con éxito!", "Actualizado", JOptionPane.INFORMATION_MESSAGE);
+
+            } else {
+                JOptionPane.showMessageDialog(this, "No se encontró una lavadora registrada con ese código para actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
+            }
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Por favor, verifica que los campos numéricos tengan un formato válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButtonBuscarActionPerformed
 
     /**
      * @param args the command line arguments
@@ -308,11 +313,11 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> new GUIEliminarLavadora().setVisible(true));
+        java.awt.EventQueue.invokeLater(() -> new GUIActualizarLavadora().setVisible(true));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnEliminarNevera;
+    private javax.swing.JButton btnActualizarLavadora;
     private javax.swing.JButton jButtonBuscar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
