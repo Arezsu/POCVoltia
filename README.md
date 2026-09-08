@@ -35,62 +35,90 @@ Un sistema robusto desarrollado en Java bajo la **Arquitectura Modelo-Vista-Cont
 
 ```mermaid
 classDiagram
+    class EmpresaInfo {
+        <<singleton>>
+        - static EmpresaInfo instancia
+        - String nombreEmpresa
+        - String version
+        + static getInstancia() EmpresaInfo
+        + getNombreEmpresa() String
+        + getVersion() String
+    }
+
+    class IAplicable {
+        <<interface>>
+        + aplicarDescuentoTemporada(double porcentaje) double
+        + obtenerCertificadoGarantia() String
+    }
+
     class ICongelable {
         <<interface>>
-        +activarSuperCongelacion() void
-        +activarModoVacacionesNevera() void
+        + activarSuperCongelacion() void
+        + activarModoVacacionesNevera() void
     }
 
     class Electrodomestico {
         <<abstract>>
-        -int codigo
-        -String marca
-        -LocalDate fechaFabricacion
-        -double precioBase
-        +getCodigo() int
-        +setCodigo(int codigo) void
-        +getMarca() String
-        +setMarca(String marca) void
-        +getFechaFabricacion() LocalDate
-        +setFechaFabricacion(LocalDate fecha) void
-        +getPrecioBase() double
-        +setPrecioBase(double precioBase) void
-        +calcularPrecioFinal() double
+        - int codigo
+        - String marca
+        - double precioBase
+        - LocalDate fechaFabricacion
+        + getCodigo() int
+        + setCodigo(int codigo) void
+        + getMarca() String
+        + setMarca(String marca) void
+        + getFechaFabricacion() LocalDate
+        + setFechaFabricacion(LocalDate fecha) void
+        + getPrecioBase() double
+        + setPrecioBase(double precioBase) void
+        + calcularPrecioFinal() double
     }
 
     class Lavadora {
-        -double capacidadKilos
-        -boolean funcionSecado
-        +getCapacidadKilos() double
-        +setCapacidadKilos(double capacidadKilos) void
-        +isFuncionSecado() boolean
-        +setFuncionSecado(boolean funcionSecado) void
-        +calcularPrecioFinal() double
+        - double capacidadCargaKilos
+        - int velocidadCentrifugadoRPM
+        - boolean tecnologiaInverter
+        - ProgramaLavado programaLavado
+        + getCapacidadCargaKilos() double
+        + setCapacidadCargaKilos(double capacidad) void
+        + getVelocidadCentrifugadoRPM() int
+        + setVelocidadCentrifugadoRPM(int rpm) void
+        + isTecnologiaInverter() boolean
+        + setTecnologiaInverter(boolean inverter) void
+        + getProgramaLavado() ProgramaLavado
+        + setProgramaLavado(ProgramaLavado programa) void
+        + calcularPrecioFinal() double
     }
 
     class Nevera {
-        -int capacidadLitros
-        -boolean tieneNoFrost
-        +getCapacidadLitros() int
-        +setCapacidadLitros(int capacidadLitros) void
-        +isTieneNoFrost() boolean
-        +setTieneNoFrost(boolean tieneNoFrost) void
-        +calcularPrecioFinal() double
-        +activarSuperCongelacion() void
-        +activarModoVacacionesNevera() void
+        - int volumenLitros
+        - int numeroPuertas
+        - boolean dispensadorAgua
+        + getVolumenLitros() int
+        + setVolumenLitros(int litros) void
+        + getNumeroPuertas() int
+        + setNumeroPuertas(int puertas) void
+        + isDispensadorAgua() boolean
+        + setDispensadorAgua(boolean dispensador) void
+        + calcularPrecioFinal() double
+        + aplicarDescuentoTemporada(double porcentaje) double
+        + obtenerCertificadoGarantia() String
+        + activarSuperCongelacion() void
+        + activarModoVacacionesNevera() void
     }
 
     class ProgramaLavado {
-        -String nombre
-        -int duracionMinutos
-        +getNombre() String
-        +setNombre(String nombre) void
-        +getDuracionMinutos() int
-        +setDuracionMinutos(int duracionMinutos) void
+        - String nombre
+        - int duracionMinutos
+        + getNombre() String
+        + setNombre(String nombre) void
+        + getDuracionMinutos() int
+        + setDuracionMinutos(int duracionMinutos) void
     }
 
-    %% Relaciones basadas en tu base
+    %% Relaciones de Herencia, Interfaces y Asociaciones
     Electrodomestico <|-- Lavadora
     Electrodomestico <|-- Nevera
+    IAplicable <|.. Nevera
     ICongelable <|.. Nevera
-    Lavadora "1" *-- "1..*" ProgramaLavado : asocia
+    Lavadora "1" *-- "1" ProgramaLavado : asocia
