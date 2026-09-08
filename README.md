@@ -51,12 +51,6 @@ classDiagram
         + obtenerCertificadoGarantia() String
     }
 
-    class ICongelable {
-        <<interface>>
-        + activarSuperCongelacion() void
-        + activarModoVacacionesNevera() void
-    }
-
     class Electrodomestico {
         <<abstract>>
         - int codigo
@@ -103,8 +97,6 @@ classDiagram
         + calcularPrecioFinal() double
         + aplicarDescuentoTemporada(double porcentaje) double
         + obtenerCertificadoGarantia() String
-        + activarSuperCongelacion() void
-        + activarModoVacacionesNevera() void
     }
 
     class ProgramaLavado {
@@ -120,5 +112,4 @@ classDiagram
     Electrodomestico <|-- Lavadora
     Electrodomestico <|-- Nevera
     IAplicable <|.. Nevera
-    ICongelable <|.. Nevera
     Lavadora "1" *-- "1" ProgramaLavado : asocia
