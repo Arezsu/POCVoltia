@@ -50,6 +50,7 @@ import javax.swing.JOptionPane;
         jButtonBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Eliminar Programa Lavado");
 
         txtMinMin.setEditable(false);
         txtMinMin.setToolTipText("Minimo");

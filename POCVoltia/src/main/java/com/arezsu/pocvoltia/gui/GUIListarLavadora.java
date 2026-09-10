@@ -14,7 +14,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author UNIBAGUE
  */
-public class GUIListarLavadora extends javax.swing.JFrame {
+public class GUIListarLavadora extends javax.swing.JFrame implements ObservadorListado {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIListarLavadora.class.getName());
 
@@ -24,6 +24,17 @@ public class GUIListarLavadora extends javax.swing.JFrame {
     public GUIListarLavadora() {
         initComponents();
         setLocationRelativeTo(this);
+
+        // Nos registramos como observadores del servicio
+        ServicioElectrodomestico.agregarObservador(this);
+        cargarTabla(); // carga inicial al abrir la ventana
+
+        
+    }
+
+    @Override
+    public void actualizar() {
+        cargarTabla();
     }
 
     /**
@@ -43,6 +54,11 @@ public class GUIListarLavadora extends javax.swing.JFrame {
         setTitle("Listar Lavadora");
         setBackground(new java.awt.Color(255, 255, 153));
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         tblLavadora.setBackground(new java.awt.Color(204, 204, 255));
         tblLavadora.setBorder(new javax.swing.border.MatteBorder(null));
@@ -101,6 +117,13 @@ public class GUIListarLavadora extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnListarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnListarActionPerformed
+        cargarTabla();
+    }//GEN-LAST:event_btnListarActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        ServicioElectrodomestico.quitarObservador(this);
+    }//GEN-LAST:event_formWindowClosed
+    private void cargarTabla() {
         Map<Integer, Electrodomestico> electrodomesticos;
         electrodomesticos = ServicioElectrodomestico.getElectrodomesticos();
 
@@ -132,7 +155,7 @@ public class GUIListarLavadora extends javax.swing.JFrame {
                 modelo.addRow(fila);
             }
         }
-    }//GEN-LAST:event_btnListarActionPerformed
+    }
 
     /**
      * @param args the command line arguments

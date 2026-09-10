@@ -204,7 +204,7 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextFieldBuscarActionPerformed
 
     private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
-        try {
+try {
             int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
 
             Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
@@ -220,7 +220,19 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
                 txtNumPuertas.setText(String.valueOf(nev.getNumeroPuertas())); 
                 jcbDispenAgua.setSelected(nev.isDispensadorAgua());
 
-                JOptionPane.showMessageDialog(this, "¡Nevera encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                // --- POLIMORFISMO Y OPERACIÓN EXPLÍCITA (ICongelable) ---
+                double precioRegular = nev.calcularPrecioFinal();
+                double precioConDescuento = nev.aplicarDescuentoTemporada(15.0); // 15% de descuento de temporada
+                String garantia = nev.obtenerCertificadoGarantia();
+
+                JOptionPane.showMessageDialog(this, 
+                    "¡Nevera encontrada y cargada!\n\n" +
+                    " CÁLCULO POLIMÓRFICO EXPLÍCITO \n" +
+                    "Precio Final Regular: $" + precioRegular + "\n" +
+                    "Precio con Descuento (15 %): $" + precioConDescuento + "\n" +
+                    "Certificado: " + garantia, 
+                    "Éxito y Cálculo", 
+                    JOptionPane.INFORMATION_MESSAGE);
 
             } else if (e != null) {
                 JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una nevera.", "Aviso", JOptionPane.WARNING_MESSAGE);

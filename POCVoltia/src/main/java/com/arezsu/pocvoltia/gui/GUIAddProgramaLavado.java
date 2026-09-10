@@ -44,6 +44,7 @@ public class GUIAddProgramaLavado extends javax.swing.JFrame {
         txtMinMax = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Añadir Prgrama Lavado");
 
         txtMinMin.setToolTipText("Minimo");
         txtMinMin.addActionListener(this::txtMinMinActionPerformed);

@@ -12,11 +12,14 @@ com\arezsu\pocvoltia\POCVoltia.class
 com\arezsu\pocvoltia\gui\GUIActualizarLavadora.class
 com\arezsu\pocvoltia\gui\GUIBuscarNevera.class
 com\arezsu\pocvoltia\gui\GUIListarProgramaLavado$1.class
+com\arezsu\pocvoltia\gui\ObservadorListado.class
 com\arezsu\pocvoltia\model\Lavadora.class
 com\arezsu\pocvoltia\util\SoundPlayer.class
+com\arezsu\pocvoltia\gui\GUIListarNevera$2.class
 com\arezsu\pocvoltia\gui\GUIAddLavadora.class
 com\arezsu\pocvoltia\gui\GUIAddProgramaLavado.class
 com\arezsu\pocvoltia\gui\GUIEliminarNevera.class
+com\arezsu\pocvoltia\gui\GUIListarLavadora$2.class
 com\arezsu\pocvoltia\gui\GUIListarLavadora.class
 com\arezsu\pocvoltia\gui\GUIBuscarProgramaLavado.class
 com\arezsu\pocvoltia\model\ICongelable.class

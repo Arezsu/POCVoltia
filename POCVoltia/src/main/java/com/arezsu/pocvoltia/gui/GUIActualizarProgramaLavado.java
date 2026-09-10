@@ -47,6 +47,7 @@ public class GUIActualizarProgramaLavado extends javax.swing.JFrame {
         jButtonBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Actualizar Programa Lavado");
 
         txtMinMin.setToolTipText("Minimo");
         txtMinMin.addActionListener(this::txtMinMinActionPerformed);

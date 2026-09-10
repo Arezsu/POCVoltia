@@ -4,6 +4,7 @@
  */
 package com.arezsu.pocvoltia.gui;
 
+import com.arezsu.pocvoltia.servicios.EmpresaInfo;
 import javax.swing.JOptionPane;
 
 /**
@@ -11,7 +12,7 @@ import javax.swing.JOptionPane;
  * @author UNIBAGUE
  */
 public class GUIPrincipal extends javax.swing.JFrame {
-    
+
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIPrincipal.class.getName());
 
     /**
@@ -21,7 +22,7 @@ public class GUIPrincipal extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(this);
         com.arezsu.pocvoltia.util.SoundPlayer.playSound("click.wav");
-        
+
     }
 
     /**
@@ -41,22 +42,22 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuItem1 = new javax.swing.JMenuItem();
         jMenu5 = new javax.swing.JMenu();
         jMenuItem4 = new javax.swing.JMenuItem();
-        jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem6 = new javax.swing.JMenuItem();
-        jMenuItem10 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
         jMenuItem7 = new javax.swing.JMenuItem();
+        jMenuItem10 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuAddLav = new javax.swing.JMenuItem();
         jMenuBuscarLav = new javax.swing.JMenuItem();
         jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuListLav = new javax.swing.JMenuItem();
         jMenuDelLav = new javax.swing.JMenuItem();
+        jMenuListLav = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
         jMenuAddNev = new javax.swing.JMenuItem();
         jMenuBuscNev = new javax.swing.JMenuItem();
         jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuListNev = new javax.swing.JMenuItem();
         jMenuDelNev = new javax.swing.JMenuItem();
+        jMenuListNev = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem8 = new javax.swing.JMenuItem();
 
@@ -115,6 +116,7 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenu5.setBackground(new java.awt.Color(244, 246, 247));
         jMenu5.setForeground(new java.awt.Color(51, 51, 51));
         jMenu5.setText("Programa Lavado");
+        jMenu5.setFont(new java.awt.Font("Sans Serif Collection", 0, 12)); // NOI18N
 
         jMenuItem4.setBackground(new java.awt.Color(244, 246, 247));
         jMenuItem4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
@@ -123,13 +125,6 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuItem4.addActionListener(this::jMenuItem4ActionPerformed);
         jMenu5.add(jMenuItem4);
 
-        jMenuItem5.setBackground(new java.awt.Color(244, 246, 247));
-        jMenuItem5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jMenuItem5.setForeground(new java.awt.Color(51, 51, 51));
-        jMenuItem5.setText("Actualizar Programa Lavado");
-        jMenuItem5.addActionListener(this::jMenuItem5ActionPerformed);
-        jMenu5.add(jMenuItem5);
-
         jMenuItem6.setBackground(new java.awt.Color(244, 246, 247));
         jMenuItem6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jMenuItem6.setForeground(new java.awt.Color(51, 51, 51));
@@ -137,12 +132,12 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuItem6.addActionListener(this::jMenuItem6ActionPerformed);
         jMenu5.add(jMenuItem6);
 
-        jMenuItem10.setBackground(new java.awt.Color(244, 246, 247));
-        jMenuItem10.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jMenuItem10.setForeground(new java.awt.Color(51, 51, 51));
-        jMenuItem10.setText("Borrar Programa Lavado");
-        jMenuItem10.addActionListener(this::jMenuItem10ActionPerformed);
-        jMenu5.add(jMenuItem10);
+        jMenuItem5.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem5.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem5.setText("Actualizar Programa Lavado");
+        jMenuItem5.addActionListener(this::jMenuItem5ActionPerformed);
+        jMenu5.add(jMenuItem5);
 
         jMenuItem7.setBackground(new java.awt.Color(244, 246, 247));
         jMenuItem7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
@@ -150,6 +145,13 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuItem7.setText("Listar Programa Lavado");
         jMenuItem7.addActionListener(this::jMenuItem7ActionPerformed);
         jMenu5.add(jMenuItem7);
+
+        jMenuItem10.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem10.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem10.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem10.setText("Borrar Programa Lavado");
+        jMenuItem10.addActionListener(this::jMenuItem10ActionPerformed);
+        jMenu5.add(jMenuItem10);
 
         jMenuBar1.add(jMenu5);
 
@@ -179,19 +181,19 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuItem2.addActionListener(this::jMenuItem2ActionPerformed);
         jMenu3.add(jMenuItem2);
 
-        jMenuListLav.setBackground(new java.awt.Color(244, 246, 247));
-        jMenuListLav.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jMenuListLav.setForeground(new java.awt.Color(51, 51, 51));
-        jMenuListLav.setText("Listar Lavadora");
-        jMenuListLav.addActionListener(this::jMenuListLavActionPerformed);
-        jMenu3.add(jMenuListLav);
-
         jMenuDelLav.setBackground(new java.awt.Color(244, 246, 247));
         jMenuDelLav.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jMenuDelLav.setForeground(new java.awt.Color(51, 51, 51));
         jMenuDelLav.setText("Eliminar Lavadora");
         jMenuDelLav.addActionListener(this::jMenuDelLavActionPerformed);
         jMenu3.add(jMenuDelLav);
+
+        jMenuListLav.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuListLav.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuListLav.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuListLav.setText("Listar Lavadora");
+        jMenuListLav.addActionListener(this::jMenuListLavActionPerformed);
+        jMenu3.add(jMenuListLav);
 
         jMenuBar1.add(jMenu3);
 
@@ -217,16 +219,9 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuItem3.setBackground(new java.awt.Color(244, 246, 247));
         jMenuItem3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         jMenuItem3.setForeground(new java.awt.Color(51, 51, 51));
-        jMenuItem3.setText("Actualizar Lavadora");
+        jMenuItem3.setText("Actualizar Nevera");
         jMenuItem3.addActionListener(this::jMenuItem3ActionPerformed);
         jMenu4.add(jMenuItem3);
-
-        jMenuListNev.setBackground(new java.awt.Color(244, 246, 247));
-        jMenuListNev.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jMenuListNev.setForeground(new java.awt.Color(51, 51, 51));
-        jMenuListNev.setText("Listar Nevera");
-        jMenuListNev.addActionListener(this::jMenuListNevActionPerformed);
-        jMenu4.add(jMenuListNev);
 
         jMenuDelNev.setBackground(new java.awt.Color(244, 246, 247));
         jMenuDelNev.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
@@ -234,6 +229,13 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuDelNev.setText("Eliminar Nevera");
         jMenuDelNev.addActionListener(this::jMenuDelNevActionPerformed);
         jMenu4.add(jMenuDelNev);
+
+        jMenuListNev.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuListNev.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuListNev.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuListNev.setText("Listar Nevera");
+        jMenuListNev.addActionListener(this::jMenuListNevActionPerformed);
+        jMenu4.add(jMenuListNev);
 
         jMenuBar1.add(jMenu4);
 
@@ -300,7 +302,8 @@ public class GUIPrincipal extends javax.swing.JFrame {
     }//GEN-LAST:event_jMenuBuscNevActionPerformed
 
     private void jMenuItem8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem8ActionPerformed
-        JOptionPane.showMessageDialog(this, "Version 1.0 Alfa Agosto 2026 \n Juan Andres Bermeo Alvarez 2220241053 \n Alejandro Sanchez Quimbayo 2220241077 \n David Arredondo 2220241062");
+        EmpresaInfo info = EmpresaInfo.getInstancia();
+        JOptionPane.showMessageDialog(this, info.getInfoCompleta(), "Acerca de", JOptionPane.INFORMATION_MESSAGE);
     }//GEN-LAST:event_jMenuItem8ActionPerformed
 
     private void jMenuDelNevActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuDelNevActionPerformed

@@ -14,16 +14,21 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author UNIBAGUE
  */
-public class GUIListarNevera extends javax.swing.JFrame {
+public class GUIListarNevera extends javax.swing.JFrame implements ObservadorListado {
 
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIListarNevera.class.getName());
 
-    /**
-     * Creates new form GUIListarDocente
-     */
+
     public GUIListarNevera() {
         initComponents();
         setLocationRelativeTo(this);
+        ServicioElectrodomestico.agregarObservador(this);
+        cargarTabla();
+    }
+
+    @Override
+    public void actualizar() {
+        cargarTabla();
     }
 
     /**
@@ -42,6 +47,11 @@ public class GUIListarNevera extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Listar Nevera");
         setBackground(new java.awt.Color(255, 255, 153));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosed(java.awt.event.WindowEvent evt) {
+                formWindowClosed(evt);
+            }
+        });
 
         tblNevera.setBackground(new java.awt.Color(204, 204, 255));
         tblNevera.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
@@ -103,6 +113,13 @@ public class GUIListarNevera extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnListarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnListarActionPerformed
+        cargarTabla();
+    }//GEN-LAST:event_btnListarActionPerformed
+
+    private void formWindowClosed(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosed
+        ServicioElectrodomestico.quitarObservador(this);        
+    }//GEN-LAST:event_formWindowClosed
+    private void cargarTabla() {
         Map<Integer, Electrodomestico> electrodomesticos;
         electrodomesticos = ServicioElectrodomestico.getElectrodomesticos();
 
@@ -130,7 +147,7 @@ public class GUIListarNevera extends javax.swing.JFrame {
                 modelo.addRow(fila);
             }
         }
-    }//GEN-LAST:event_btnListarActionPerformed
+    }
 
     /**
      * @param args the command line arguments

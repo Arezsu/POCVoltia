@@ -45,6 +45,7 @@ public class GUIBuscarProgramaLavado extends javax.swing.JFrame {
         jButtonBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Buscar Programa Lavado");
 
         txtMinMin.setToolTipText("Minimo");
         txtMinMin.setEnabled(false);
