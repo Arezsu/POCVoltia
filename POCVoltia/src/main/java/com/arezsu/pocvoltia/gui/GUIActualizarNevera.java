@@ -223,6 +223,8 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
                 nev.setMarca(jcbMarca.getSelectedItem().toString());
                 if (jdFecha.getDate() != null) {
                     nev.setFechaFabricacion(jdFecha.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+                } else {
+                    throw new IllegalArgumentException("Debe seleccionar una fecha de fabricación.");
                 }
                 nev.setPrecioBase(Double.parseDouble(txtPrecioBase.getText().trim()));
                 nev.setVolumenLitros(Integer.parseInt(txtCapacidad.getText().trim()));

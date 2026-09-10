@@ -218,6 +218,8 @@ public class GUIAddNevera extends javax.swing.JFrame {
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Por favor revise que los campos numéricos estén bien escritos.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, e.getMessage(), "Error", JOptionPane.WARNING_MESSAGE);
+
         }
     }//GEN-LAST:event_btnAceptarActionPerformed
 
