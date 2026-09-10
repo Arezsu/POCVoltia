@@ -7,6 +7,7 @@ package com.arezsu.pocvoltia.gui;
 import com.arezsu.pocvoltia.model.Electrodomestico;
 import com.arezsu.pocvoltia.model.Nevera;
 import com.arezsu.pocvoltia.servicios.ServicioElectrodomestico;
+import com.arezsu.pocvoltia.util.SoundPlayer;
 import java.time.LocalDate;
 import javax.swing.JOptionPane;
 
@@ -38,11 +39,9 @@ public class GUIAddNevera extends javax.swing.JFrame {
         txtPrecioBase = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         btnAceptar = new javax.swing.JButton();
-        txtFechaFab = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        txtMarca = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtCapacidad = new javax.swing.JTextField();
@@ -50,6 +49,8 @@ public class GUIAddNevera extends javax.swing.JFrame {
         jcbDispenAgua = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
         txtNumPuertas = new javax.swing.JTextField();
+        jdFecha = new com.toedter.calendar.JDateChooser();
+        jcbMarca = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Adicionar Nevera");
@@ -60,8 +61,6 @@ public class GUIAddNevera extends javax.swing.JFrame {
         btnAceptar.setText("Aceptar");
         btnAceptar.addActionListener(this::btnAceptarActionPerformed);
 
-        txtFechaFab.setToolTipText("2026-12-25");
-
         jLabel2.setText("Codigo:");
         jLabel2.setToolTipText("");
 
@@ -69,8 +68,6 @@ public class GUIAddNevera extends javax.swing.JFrame {
 
         jLabel3.setText("Marca:");
         jLabel3.setToolTipText("");
-
-        txtMarca.setToolTipText("");
 
         jLabel4.setText("Precio base: ");
         jLabel4.setToolTipText("");
@@ -91,6 +88,9 @@ public class GUIAddNevera extends javax.swing.JFrame {
 
         txtNumPuertas.addActionListener(this::txtNumPuertasActionPerformed);
 
+        jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
+        jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -108,16 +108,16 @@ public class GUIAddNevera extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jcbDispenAgua)
-                    .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(37, 37, 37)
+                        .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(68, 68, 68)
                         .addComponent(btnAceptar))
-                    .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(txtNumPuertas, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(txtCapacidad, javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(txtPrecioBase)
+                        .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jcbMarca, 0, 139, Short.MAX_VALUE)))
                 .addGap(32, 32, 32))
         );
         layout.setVerticalGroup(
@@ -129,13 +129,15 @@ public class GUIAddNevera extends javax.swing.JFrame {
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
                 .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFechaFab, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3)
+                        .addGap(28, 28, 28)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(26, 26, 26)
+                        .addComponent(jdFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -144,7 +146,7 @@ public class GUIAddNevera extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 13, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -161,7 +163,6 @@ public class GUIAddNevera extends javax.swing.JFrame {
     private void btnAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAceptarActionPerformed
         int codigo;
         Electrodomestico nev;
-        LocalDate fechaFabricacion;
         double precioBase;
         int volumenLitros;
         int numeroPuertas;
@@ -169,14 +170,22 @@ public class GUIAddNevera extends javax.swing.JFrame {
 
         try {
             String strCodigo = txtCodigo.getText().trim();
-            String marca = txtMarca.getText().trim();
-            String strFechaFabricacion = txtFechaFab.getText().trim();
+            String marca = jcbMarca.getSelectedItem().toString().trim();
+
+            // Usamos solo el JDateChooser (asegúrate de que el nombre del componente sea jdcFecha o jdFecha según tu diseño)
+            java.util.Date fecha = jdFecha.getDate();
+            LocalDate fechaFabricacion = null;
+
+            if (fecha != null) {
+                fechaFabricacion = fecha.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            } else {
+                throw new IllegalArgumentException("Debe seleccionar una fecha de fabricación.");
+            }
             String strPrecioBase = txtPrecioBase.getText().trim();
             String strCapacidad = txtCapacidad.getText().trim();
-            String strNumPuertas = txtNumPuertas.getText().trim(); 
+            String strNumPuertas = txtNumPuertas.getText().trim();
 
             codigo = Integer.parseInt(strCodigo);
-            fechaFabricacion = LocalDate.parse(strFechaFabricacion);
             precioBase = Double.parseDouble(strPrecioBase);
             volumenLitros = Integer.parseInt(strCapacidad);
             numeroPuertas = Integer.parseInt(strNumPuertas); // Convertir a entero
@@ -186,6 +195,7 @@ public class GUIAddNevera extends javax.swing.JFrame {
 
             ServicioElectrodomestico.addElectrodomestico(nev);
             JOptionPane.showMessageDialog(this, "¡Nevera creada exitosamente!");
+            SoundPlayer.playSoundNeveraa("nevera.wav");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de validación", JOptionPane.ERROR_MESSAGE);
@@ -207,6 +217,10 @@ public class GUIAddNevera extends javax.swing.JFrame {
     private void txtNumPuertasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNumPuertasActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNumPuertasActionPerformed
+
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -243,10 +257,10 @@ public class GUIAddNevera extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JCheckBox jcbDispenAgua;
+    private javax.swing.JComboBox<String> jcbMarca;
+    private com.toedter.calendar.JDateChooser jdFecha;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
-    private javax.swing.JTextField txtFechaFab;
-    private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtNumPuertas;
     private javax.swing.JTextField txtPrecioBase;
     // End of variables declaration//GEN-END:variables

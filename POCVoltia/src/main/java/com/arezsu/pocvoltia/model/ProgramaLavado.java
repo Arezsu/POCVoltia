@@ -1,16 +1,27 @@
 package com.arezsu.pocvoltia.model;
 
-/**
- *
- * @author arezs
- */
 public class ProgramaLavado {
+    private String id;
     private String nombre;
-    private int duracionMinutos;
+    private int minMinutos;
+    private int maxMinutos;
 
-    public ProgramaLavado(String nombre, int duracionMinutos) {
+    public ProgramaLavado(String id, String nombre, int minMinutos, int maxMinutos) {
+        setId(id);
         this.nombre = nombre;
-        this.duracionMinutos = duracionMinutos;
+        this.minMinutos = minMinutos;
+        this.maxMinutos = maxMinutos;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        if (id == null || !id.matches("\\d{3,4}")) {
+            throw new IllegalArgumentException("El código debe tener exactamente 3 o 4 dígitos numéricos.");
+        }
+        this.id = id;
     }
 
     public String getNombre() {
@@ -21,11 +32,24 @@ public class ProgramaLavado {
         this.nombre = nombre;
     }
 
-    public int getDuracionMinutos() {
-        return duracionMinutos;
+    public int getMinMinutos() {
+        return minMinutos;
     }
 
-    public void setDuracionMinutos(int duracionMinutos) {
-        this.duracionMinutos = duracionMinutos;
+    public void setMinMinutos(int minMinutos) {
+        this.minMinutos = minMinutos;
+    }
+
+    public int getMaxMinutos() {
+        return maxMinutos;
+    }
+
+    public void setMaxMinutos(int maxMinutos) {
+        this.maxMinutos = maxMinutos;
+    }
+    
+    // Método para saber si los minutos que digita la lavadora caen dentro de este programa
+    public boolean perteneceAlRango(int minutos) {
+        return minutos >= minMinutos && minutos <= maxMinutos;
     }
 }

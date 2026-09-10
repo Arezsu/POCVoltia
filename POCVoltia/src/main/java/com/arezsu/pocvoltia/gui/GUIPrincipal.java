@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
  * @author UNIBAGUE
  */
 public class GUIPrincipal extends javax.swing.JFrame {
-
+    
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(GUIPrincipal.class.getName());
 
     /**
@@ -21,7 +21,6 @@ public class GUIPrincipal extends javax.swing.JFrame {
         initComponents();
         setLocationRelativeTo(this);
         com.arezsu.pocvoltia.util.SoundPlayer.playSound("click.wav");
-        
         
     }
 
@@ -40,16 +39,24 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
+        jMenu5 = new javax.swing.JMenu();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem6 = new javax.swing.JMenuItem();
+        jMenuItem10 = new javax.swing.JMenuItem();
+        jMenuItem7 = new javax.swing.JMenuItem();
         jMenu3 = new javax.swing.JMenu();
         jMenuAddLav = new javax.swing.JMenuItem();
         jMenuBuscarLav = new javax.swing.JMenuItem();
+        jMenuItem2 = new javax.swing.JMenuItem();
         jMenuListLav = new javax.swing.JMenuItem();
         jMenuDelLav = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
         jMenuAddNev = new javax.swing.JMenuItem();
         jMenuBuscNev = new javax.swing.JMenuItem();
-        jMenuDelNev = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
         jMenuListNev = new javax.swing.JMenuItem();
+        jMenuDelNev = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
         jMenuItem8 = new javax.swing.JMenuItem();
 
@@ -105,6 +112,47 @@ public class GUIPrincipal extends javax.swing.JFrame {
 
         jMenuBar1.add(jMenu1);
 
+        jMenu5.setBackground(new java.awt.Color(244, 246, 247));
+        jMenu5.setForeground(new java.awt.Color(51, 51, 51));
+        jMenu5.setText("Programa Lavado");
+
+        jMenuItem4.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem4.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem4.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem4.setText("Adicionar Programa Lavado");
+        jMenuItem4.addActionListener(this::jMenuItem4ActionPerformed);
+        jMenu5.add(jMenuItem4);
+
+        jMenuItem5.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem5.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem5.setText("Actualizar Programa Lavado");
+        jMenuItem5.addActionListener(this::jMenuItem5ActionPerformed);
+        jMenu5.add(jMenuItem5);
+
+        jMenuItem6.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem6.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem6.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem6.setText("Buscar Programa Lavado");
+        jMenuItem6.addActionListener(this::jMenuItem6ActionPerformed);
+        jMenu5.add(jMenuItem6);
+
+        jMenuItem10.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem10.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem10.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem10.setText("Borrar Programa Lavado");
+        jMenuItem10.addActionListener(this::jMenuItem10ActionPerformed);
+        jMenu5.add(jMenuItem10);
+
+        jMenuItem7.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem7.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem7.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem7.setText("Listar Programa Lavado");
+        jMenuItem7.addActionListener(this::jMenuItem7ActionPerformed);
+        jMenu5.add(jMenuItem7);
+
+        jMenuBar1.add(jMenu5);
+
         jMenu3.setBackground(new java.awt.Color(244, 246, 247));
         jMenu3.setForeground(new java.awt.Color(51, 51, 51));
         jMenu3.setText("Lavadora");
@@ -123,6 +171,13 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuBuscarLav.setText("Buscar Lavadora");
         jMenuBuscarLav.addActionListener(this::jMenuBuscarLavActionPerformed);
         jMenu3.add(jMenuBuscarLav);
+
+        jMenuItem2.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem2.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem2.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem2.setText("Actualizar Lavadora");
+        jMenuItem2.addActionListener(this::jMenuItem2ActionPerformed);
+        jMenu3.add(jMenuItem2);
 
         jMenuListLav.setBackground(new java.awt.Color(244, 246, 247));
         jMenuListLav.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
@@ -159,12 +214,12 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuBuscNev.addActionListener(this::jMenuBuscNevActionPerformed);
         jMenu4.add(jMenuBuscNev);
 
-        jMenuDelNev.setBackground(new java.awt.Color(244, 246, 247));
-        jMenuDelNev.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jMenuDelNev.setForeground(new java.awt.Color(51, 51, 51));
-        jMenuDelNev.setText("Eliminar Nevera");
-        jMenuDelNev.addActionListener(this::jMenuDelNevActionPerformed);
-        jMenu4.add(jMenuDelNev);
+        jMenuItem3.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuItem3.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuItem3.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuItem3.setText("Actualizar Lavadora");
+        jMenuItem3.addActionListener(this::jMenuItem3ActionPerformed);
+        jMenu4.add(jMenuItem3);
 
         jMenuListNev.setBackground(new java.awt.Color(244, 246, 247));
         jMenuListNev.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
@@ -172,6 +227,13 @@ public class GUIPrincipal extends javax.swing.JFrame {
         jMenuListNev.setText("Listar Nevera");
         jMenuListNev.addActionListener(this::jMenuListNevActionPerformed);
         jMenu4.add(jMenuListNev);
+
+        jMenuDelNev.setBackground(new java.awt.Color(244, 246, 247));
+        jMenuDelNev.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        jMenuDelNev.setForeground(new java.awt.Color(51, 51, 51));
+        jMenuDelNev.setText("Eliminar Nevera");
+        jMenuDelNev.addActionListener(this::jMenuDelNevActionPerformed);
+        jMenu4.add(jMenuDelNev);
 
         jMenuBar1.add(jMenu4);
 
@@ -252,6 +314,41 @@ public class GUIPrincipal extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jMenuDelLavActionPerformed
 
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        GUIActualizarLavadora gui = new GUIActualizarLavadora();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem3ActionPerformed
+        GUIActualizarNevera gui = new GUIActualizarNevera();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem3ActionPerformed
+
+    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem4ActionPerformed
+        GUIAddProgramaLavado gui = new GUIAddProgramaLavado();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem4ActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        GUIActualizarProgramaLavado gui = new GUIActualizarProgramaLavado();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
+
+    private void jMenuItem6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem6ActionPerformed
+        GUIBuscarProgramaLavado gui = new GUIBuscarProgramaLavado();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem6ActionPerformed
+
+    private void jMenuItem7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem7ActionPerformed
+        GUIListarProgramaLavado gui = new GUIListarProgramaLavado();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem7ActionPerformed
+
+    private void jMenuItem10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem10ActionPerformed
+        GUIEliminarProgramaLavado gui = new GUIEliminarProgramaLavado();
+        gui.setVisible(true);
+    }//GEN-LAST:event_jMenuItem10ActionPerformed
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -260,6 +357,7 @@ public class GUIPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu2;
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
+    private javax.swing.JMenu jMenu5;
     private javax.swing.JMenuItem jMenuAddLav;
     private javax.swing.JMenuItem jMenuAddNev;
     private javax.swing.JMenuBar jMenuBar1;
@@ -268,6 +366,13 @@ public class GUIPrincipal extends javax.swing.JFrame {
     private javax.swing.JMenuItem jMenuDelLav;
     private javax.swing.JMenuItem jMenuDelNev;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem10;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JMenuItem jMenuItem8;
     private javax.swing.JMenuItem jMenuListLav;
     private javax.swing.JMenuItem jMenuListNev;

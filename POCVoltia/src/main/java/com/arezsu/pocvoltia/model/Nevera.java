@@ -8,7 +8,7 @@ public class Nevera extends Electrodomestico implements ICongelable {
     private int numeroPuertas;
     private boolean dispensadorAgua;
 
-    public Nevera(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, int volumenLitros, int numeroPuertas1, boolean dispensadorAgua) throws Exception {
+    public Nevera(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, int volumenLitros, int numeroPuertas, boolean dispensadorAgua) throws Exception {
         super(codigo, marca, fechaFabricacion, precioBase);
         setVolumenLitros(volumenLitros);
         setNumeroPuertas(numeroPuertas);
@@ -18,7 +18,7 @@ public class Nevera extends Electrodomestico implements ICongelable {
     @Override
     public double calcularPrecioFinal() {
         double precio = getPrecioBase();
-        if (volumenLitros > 300) {
+        if (volumenLitros > 150) {
             precio += 300000;
         }
         if (dispensadorAgua) {

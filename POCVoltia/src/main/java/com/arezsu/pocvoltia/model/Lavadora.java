@@ -1,5 +1,6 @@
 package com.arezsu.pocvoltia.model;
 
+import com.arezsu.pocvoltia.servicios.ServicioProgramaLavado;
 import java.time.LocalDate;
 
 public class Lavadora extends Electrodomestico {
@@ -9,12 +10,14 @@ public class Lavadora extends Electrodomestico {
     private boolean tecnologiaInverter;
     private ProgramaLavado programaLavado; // Asociación con la Clase D
 
-    public Lavadora(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, double capacidadCargaKilos, int velocidadCentrifugadoRPM1, boolean tecnologiaInverter) throws Exception {
+    public Lavadora(int codigo, String marca, LocalDate fechaFabricacion, double precioBase, double capacidadCargaKilos, int velocidadCentrifugadoRPM, boolean tecnologiaInverter, int minutosIngresados) throws Exception {
         super(codigo, marca, fechaFabricacion, precioBase);
         setCapacidadCargaKilos(capacidadCargaKilos);
         setVelocidadCentrifugadoRPM(velocidadCentrifugadoRPM);
         this.tecnologiaInverter = tecnologiaInverter;
-        this.programaLavado = new ProgramaLavado("Ciclo Rápido", 15);
+        
+        // Asocia el programa llamando a la lógica del servicio
+        this.programaLavado = ServicioProgramaLavado.determinarProgramaPorMinutos(minutosIngresados);
     }
 
     @Override

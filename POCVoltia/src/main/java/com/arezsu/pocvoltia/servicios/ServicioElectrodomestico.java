@@ -17,7 +17,6 @@ public class ServicioElectrodomestico {
     }
 
     public static boolean addElectrodomestico(Electrodomestico elem) {
-        // Validamos si el código ya está en uso
         if (electrodomesticos.containsKey(elem.getCodigo())) {
             return false;
         }

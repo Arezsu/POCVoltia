@@ -42,8 +42,6 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
-        txtMarca = new javax.swing.JTextField();
-        txtFechaFab = new javax.swing.JTextField();
         txtPrecioBase = new javax.swing.JTextField();
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
@@ -53,6 +51,8 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
         txtVelCentri = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         jcbTecInve = new javax.swing.JCheckBox();
+        jcbMarca = new javax.swing.JComboBox<>();
+        jdFecha = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Buscar Lavadora");
@@ -75,14 +75,6 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
         txtCodigo.setEditable(false);
         txtCodigo.setActionCommand("<Not Set>");
         txtCodigo.setEnabled(false);
-
-        txtMarca.setEditable(false);
-        txtMarca.setActionCommand("<Not Set>");
-        txtMarca.setEnabled(false);
-
-        txtFechaFab.setEditable(false);
-        txtFechaFab.setActionCommand("<Not Set>");
-        txtFechaFab.setEnabled(false);
 
         txtPrecioBase.setEditable(false);
         txtPrecioBase.setActionCommand("<Not Set>");
@@ -115,6 +107,12 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
         jcbTecInve.setEnabled(false);
         jcbTecInve.addActionListener(this::jcbTecInveActionPerformed);
 
+        jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
+        jcbMarca.setEnabled(false);
+        jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
+        jdFecha.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -132,13 +130,14 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
                         .addGap(35, 35, 35)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel7))))
+                                .addComponent(jLabel7))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jcbMarca, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel8)
@@ -166,14 +165,17 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(jLabel3)
+                        .addGap(19, 19, 19)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(26, 26, 26)
+                        .addComponent(jdFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -192,7 +194,7 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(jcbTecInve))
-                .addContainerGap(45, Short.MAX_VALUE))
+                .addContainerGap(44, Short.MAX_VALUE))
         );
 
         pack();
@@ -203,7 +205,7 @@ public class GUIBuscarLavadora extends javax.swing.JFrame {
     }//GEN-LAST:event_jTextFieldBuscarActionPerformed
 
     private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
-try {
+        try {
             int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
 
             Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
@@ -212,10 +214,10 @@ try {
                 Lavadora lav = (Lavadora) e;
 
                 txtCodigo.setText(String.valueOf(lav.getCodigo()));
-                txtMarca.setText(lav.getMarca());
-                txtFechaFab.setText(String.valueOf(lav.getFechaFabricacion()));
+                jcbMarca.setSelectedItem(lav.getMarca());
+                jdFecha.setDate(java.sql.Date.valueOf(lav.getFechaFabricacion()));
                 txtPrecioBase.setText(String.valueOf(lav.getPrecioBase()));
-                txtCapacidad.setText(String.valueOf(lav.getCapacidadCargaKilos())); 
+                txtCapacidad.setText(String.valueOf(lav.getCapacidadCargaKilos()));
                 txtVelCentri.setText(String.valueOf(lav.getVelocidadCentrifugadoRPM()));
                 jcbTecInve.setSelected(lav.isTecnologiaInverter());
 
@@ -243,6 +245,10 @@ try {
     private void jcbTecInveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbTecInveActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jcbTecInveActionPerformed
+
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -280,11 +286,11 @@ try {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JTextField jTextFieldBuscar;
+    private javax.swing.JComboBox<String> jcbMarca;
     private javax.swing.JCheckBox jcbTecInve;
+    private com.toedter.calendar.JDateChooser jdFecha;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
-    private javax.swing.JTextField txtFechaFab;
-    private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtPrecioBase;
     private javax.swing.JTextField txtVelCentri;
     // End of variables declaration//GEN-END:variables

@@ -41,8 +41,6 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
-        txtMarca = new javax.swing.JTextField();
-        txtFechaFab = new javax.swing.JTextField();
         txtPrecioBase = new javax.swing.JTextField();
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
@@ -52,6 +50,8 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         jcbDispenAgua = new javax.swing.JCheckBox();
         txtNumPuertas = new javax.swing.JTextField();
+        jcbMarca = new javax.swing.JComboBox<>();
+        jdFecha = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Buscar Nevera");
@@ -74,14 +74,6 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         txtCodigo.setEditable(false);
         txtCodigo.setActionCommand("<Not Set>");
         txtCodigo.setEnabled(false);
-
-        txtMarca.setEditable(false);
-        txtMarca.setActionCommand("<Not Set>");
-        txtMarca.setEnabled(false);
-
-        txtFechaFab.setEditable(false);
-        txtFechaFab.setActionCommand("<Not Set>");
-        txtFechaFab.setEnabled(false);
 
         txtPrecioBase.setEditable(false);
         txtPrecioBase.setActionCommand("<Not Set>");
@@ -113,6 +105,12 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
         txtNumPuertas.setEnabled(false);
         txtNumPuertas.addActionListener(this::txtNumPuertasActionPerformed);
 
+        jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
+        jcbMarca.setEnabled(false);
+        jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
+        jdFecha.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -137,13 +135,14 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
                                 .addGap(35, 35, 35)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel7))))
+                                        .addComponent(jLabel7))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                        .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel6)
@@ -165,14 +164,17 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel3)
+                            .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(16, 16, 16)
+                        .addComponent(jLabel1))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(54, 54, 54)
+                        .addComponent(jdFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
@@ -211,8 +213,8 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
                 Nevera nev = (Nevera) e;
                 
                 txtCodigo.setText(String.valueOf(nev.getCodigo()));
-                txtMarca.setText(nev.getMarca());
-                txtFechaFab.setText(String.valueOf(nev.getFechaFabricacion()));
+                jcbMarca.setSelectedItem(nev.getMarca());
+                jdFecha.setDate(java.sql.Date.valueOf(nev.getFechaFabricacion()));
                 txtPrecioBase.setText(String.valueOf(nev.getPrecioBase()));
                 txtCapacidad.setText(String.valueOf(nev.getVolumenLitros()));
                 txtNumPuertas.setText(String.valueOf(nev.getNumeroPuertas())); 
@@ -238,6 +240,10 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
     private void txtNumPuertasActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNumPuertasActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNumPuertasActionPerformed
+
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -276,10 +282,10 @@ public class GUIBuscarNevera extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JTextField jTextFieldBuscar;
     private javax.swing.JCheckBox jcbDispenAgua;
+    private javax.swing.JComboBox<String> jcbMarca;
+    private com.toedter.calendar.JDateChooser jdFecha;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
-    private javax.swing.JTextField txtFechaFab;
-    private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtNumPuertas;
     private javax.swing.JTextField txtPrecioBase;
     // End of variables declaration//GEN-END:variables

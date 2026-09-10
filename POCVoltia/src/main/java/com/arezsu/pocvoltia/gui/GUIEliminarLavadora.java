@@ -42,18 +42,18 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
-        txtMarca = new javax.swing.JTextField();
-        txtFechaFab = new javax.swing.JTextField();
         txtPrecioBase = new javax.swing.JTextField();
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
         jTextFieldBuscar = new javax.swing.JTextField();
-        jButtonBuscar = new javax.swing.JButton();
         btnEliminarNevera = new javax.swing.JButton();
         jLabel8 = new javax.swing.JLabel();
         txtVelCentri = new javax.swing.JTextField();
         jLabel6 = new javax.swing.JLabel();
         jcbTecInve = new javax.swing.JCheckBox();
+        jButtonBuscar = new javax.swing.JButton();
+        jdFecha = new com.toedter.calendar.JDateChooser();
+        jcbMarca = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Eliminar Lavadora");
@@ -77,17 +77,10 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         txtCodigo.setActionCommand("<Not Set>");
         txtCodigo.setEnabled(false);
 
-        txtMarca.setEditable(false);
-        txtMarca.setActionCommand("<Not Set>");
-        txtMarca.setEnabled(false);
-
-        txtFechaFab.setEditable(false);
-        txtFechaFab.setActionCommand("<Not Set>");
-        txtFechaFab.setEnabled(false);
-
         txtPrecioBase.setEditable(false);
         txtPrecioBase.setActionCommand("<Not Set>");
         txtPrecioBase.setEnabled(false);
+        txtPrecioBase.addActionListener(this::txtPrecioBaseActionPerformed);
 
         txtCapacidad.setEditable(false);
         txtCapacidad.setActionCommand("<Not Set>");
@@ -99,8 +92,6 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
 
         jTextFieldBuscar.setToolTipText("Escriba el Codigo de la lavadora");
         jTextFieldBuscar.addActionListener(this::jTextFieldBuscarActionPerformed);
-
-        jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
 
         btnEliminarNevera.setText("Eliminar");
         btnEliminarNevera.addActionListener(this::btnEliminarNeveraActionPerformed);
@@ -118,6 +109,15 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
         jcbTecInve.setEnabled(false);
         jcbTecInve.addActionListener(this::jcbTecInveActionPerformed);
 
+        jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
+        jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
+
+        jdFecha.setEnabled(false);
+
+        jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
+        jcbMarca.setEnabled(false);
+        jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -128,32 +128,34 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
                         .addGap(29, 29, 29)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel2))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 22, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel8)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel7))
-                    .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jcbTecInve)))
-                .addContainerGap(43, Short.MAX_VALUE))
-            .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel8)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jcbTecInve)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel1)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jLabel5))
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addGroup(layout.createSequentialGroup()
+                                                .addGap(35, 35, 35)
+                                                .addComponent(jLabel7))
+                                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                                .addComponent(txtCodigo, javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jcbMarca, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(22, 22, 22)
+                                        .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(59, 59, 59)
                         .addComponent(jTextFieldBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -162,7 +164,7 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(152, 152, 152)
                         .addComponent(btnEliminarNevera)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(35, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -170,44 +172,41 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTextFieldBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addGap(21, 21, 21))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addGap(30, 30, 30)
                         .addComponent(jLabel3)
                         .addGap(19, 19, 19)
                         .addComponent(jLabel1))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(13, 13, 13)
-                        .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4)
-                    .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(16, 16, 16)
+                        .addComponent(jdFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(21, 21, 21)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(txtPrecioBase, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel7))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING))
+                .addGap(9, 9, 9)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
                     .addComponent(jcbTecInve))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(btnEliminarNevera)
-                .addContainerGap(14, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -216,35 +215,6 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
     private void jTextFieldBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextFieldBuscarActionPerformed
         jButtonBuscarActionPerformed(evt);
     }//GEN-LAST:event_jTextFieldBuscarActionPerformed
-
-    private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
-        try {
-            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
-
-            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
-
-            if (e != null && e instanceof Lavadora) {
-                Lavadora lav = (Lavadora) e;
-
-                txtCodigo.setText(String.valueOf(lav.getCodigo()));
-                txtMarca.setText(lav.getMarca());
-                txtFechaFab.setText(String.valueOf(lav.getFechaFabricacion()));
-                txtPrecioBase.setText(String.valueOf(lav.getPrecioBase()));
-                txtCapacidad.setText(String.valueOf(lav.getCapacidadCargaKilos()));
-                jcbTecInve.setSelected(lav.isTecnologiaInverter());
-
-                JOptionPane.showMessageDialog(this, "¡Lavadora encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
-
-            } else if (e != null) {
-                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una Lavadora.", "Aviso", JOptionPane.WARNING_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "No existe ningún electrodoméstico registrado con ese código.", "No encontrado", JOptionPane.ERROR_MESSAGE);
-            }
-
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
-        }
-    }//GEN-LAST:event_jButtonBuscarActionPerformed
 
     private void btnEliminarNeveraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarNeveraActionPerformed
         try {
@@ -255,13 +225,17 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
             boolean eliminado = ServicioElectrodomestico.eliminarElectrodomestico(codigoAEliminar);
 
             if (eliminado) {
-                JOptionPane.showMessageDialog(this, "¡Electrodoméstico eliminado con éxito!", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "¡Lavadora eliminada con éxito!", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
 
+                // 3. Limpiamos los campos y controles correctamente adaptados a Lavadora
                 txtCodigo.setText("");
-                txtMarca.setText("");
+                if (jcbMarca.getItemCount() > 0) {
+                    jcbMarca.setSelectedIndex(0); // Resetea el combo de marca al primer elemento
+                }
+                jdFecha.setDate(null);
+                txtCodigo.setText("");
                 txtPrecioBase.setText("");
                 txtCapacidad.setText("");
-                txtFechaFab.setText("");
                 jcbTecInve.setSelected(eliminado);
             } else {
                 JOptionPane.showMessageDialog(this, "No se encontró ningún electrodoméstico con ese código.", "Error", JOptionPane.WARNING_MESSAGE);
@@ -285,6 +259,43 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
     private void jcbTecInveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbTecInveActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jcbTecInveActionPerformed
+
+    private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
+        try {
+            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
+
+            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
+
+            if (e != null && e instanceof Lavadora) {
+                Lavadora lav = (Lavadora) e;
+
+                txtCodigo.setText(String.valueOf(lav.getCodigo()));
+                jcbMarca.setSelectedItem(lav.getMarca());
+                txtPrecioBase.setText(String.valueOf(lav.getPrecioBase()));
+                txtCapacidad.setText(String.valueOf(lav.getCapacidadCargaKilos()));
+                txtVelCentri.setText(String.valueOf(lav.getVelocidadCentrifugadoRPM()));
+                jcbTecInve.setSelected(lav.isTecnologiaInverter());
+
+                JOptionPane.showMessageDialog(this, "¡Lavadora encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+
+            } else if (e != null) {
+                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una Lavadora.", "Aviso", JOptionPane.WARNING_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "No existe ningún electrodoméstico registrado con ese código.", "No encontrado", JOptionPane.ERROR_MESSAGE);
+            }
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_jButtonBuscarActionPerformed
+
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
+
+    private void txtPrecioBaseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtPrecioBaseActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtPrecioBaseActionPerformed
 
     /**
      * @param args the command line arguments
@@ -323,11 +334,11 @@ public class GUIEliminarLavadora extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JTextField jTextFieldBuscar;
+    private javax.swing.JComboBox<String> jcbMarca;
     private javax.swing.JCheckBox jcbTecInve;
+    private com.toedter.calendar.JDateChooser jdFecha;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
-    private javax.swing.JTextField txtFechaFab;
-    private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtPrecioBase;
     private javax.swing.JTextField txtVelCentri;
     // End of variables declaration//GEN-END:variables

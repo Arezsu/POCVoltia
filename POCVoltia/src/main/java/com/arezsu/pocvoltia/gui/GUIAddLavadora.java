@@ -8,6 +8,7 @@ import com.arezsu.pocvoltia.model.Electrodomestico;
 import com.arezsu.pocvoltia.model.Lavadora;
 import com.arezsu.pocvoltia.model.ProgramaLavado;
 import com.arezsu.pocvoltia.servicios.ServicioElectrodomestico;
+import com.arezsu.pocvoltia.util.SoundPlayer;
 import java.time.LocalDate;
 import javax.swing.JOptionPane;
 
@@ -39,11 +40,9 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         txtPrecioBase = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         btnAceptar = new javax.swing.JButton();
-        txtFechaFab = new javax.swing.JTextField();
         jLabel2 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
-        txtMarca = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtCapacidad = new javax.swing.JTextField();
@@ -51,6 +50,10 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         jcbTecInve = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
         txtVelCentri = new javax.swing.JTextField();
+        jcbMarca = new javax.swing.JComboBox<>();
+        jdFecha = new com.toedter.calendar.JDateChooser();
+        jLabel8 = new javax.swing.JLabel();
+        txtTiemLav = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Adicionar Lavadora");
@@ -62,8 +65,6 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         btnAceptar.setText("Aceptar");
         btnAceptar.addActionListener(this::btnAceptarActionPerformed);
 
-        txtFechaFab.setToolTipText("2026-12-25");
-
         jLabel2.setText("Codigo:");
         jLabel2.setToolTipText("");
 
@@ -71,8 +72,6 @@ public class GUIAddLavadora extends javax.swing.JFrame {
 
         jLabel3.setText("Marca:");
         jLabel3.setToolTipText("");
-
-        txtMarca.setToolTipText("");
 
         jLabel4.setText("Precio base: ");
         jLabel4.setToolTipText("");
@@ -93,6 +92,14 @@ public class GUIAddLavadora extends javax.swing.JFrame {
 
         txtVelCentri.addActionListener(this::txtVelCentriActionPerformed);
 
+        jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
+        jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
+        jLabel8.setText("Tiempo de lavado (m):");
+        jLabel8.setToolTipText("");
+
+        txtTiemLav.addActionListener(this::txtTiemLavActionPerformed);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -106,49 +113,65 @@ public class GUIAddLavadora extends javax.swing.JFrame {
                     .addComponent(jLabel4)
                     .addComponent(jLabel5)
                     .addComponent(jLabel6)
-                    .addComponent(jLabel7))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 65, Short.MAX_VALUE)
+                    .addComponent(jLabel7)
+                    .addComponent(jLabel8))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 52, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(txtTiemLav)
+                        .addGap(172, 172, 172))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(37, 37, 37)
-                        .addComponent(btnAceptar))
+                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(6, 6, 6)
+                                .addComponent(jcbTecInve)))
+                        .addGap(172, 172, 172))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addComponent(jcbTecInve))
-                    .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(32, 32, 32))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtVelCentri, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtCapacidad, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtPrecioBase)
+                            .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jcbMarca, javax.swing.GroupLayout.Alignment.LEADING, 0, 139, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnAceptar)
+                        .addGap(36, 36, 36))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnAceptar)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(txtFechaFab, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.Alignment.TRAILING))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4))
-                .addGap(18, 18, 18)
+                    .addComponent(jLabel3)
+                    .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(26, 26, 26)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel1)
+                    .addComponent(jdFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel4))
+                        .addGap(18, 18, 18))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnAceptar)
+                        .addGap(5, 5, 5)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(txtTiemLav, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7)
                     .addComponent(txtVelCentri, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -165,34 +188,47 @@ public class GUIAddLavadora extends javax.swing.JFrame {
     private void btnAceptarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAceptarActionPerformed
         int codigo;
         Electrodomestico lav;
-        LocalDate fechaFabricacion;
         double precioBase;
         double capacidadCargaKilos;
         int velocidadCentrifugadoRPM;
         boolean tecnologiaInverter;
+        int tiempoLavado; // Variable para capturar los minutos de la Clase D
 
         try {
             String strCodigo = txtCodigo.getText().trim();
-            String marca = txtMarca.getText().trim();
-            String strFechaFabricacion = txtFechaFab.getText().trim();
+            String marca = jcbMarca.getSelectedItem().toString().trim();
+
+            java.util.Date fecha = jdFecha.getDate();
+            LocalDate fechaFabricacion = null;
+
+            if (fecha != null) {
+                fechaFabricacion = fecha.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+            } else {
+                throw new IllegalArgumentException("Debe seleccionar una fecha de fabricación.");
+            }
+
             String strPrecioBase = txtPrecioBase.getText().trim();
             String strCapacidad = txtCapacidad.getText().trim();
-            String strRpm = txtVelCentri.getText().trim(); 
+            String strRpm = txtVelCentri.getText().trim();
+            String strTiempoLav = txtTiemLav.getText().trim(); 
 
             codigo = Integer.parseInt(strCodigo);
-            fechaFabricacion = LocalDate.parse(strFechaFabricacion);
             precioBase = Double.parseDouble(strPrecioBase);
             capacidadCargaKilos = Double.parseDouble(strCapacidad);
-            velocidadCentrifugadoRPM = Integer.parseInt(strRpm); // Convertir a entero
+            velocidadCentrifugadoRPM = Integer.parseInt(strRpm);
+            tiempoLavado = Integer.parseInt(strTiempoLav); 
             tecnologiaInverter = jcbTecInve.isSelected();
 
-            // Instanciando con los nuevos parámetros de la clase Lavadora
-            lav = new Lavadora(codigo, marca, fechaFabricacion, precioBase, capacidadCargaKilos, velocidadCentrifugadoRPM, tecnologiaInverter);
+            lav = new Lavadora(codigo, marca, fechaFabricacion, precioBase, capacidadCargaKilos, velocidadCentrifugadoRPM, tecnologiaInverter, tiempoLavado);
 
             ServicioElectrodomestico.addElectrodomestico(lav);
-            JOptionPane.showMessageDialog(this, "¡Lavadora creada exitosamente!");
+            JOptionPane.showMessageDialog(this, "¡Lavadora creada exitosamente con su programa de lavado asignado!");
+            SoundPlayer.playSoundLavadora("lavadora.wav");
 
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Por favor revise que los campos numéricos y el tiempo estén bien escritos.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
+            e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de validación", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAceptarActionPerformed
@@ -212,6 +248,14 @@ public class GUIAddLavadora extends javax.swing.JFrame {
     private void txtVelCentriActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtVelCentriActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtVelCentriActionPerformed
+
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
+
+    private void txtTiemLavActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTiemLavActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtTiemLavActionPerformed
 
     /**
      * @param args the command line arguments
@@ -247,12 +291,14 @@ public class GUIAddLavadora extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JComboBox<String> jcbMarca;
     private javax.swing.JCheckBox jcbTecInve;
+    private com.toedter.calendar.JDateChooser jdFecha;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
-    private javax.swing.JTextField txtFechaFab;
-    private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtPrecioBase;
+    private javax.swing.JTextField txtTiemLav;
     private javax.swing.JTextField txtVelCentri;
     // End of variables declaration//GEN-END:variables
 }

@@ -42,8 +42,6 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         txtCodigo = new javax.swing.JTextField();
-        txtMarca = new javax.swing.JTextField();
-        txtFechaFab = new javax.swing.JTextField();
         txtPrecioBase = new javax.swing.JTextField();
         txtCapacidad = new javax.swing.JTextField();
         jLabel7 = new javax.swing.JLabel();
@@ -54,6 +52,8 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         jButtonBuscar = new javax.swing.JButton();
+        jcbMarca = new javax.swing.JComboBox<>();
+        jdFecha = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Borrar Nevera");
@@ -76,14 +76,6 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         txtCodigo.setEditable(false);
         txtCodigo.setActionCommand("<Not Set>");
         txtCodigo.setEnabled(false);
-
-        txtMarca.setEditable(false);
-        txtMarca.setActionCommand("<Not Set>");
-        txtMarca.setEnabled(false);
-
-        txtFechaFab.setEditable(false);
-        txtFechaFab.setActionCommand("<Not Set>");
-        txtFechaFab.setEnabled(false);
 
         txtPrecioBase.setEditable(false);
         txtPrecioBase.setActionCommand("<Not Set>");
@@ -119,6 +111,12 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
         jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
         jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
 
+        jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
+        jcbMarca.setEnabled(false);
+        jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
+        jdFecha.setEnabled(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -132,7 +130,7 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                         .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(29, 29, 29)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel2)
@@ -141,27 +139,27 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                                     .addComponent(jLabel4)
                                     .addComponent(jLabel5))
                                 .addGap(35, 35, 35)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                     .addGroup(layout.createSequentialGroup()
                                         .addComponent(txtCapacidad, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(jLabel7))))
+                                        .addComponent(jLabel7))
+                                    .addComponent(txtCodigo)
+                                    .addComponent(jdFecha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jcbMarca, 0, 139, Short.MAX_VALUE)
+                                    .addComponent(txtPrecioBase)))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel6)
                                     .addComponent(jLabel8))
                                 .addGap(37, 37, 37)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jcbDispenAgua)))))
+                                    .addComponent(jcbDispenAgua)
+                                    .addComponent(txtNumPuertas)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(161, 161, 161)
                         .addComponent(btnEliminarNevera)))
-                .addContainerGap(38, Short.MAX_VALUE))
+                .addContainerGap(77, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -174,15 +172,18 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3)
-                    .addComponent(txtMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(21, 21, 21)
+                        .addComponent(jLabel3))
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jcbMarca, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(19, 19, 19)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel1)
-                    .addComponent(txtFechaFab, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                    .addComponent(jdFecha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(22, 22, 22)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -200,7 +201,7 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jcbDispenAgua)
                     .addComponent(jLabel6))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
                 .addComponent(btnEliminarNevera)
                 .addGap(22, 22, 22))
         );
@@ -225,20 +226,21 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
             boolean eliminado = ServicioElectrodomestico.eliminarElectrodomestico(codigoAEliminar);
 
             if (eliminado) {
-                JOptionPane.showMessageDialog(this, "¡Electrodoméstico eliminado con éxito!", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "¡Nevera eliminada con éxito!", "Eliminado", JOptionPane.INFORMATION_MESSAGE);
 
-                // 3. Limpiamos los campos de texto y controles
+                // 3. Limpiamos los campos y controles correctamente adaptados a Lavadora
                 txtCodigo.setText("");
-                txtMarca.setText("");
+                if (jcbMarca.getItemCount() > 0) {
+                    jcbMarca.setSelectedIndex(0); // Resetea el combo de marca al primer elemento
+                }
+                jdFecha.setDate(null); // Limpia el JDateChooser
                 txtPrecioBase.setText("");
                 txtCapacidad.setText("");
-                txtFechaFab.setText("");
+                txtNumPuertas.setText("");
+                jcbDispenAgua.setSelected(false); // Desmarca el checkbox de tecnología inverter
 
-                // Limpiar campos adicionales si existen en esta vista (ej. RPM, puertas, etc.)
-                // txtNumPuertas.setText(""); 
-                // jcbDispenAgua.setSelected(false); // Corregido para desmarcar el checkbox
             } else {
-                JOptionPane.showMessageDialog(this, "No se encontró ningún electrodoméstico con ese código.", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se encontró ninguna nevadora registrada con ese código.", "Error", JOptionPane.WARNING_MESSAGE);
             }
 
         } catch (NumberFormatException ex) {
@@ -259,7 +261,7 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
 
     private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
         try {
-            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
+            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText().trim());
 
             Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
 
@@ -267,25 +269,32 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
                 Nevera nev = (Nevera) e;
 
                 txtCodigo.setText(String.valueOf(nev.getCodigo()));
-                txtMarca.setText(nev.getMarca());
-                txtFechaFab.setText(String.valueOf(nev.getFechaFabricacion()));
+
+                jcbMarca.setSelectedItem(nev.getMarca());
+
                 txtPrecioBase.setText(String.valueOf(nev.getPrecioBase()));
                 txtCapacidad.setText(String.valueOf(nev.getVolumenLitros()));
                 txtNumPuertas.setText(String.valueOf(nev.getNumeroPuertas()));
                 jcbDispenAgua.setSelected(nev.isDispensadorAgua());
 
-                JOptionPane.showMessageDialog(this, "¡Nevera encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, "¡Lavadora encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
             } else if (e != null) {
-                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una nevera.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una nevadora.", "Aviso", JOptionPane.WARNING_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "No existe ningún electrodoméstico registrado con ese código.", "No encontrado", JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonBuscarActionPerformed
+
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
 
     /**
      * @param args the command line arguments
@@ -325,10 +334,10 @@ public class GUIEliminarNevera extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel8;
     private javax.swing.JTextField jTextFieldBuscar;
     private javax.swing.JCheckBox jcbDispenAgua;
+    private javax.swing.JComboBox<String> jcbMarca;
+    private com.toedter.calendar.JDateChooser jdFecha;
     private javax.swing.JTextField txtCapacidad;
     private javax.swing.JTextField txtCodigo;
-    private javax.swing.JTextField txtFechaFab;
-    private javax.swing.JTextField txtMarca;
     private javax.swing.JTextField txtNumPuertas;
     private javax.swing.JTextField txtPrecioBase;
     // End of variables declaration//GEN-END:variables
