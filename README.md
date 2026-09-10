@@ -101,11 +101,14 @@ classDiagram
 
     class ProgramaLavado {
         - String nombre
-        - int duracionMinutos
+        - int minMinutos
+        - int maxMinutos
         + getNombre() String
         + setNombre(String nombre) void
-        + getDuracionMinutos() int
-        + setDuracionMinutos(int duracionMinutos) void
+        + getMinMinutos(): int
+        + setMinMinutos(minMinutos: int): void
+        + getMaxMinutos(): int
+        + setMaxMinutos(maxMinutos: int): void
     }
 
     %% Relaciones de Herencia, Interfaces y Asociaciones
