@@ -6,6 +6,7 @@ package com.arezsu.pocvoltia.gui;
 
 import com.arezsu.pocvoltia.model.Electrodomestico;
 import com.arezsu.pocvoltia.model.Lavadora;
+import com.arezsu.pocvoltia.model.Nevera;
 import com.arezsu.pocvoltia.model.ProgramaLavado;
 import com.arezsu.pocvoltia.servicios.ServicioElectrodomestico;
 import com.arezsu.pocvoltia.util.SoundPlayer;
@@ -192,7 +193,7 @@ public class GUIAddLavadora extends javax.swing.JFrame {
         double capacidadCargaKilos;
         int velocidadCentrifugadoRPM;
         boolean tecnologiaInverter;
-        int tiempoLavado; // Variable para capturar los minutos de la Clase D
+        int tiempoLavado;
 
         try {
             String strCodigo = txtCodigo.getText().trim();
@@ -210,26 +211,39 @@ public class GUIAddLavadora extends javax.swing.JFrame {
             String strPrecioBase = txtPrecioBase.getText().trim();
             String strCapacidad = txtCapacidad.getText().trim();
             String strRpm = txtVelCentri.getText().trim();
-            String strTiempoLav = txtTiemLav.getText().trim(); 
+            String strTiempoLav = txtTiemLav.getText().trim();
 
             codigo = Integer.parseInt(strCodigo);
             precioBase = Double.parseDouble(strPrecioBase);
             capacidadCargaKilos = Double.parseDouble(strCapacidad);
             velocidadCentrifugadoRPM = Integer.parseInt(strRpm);
-            tiempoLavado = Integer.parseInt(strTiempoLav); 
+            tiempoLavado = Integer.parseInt(strTiempoLav);
             tecnologiaInverter = jcbTecInve.isSelected();
 
             lav = new Lavadora(codigo, marca, fechaFabricacion, precioBase, capacidadCargaKilos, velocidadCentrifugadoRPM, tecnologiaInverter, tiempoLavado);
 
-            ServicioElectrodomestico.addElectrodomestico(lav);
-            JOptionPane.showMessageDialog(this, "¡Lavadora creada exitosamente con su programa de lavado asignado!");
-            SoundPlayer.playSoundLavadora("lavadora.wav");
+            boolean registrado = ServicioElectrodomestico.addElectrodomestico(lav);
+
+            if (registrado) {
+                JOptionPane.showMessageDialog(this, "¡Lavadora creada exitosamente con su programa de lavado asignado!");
+                SoundPlayer.playSoundLavadora("lavadora.wav");
+                limpiarCampos();
+            } else {
+                Electrodomestico existente = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
+                String tipoExistente = "electrodoméstico";
+
+                if (existente instanceof Nevera) {
+                    tipoExistente = "nevera";
+                } else if (existente instanceof Lavadora) {
+                    tipoExistente = "lavadora";
+                }
+
+                JOptionPane.showMessageDialog(this, "Ya existe una " + tipoExistente + " registrada con este código.", "Código duplicado", JOptionPane.WARNING_MESSAGE);
+            }
 
         } catch (NumberFormatException e) {
             JOptionPane.showMessageDialog(this, "Por favor revise que los campos numéricos y el tiempo estén bien escritos.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de validación", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAceptarActionPerformed
 
@@ -301,4 +315,16 @@ public class GUIAddLavadora extends javax.swing.JFrame {
     private javax.swing.JTextField txtTiemLav;
     private javax.swing.JTextField txtVelCentri;
     // End of variables declaration//GEN-END:variables
+
+    private void limpiarCampos() {
+        txtCodigo.setText("");
+        jcbMarca.setSelectedIndex(0); // Vuelve a la primera opción de la lista
+        jdFecha.setDate(null);
+        txtPrecioBase.setText("");
+        txtCapacidad.setText("");
+        txtVelCentri.setText("");
+        txtTiemLav.setText("");
+        jcbTecInve.setSelected(false);
+        txtCodigo.requestFocus(); // Devuelve el cursor al campo del código
+    }
 }

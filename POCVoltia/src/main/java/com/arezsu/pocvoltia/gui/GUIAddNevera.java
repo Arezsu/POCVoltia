@@ -5,6 +5,7 @@
 package com.arezsu.pocvoltia.gui;
 
 import com.arezsu.pocvoltia.model.Electrodomestico;
+import com.arezsu.pocvoltia.model.Lavadora;
 import com.arezsu.pocvoltia.model.Nevera;
 import com.arezsu.pocvoltia.servicios.ServicioElectrodomestico;
 import com.arezsu.pocvoltia.util.SoundPlayer;
@@ -106,29 +107,31 @@ public class GUIAddNevera extends javax.swing.JFrame {
                     .addComponent(jLabel6)
                     .addComponent(jLabel7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jcbDispenAgua)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(68, 68, 68)
-                        .addComponent(btnAceptar))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(txtNumPuertas, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(txtCapacidad, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(txtPrecioBase)
-                        .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jcbMarca, 0, 139, Short.MAX_VALUE)))
-                .addGap(32, 32, 32))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jcbDispenAgua)
+                            .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, 139, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(172, 172, 172))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(txtNumPuertas, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtCapacidad, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtPrecioBase)
+                            .addComponent(jdFecha, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jcbMarca, 0, 139, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnAceptar)
+                        .addGap(33, 33, 33))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(btnAceptar)
                     .addComponent(txtCodigo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel2))
-                .addGap(18, 18, 18)
+                .addGap(19, 19, 19)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel3)
@@ -141,7 +144,8 @@ public class GUIAddNevera extends javax.swing.JFrame {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(txtPrecioBase, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel4))
+                    .addComponent(jLabel4)
+                    .addComponent(btnAceptar))
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
@@ -172,7 +176,6 @@ public class GUIAddNevera extends javax.swing.JFrame {
             String strCodigo = txtCodigo.getText().trim();
             String marca = jcbMarca.getSelectedItem().toString().trim();
 
-            // Usamos solo el JDateChooser (asegúrate de que el nombre del componente sea jdcFecha o jdFecha según tu diseño)
             java.util.Date fecha = jdFecha.getDate();
             LocalDate fechaFabricacion = null;
 
@@ -188,17 +191,33 @@ public class GUIAddNevera extends javax.swing.JFrame {
             codigo = Integer.parseInt(strCodigo);
             precioBase = Double.parseDouble(strPrecioBase);
             volumenLitros = Integer.parseInt(strCapacidad);
-            numeroPuertas = Integer.parseInt(strNumPuertas); // Convertir a entero
-            dispensadorAgua = jcbDispenAgua.isSelected(); // El checkbox del dispensador de agua
+            numeroPuertas = Integer.parseInt(strNumPuertas);
+            dispensadorAgua = jcbDispenAgua.isSelected();
 
             nev = new Nevera(codigo, marca, fechaFabricacion, precioBase, volumenLitros, numeroPuertas, dispensadorAgua);
 
-            ServicioElectrodomestico.addElectrodomestico(nev);
-            JOptionPane.showMessageDialog(this, "¡Nevera creada exitosamente!");
-            SoundPlayer.playSoundNeveraa("nevera.wav");
+            boolean registrado = ServicioElectrodomestico.addElectrodomestico(nev);
 
+            if (registrado) {
+                JOptionPane.showMessageDialog(this, "¡Nevera creada exitosamente!");
+                SoundPlayer.playSoundNeveraa("nevera.wav");
+                limpiarCampos();
+            } else {
+                Electrodomestico existente = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
+                String tipoExistente = "electrodoméstico";
+
+                if (existente instanceof Nevera) {
+                    tipoExistente = "nevera";
+                } else if (existente instanceof Lavadora) {
+                    tipoExistente = "lavadora";
+                }
+
+                JOptionPane.showMessageDialog(this, "Ya existe una " + tipoExistente + " registrada con este código.", "Código duplicado", JOptionPane.WARNING_MESSAGE);
+            }
+
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Por favor revise que los campos numéricos estén bien escritos.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage(), "Error de validación", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnAceptarActionPerformed
 
@@ -264,4 +283,15 @@ public class GUIAddNevera extends javax.swing.JFrame {
     private javax.swing.JTextField txtNumPuertas;
     private javax.swing.JTextField txtPrecioBase;
     // End of variables declaration//GEN-END:variables
+
+    private void limpiarCampos() {
+        txtCodigo.setText("");
+        jcbMarca.setSelectedIndex(0);
+        jdFecha.setDate(null);
+        txtPrecioBase.setText("");
+        txtCapacidad.setText("");
+        txtNumPuertas.setText("");
+        jcbDispenAgua.setSelected(false);
+        txtCodigo.requestFocus();
+    }
 }

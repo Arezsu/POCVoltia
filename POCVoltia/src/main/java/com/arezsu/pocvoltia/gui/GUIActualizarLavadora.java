@@ -57,7 +57,7 @@ import javax.swing.JOptionPane;
         jdFecha = new com.toedter.calendar.JDateChooser();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Eliminar Lavadora");
+        setTitle("Actualizar Lavadora");
 
         jLabel1.setText("Fecha de fabricacion:");
         jLabel1.setToolTipText("");
@@ -79,11 +79,9 @@ import javax.swing.JOptionPane;
         txtCodigo.setActionCommand("<Not Set>");
         txtCodigo.setEnabled(false);
 
-        txtPrecioBase.setEditable(false);
         txtPrecioBase.setBackground(new java.awt.Color(255, 255, 255));
         txtPrecioBase.setActionCommand("<Not Set>");
 
-        txtCapacidad.setEditable(false);
         txtCapacidad.setBackground(new java.awt.Color(255, 255, 255));
         txtCapacidad.setActionCommand("<Not Set>");
         txtCapacidad.addActionListener(this::txtCapacidadActionPerformed);
@@ -247,12 +245,12 @@ import javax.swing.JOptionPane;
     }//GEN-LAST:event_jcbTecInveActionPerformed
 
     private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
-try {
+        try {
             int codigo = Integer.parseInt(jTextFieldBuscar.getText().trim());
-            
+
             Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
 
-    if (e != null && e instanceof Lavadora) {
+            if (e != null && e instanceof Lavadora) {
                 Lavadora lav = (Lavadora) e;
 
                 txtCodigo.setText(String.valueOf(lav.getCodigo()));

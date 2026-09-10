@@ -36,22 +36,27 @@
                   <Component id="jLabel7" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace pref="81" max="32767" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jcbDispenAgua" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="txtCodigo" min="-2" pref="139" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
-                      <Component id="btnAceptar" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jcbDispenAgua" min="-2" max="-2" attributes="0"/>
+                          <Component id="txtCodigo" alignment="0" min="-2" pref="139" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="-2" pref="172" max="-2" attributes="0"/>
                   </Group>
-                  <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                      <Component id="txtNumPuertas" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtCapacidad" alignment="0" max="32767" attributes="0"/>
-                      <Component id="txtPrecioBase" max="32767" attributes="0"/>
-                      <Component id="jdFecha" alignment="0" max="32767" attributes="0"/>
-                      <Component id="jcbMarca" alignment="1" pref="139" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                          <Component id="txtNumPuertas" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtCapacidad" alignment="0" max="32767" attributes="0"/>
+                          <Component id="txtPrecioBase" max="32767" attributes="0"/>
+                          <Component id="jdFecha" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jcbMarca" alignment="1" pref="139" max="32767" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="btnAceptar" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace min="-2" pref="32" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -60,11 +65,10 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="btnAceptar" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="txtCodigo" alignment="0" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
                       <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
@@ -81,6 +85,7 @@
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="txtPrecioBase" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="jLabel4" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="btnAceptar" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">

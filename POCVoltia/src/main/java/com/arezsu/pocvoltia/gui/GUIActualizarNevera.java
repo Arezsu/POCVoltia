@@ -50,9 +50,9 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
         jcbDispenAgua = new javax.swing.JCheckBox();
         jLabel8 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jButtonBuscar = new javax.swing.JButton();
         jdFecha = new com.toedter.calendar.JDateChooser();
         jcbMarca = new javax.swing.JComboBox<>();
+        jButtonBuscar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Actualizar Nevera");
@@ -77,11 +77,9 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
         txtCodigo.setActionCommand("<Not Set>");
         txtCodigo.setEnabled(false);
 
-        txtPrecioBase.setEditable(false);
         txtPrecioBase.setBackground(new java.awt.Color(255, 255, 255));
         txtPrecioBase.setActionCommand("<Not Set>");
 
-        txtCapacidad.setEditable(false);
         txtCapacidad.setBackground(new java.awt.Color(255, 255, 255));
         txtCapacidad.setActionCommand("<Not Set>");
         txtCapacidad.addActionListener(this::txtCapacidadActionPerformed);
@@ -107,11 +105,11 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
         jLabel6.setText("Dispensador de agua");
         jLabel6.setToolTipText("");
 
-        jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
-        jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
-
         jcbMarca.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Samsung", "LG", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Haier", "Panasonic", "Frigidaire" }));
         jcbMarca.addActionListener(this::jcbMarcaActionPerformed);
+
+        jButtonBuscar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Buscar (2).png"))); // NOI18N
+        jButtonBuscar.addActionListener(this::jButtonBuscarActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -119,11 +117,6 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(59, 59, 59)
-                        .addComponent(jTextFieldBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(29, 29, 29)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -153,15 +146,23 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
                                     .addComponent(txtNumPuertas, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jcbDispenAgua)))))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(161, 161, 161)
-                        .addComponent(btnActualizarNevera)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(161, 161, 161)
+                                .addComponent(btnActualizarNevera))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(59, 59, 59)
+                                .addComponent(jTextFieldBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 201, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap(38, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jTextFieldBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButtonBuscar, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(12, 12, 12)
@@ -212,33 +213,34 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
 
     private void btnActualizarNeveraActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarNeveraActionPerformed
         try {
-            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
+            int codigo = Integer.parseInt(txtCodigo.getText().trim());
 
-            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
+            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
 
             if (e != null && e instanceof Nevera) {
                 Nevera nev = (Nevera) e;
 
-                txtCodigo.setText(String.valueOf(nev.getCodigo()));
-                jcbMarca.setSelectedItem(nev.getMarca());
-                if (nev.getFechaFabricacion() != null) {
-                    jdFecha.setDate(java.sql.Date.valueOf(nev.getFechaFabricacion()));
+                nev.setMarca(jcbMarca.getSelectedItem().toString());
+                if (jdFecha.getDate() != null) {
+                    nev.setFechaFabricacion(jdFecha.getDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
                 }
-                txtPrecioBase.setText(String.valueOf(nev.getPrecioBase()));
-                txtCapacidad.setText(String.valueOf(nev.getVolumenLitros()));
-                txtNumPuertas.setText(String.valueOf(nev.getNumeroPuertas()));
-                jcbDispenAgua.setSelected(nev.isDispensadorAgua());
+                nev.setPrecioBase(Double.parseDouble(txtPrecioBase.getText().trim()));
+                nev.setVolumenLitros(Integer.parseInt(txtCapacidad.getText().trim()));
+                nev.setNumeroPuertas(Integer.parseInt(txtNumPuertas.getText().trim()));
+                nev.setDispensadorAgua(jcbDispenAgua.isSelected());
 
-                JOptionPane.showMessageDialog(this, "¡Nevera encontrada y cargada!", "Éxito", JOptionPane.INFORMATION_MESSAGE);
+                // IMPORTANTE: Llamamos a cambio() o actualizamos en el servicio para disparar el Observer
+                // (Si tu setter o el servicio ya lo notifica, la tabla se refrescará sola)
+                JOptionPane.showMessageDialog(this, "¡Nevera actualizada con éxito!", "Actualizado", JOptionPane.INFORMATION_MESSAGE);
 
-            } else if (e != null) {
-                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una nevera.", "Aviso", JOptionPane.WARNING_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "No existe ningún electrodoméstico registrado con ese código.", "No encontrado", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No se encontró una nevera para actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
             }
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Por favor, verifica que los campos numéricos tengan un formato válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Ocurrió un error al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_btnActualizarNeveraActionPerformed
 
@@ -250,40 +252,51 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jcbDispenAguaActionPerformed
 
+    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jcbMarcaActionPerformed
+
     private void jButtonBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonBuscarActionPerformed
         try {
-            int codigo = Integer.parseInt(txtCodigo.getText().trim());
+            int codigoBuscado = Integer.parseInt(jTextFieldBuscar.getText());
 
-            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigo);
+            Electrodomestico e = ServicioElectrodomestico.buscarElectrodomesticoPorCodigo(codigoBuscado);
 
             if (e != null && e instanceof Nevera) {
                 Nevera nev = (Nevera) e;
 
-                nev.setMarca(jcbMarca.getSelectedItem().toString());
-                if (jdFecha.getDate() != null) {
-                    nev.setFechaFabricacion(new java.sql.Date(jdFecha.getDate().getTime()).toLocalDate());
-                }
-                nev.setPrecioBase(Double.parseDouble(txtPrecioBase.getText().trim()));
-                nev.setVolumenLitros(Integer.parseInt(txtCapacidad.getText().trim()));
-                nev.setNumeroPuertas(Integer.parseInt(txtNumPuertas.getText().trim()));
-                nev.setDispensadorAgua(jcbDispenAgua.isSelected());
+                txtCodigo.setText(String.valueOf(nev.getCodigo()));
+                jcbMarca.setSelectedItem(nev.getMarca());
+                jdFecha.setDate(java.sql.Date.valueOf(nev.getFechaFabricacion()));
+                txtPrecioBase.setText(String.valueOf(nev.getPrecioBase()));
+                txtCapacidad.setText(String.valueOf(nev.getVolumenLitros()));
+                txtNumPuertas.setText(String.valueOf(nev.getNumeroPuertas()));
+                jcbDispenAgua.setSelected(nev.isDispensadorAgua());
 
-                JOptionPane.showMessageDialog(this, "¡Nevera actualizada con éxito!", "Actualizado", JOptionPane.INFORMATION_MESSAGE);
+                // --- POLIMORFISMO Y OPERACIÓN EXPLÍCITA (ICongelable) ---
+                double precioRegular = nev.calcularPrecioFinal();
+                double precioConDescuento = nev.aplicarDescuentoTemporada(15.0); // 15% de descuento de temporada
+                String garantia = nev.obtenerCertificadoGarantia();
 
+                JOptionPane.showMessageDialog(this,
+                        "¡Nevera encontrada y cargada!\n\n"
+                        + " CÁLCULO POLIMÓRFICO EXPLÍCITO \n"
+                        + "Precio Final Regular: $" + precioRegular + "\n"
+                        + "Precio con Descuento (15 %): $" + precioConDescuento + "\n"
+                        + "Certificado: " + garantia,
+                        "Éxito y Cálculo",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+            } else if (e != null) {
+                JOptionPane.showMessageDialog(this, "El código pertenece a otro tipo de electrodoméstico, no a una nevera.", "Aviso", JOptionPane.WARNING_MESSAGE);
             } else {
-                JOptionPane.showMessageDialog(this, "No se encontró una nevera registrada con ese código para actualizar.", "Error", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "No existe ningún electrodoméstico registrado con ese código.", "No encontrado", JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Por favor, verifica que los campos numéricos tengan un formato válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Ocurrió un error al actualizar: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Por favor, ingresa un código numérico válido.", "Error de formato", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButtonBuscarActionPerformed
-
-    private void jcbMarcaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jcbMarcaActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jcbMarcaActionPerformed
 
     /**
      * @param args the command line arguments
