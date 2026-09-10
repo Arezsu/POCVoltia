@@ -48,7 +48,9 @@ public class ServicioElectrodomestico {
         notificarObservadores(); // <-- Aquí se avisa a todos los Listar abiertos
         return true;
     }
-
+    public static void notificarCambio() {
+        notificarObservadores();
+    }
     public static Electrodomestico buscarElectrodomesticoPorCodigo(int codigo) {
         return electrodomesticos.get(codigo);
     }
@@ -56,6 +58,7 @@ public class ServicioElectrodomestico {
     public static boolean eliminarElectrodomestico(int codigo) {
         if (electrodomesticos.containsKey(codigo)) {
             electrodomesticos.remove(codigo);
+            notificarObservadores();
             return true;
         }
         return false;

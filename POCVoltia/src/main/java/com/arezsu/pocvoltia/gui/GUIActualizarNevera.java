@@ -229,6 +229,8 @@ public class GUIActualizarNevera extends javax.swing.JFrame {
                 nev.setNumeroPuertas(Integer.parseInt(txtNumPuertas.getText().trim()));
                 nev.setDispensadorAgua(jcbDispenAgua.isSelected());
 
+                ServicioElectrodomestico.notificarCambio();
+
                 // IMPORTANTE: Llamamos a cambio() o actualizamos en el servicio para disparar el Observer
                 // (Si tu setter o el servicio ya lo notifica, la tabla se refrescará sola)
                 JOptionPane.showMessageDialog(this, "¡Nevera actualizada con éxito!", "Actualizado", JOptionPane.INFORMATION_MESSAGE);
