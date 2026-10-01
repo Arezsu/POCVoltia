@@ -1,0 +1,40 @@
+type Query {
+    # Listar todos los objetos
+    lavadoras: [Lavadora]
+    # Consulta de UN solo objeto por codigo
+    lavadoraPorCodigo(codigo: Int!): Lavadora
+    # Listar con filtro (del lado del servidor) por 2 parametros opcionales
+    lavadorasPorFiltro(marca: String, funcionSecado: Boolean): [Lavadora]
+}
+
+type Mutation {
+    addLavadora(input: LavadoraInput!): Lavadora
+    actualizarLavadora(codigo: Int!, input: LavadoraUpdateInput!): Lavadora
+    eliminarLavadora(codigo: Int!): Boolean
+}
+
+input LavadoraInput {
+    codigo: Int!
+    marca: String!
+    precioBase: Float!
+    fechaFabricacion: String!
+    capacidadKilos: Float!
+    funcionSecado: Boolean!
+}
+
+input LavadoraUpdateInput {
+    marca: String
+    precioBase: Float
+    fechaFabricacion: String
+    capacidadKilos: Float
+    funcionSecado: Boolean
+}
+
+type Lavadora {
+    codigo: Int
+    marca: String
+    precioBase: Float
+    fechaFabricacion: String
+    capacidadKilos: Float
+    funcionSecado: Boolean
+}

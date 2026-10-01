@@ -1,0 +1,9 @@
+# Java / IntelliJ
+ServidorLavadora/target/
+.idea/
+*.iml
+# Visual Studio
+.vs/
+bin/
+obj/
+*.user
