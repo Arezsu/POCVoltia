@@ -1,0 +1,21 @@
+# Java / IntelliJ / Maven
+target/
+.idea/workspace.xml
+*.iml
+.mvn/wrapper/maven-wrapper.jar
+
+# C# / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+packages/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Sistema
+Thumbs.db
+.DS_Store

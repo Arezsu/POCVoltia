@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- WinExe = aplicacion de ventanas (sin consola) -->
+    <OutputType>WinExe</OutputType>
+    <!-- .NET Framework 4.8: la misma plataforma que uso el cliente de la version V2 -->
+    <TargetFramework>net48</TargetFramework>
+    <!-- UseWPF = activa las clases de ventanas WPF (Window, Button, etc.).
+         En este proyecto NO se usa XAML: toda la interfaz esta escrita en C#. -->
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>ClienteLavadora</RootNamespace>
+    <AssemblyName>ClienteLavadora</AssemblyName>
+    <Version>4.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Partes de .NET Framework que usa el cliente (App.config y HTTP) -->
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Librerias para hablar con el servidor GraphQL (las mismas de V2) -->
+    <PackageReference Include="GraphQL.Client" Version="6.1.0" />
+    <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="6.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Imagenes y sonidos: se copian junto al .exe, en la carpeta Assets -->
+    <None Update="Assets\logo.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\buscar.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\lavadora.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Assets\click.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,103 @@
+# Contrato del servicio: lo que el servidor sabe hacer.
+# Cada operacion se une con un metodo de un controller por el nombre.
+#
+# Dos objetos con relacion maestro-detalle:
+#   ProgramaLavado (maestro, 1..1)  <-  Lavadora (detalle, 0..*)
+# Un programa lo usan muchas lavadoras y cada lavadora tiene un solo programa.
+
+type Query {
+    # ----- Programas de lavado (maestro) -----
+    programas: [ProgramaLavado]
+    programaPorCodigo(codigo: Int!): ProgramaLavado
+    # Consulta de UN programa por uno o dos criterios (codigo y/o nombre)
+    programaPorCriterios(codigo: Int, nombre: String): ProgramaLavado
+    # Listar con filtro (lo hace el servidor)
+    programasPorFiltro(nombre: String, aguaCaliente: Boolean): [ProgramaLavado]
+
+    # ----- Lavadoras (detalle) -----
+    lavadoras: [Lavadora]
+    lavadoraPorCodigo(codigo: Int!): Lavadora
+    # Consulta de UNA lavadora por uno o dos criterios (codigo y/o marca)
+    lavadoraPorCriterios(codigo: Int, marca: String): Lavadora
+    # Listar con filtro (lo hace el servidor)
+    lavadorasPorFiltro(marca: String, tecnologiaInverter: Boolean): [Lavadora]
+}
+
+type Mutation {
+    addPrograma(input: ProgramaInput!): ProgramaLavado
+    actualizarPrograma(codigo: Int!, input: ProgramaUpdateInput!): ProgramaLavado
+    eliminarPrograma(codigo: Int!): Boolean
+
+    addLavadora(input: LavadoraInput!): Lavadora
+    actualizarLavadora(codigo: Int!, input: LavadoraUpdateInput!): Lavadora
+    eliminarLavadora(codigo: Int!): Boolean
+}
+
+type ProgramaLavado {
+    codigo: Int
+    nombre: String
+    minMinutos: Int
+    maxMinutos: Int
+    consumoAguaLitros: Float
+    fechaCreacion: String
+    aguaCaliente: Boolean
+    # Calculado: cuantas lavadoras usan este programa
+    cantidadLavadoras: Int
+}
+
+type Lavadora {
+    codigo: Int
+    marca: String
+    precioBase: Float
+    fechaFabricacion: String
+    capacidadCargaKilos: Float
+    velocidadCentrifugadoRPM: Int
+    tecnologiaInverter: Boolean
+    minutosLavado: Int
+    # El programa (maestro) que usa esta lavadora
+    programaLavado: ProgramaLavado
+    # Calculado: precio base mas extras
+    precioFinal: Float
+}
+
+# La fecha va como texto yyyy-MM-ddTHH:mm:ss
+input ProgramaInput {
+    codigo: Int!
+    nombre: String!
+    minMinutos: Int!
+    maxMinutos: Int!
+    consumoAguaLitros: Float!
+    fechaCreacion: String!
+    aguaCaliente: Boolean!
+}
+
+# Todos opcionales: solo se manda lo que cambia
+input ProgramaUpdateInput {
+    nombre: String
+    minMinutos: Int
+    maxMinutos: Int
+    consumoAguaLitros: Float
+    fechaCreacion: String
+    aguaCaliente: Boolean
+}
+
+input LavadoraInput {
+    codigo: Int!
+    marca: String!
+    precioBase: Float!
+    fechaFabricacion: String!
+    capacidadCargaKilos: Float!
+    velocidadCentrifugadoRPM: Int!
+    tecnologiaInverter: Boolean!
+    minutosLavado: Int!
+}
+
+input LavadoraUpdateInput {
+    marca: String
+    precioBase: Float
+    fechaFabricacion: String
+    capacidadCargaKilos: Float
+    velocidadCentrifugadoRPM: Int
+    tecnologiaInverter: Boolean
+    minutosLavado: Int
+}

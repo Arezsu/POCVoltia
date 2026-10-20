@@ -1,0 +1,393 @@
+PRUEBAS EN GRAPHIQL - VOLTIA
+============================
+
+Como usar esto:
+1. Prendan el servidor (el de Java).
+2. Abran http://localhost:8081/graphiql en el navegador.
+3. Copien UN bloque, peguenlo en el panel de la izquierda y denle al boton de play.
+4. Lo que responde el servidor sale a la derecha.
+
+Hay dos objetos con relacion maestro-detalle:
+- PROGRAMA DE LAVADO (maestro): codigos 1 a 4. Cada programa cubre un rango de minutos.
+- LAVADORA (detalle): codigos 101 a 104. Cada lavadora usa UN programa, el que cubre sus
+  minutos de lavado. Un programa lo pueden usar muchas lavadoras (0..*).
+
+La fecha siempre va asi: 2025-09-15T11:30:00 (con la T y los segundos).
+Lo que va despues de los parentesis, entre llaves { }, son los datos que queremos que
+nos devuelva el servidor.
+
+
+==========================================================
+PARTE 1. PROGRAMAS DE LAVADO (maestro)
+==========================================================
+
+----------------------------------------------------------
+1. LISTAR TODOS LOS PROGRAMAS
+----------------------------------------------------------
+
+query {
+  programas {
+    codigo
+    nombre
+    minMinutos
+    maxMinutos
+    consumoAguaLitros
+    fechaCreacion
+    aguaCaliente
+    cantidadLavadoras
+  }
+}
+
+Que decir: "cantidadLavadoras lo calcula el servidor: son las lavadoras (detalle) que usan
+cada programa."
+
+
+----------------------------------------------------------
+2. CONSULTAR UN PROGRAMA (por uno o dos criterios)
+----------------------------------------------------------
+
+# 2a. Solo por codigo
+
+query {
+  programaPorCriterios(codigo: 2) {
+    codigo
+    nombre
+    minMinutos
+    maxMinutos
+  }
+}
+
+# 2b. Solo por nombre (con "inten" encuentra Intensivo, sin importar mayusculas)
+
+query {
+  programaPorCriterios(nombre: "inten") {
+    codigo
+    nombre
+  }
+}
+
+# 2c. Por los dos criterios a la vez (debe cumplir los dos)
+
+query {
+  programaPorCriterios(codigo: 3, nombre: "intensivo") {
+    codigo
+    nombre
+  }
+}
+
+# 2d. Sin ningun criterio -> error: "Escriba al menos un criterio de busqueda (codigo o nombre)"
+
+query {
+  programaPorCriterios {
+    codigo
+  }
+}
+
+
+----------------------------------------------------------
+3. LISTAR PROGRAMAS CON FILTRO (el filtro lo hace el servidor)
+----------------------------------------------------------
+
+query {
+  programasPorFiltro(nombre: "r", aguaCaliente: true) {
+    codigo
+    nombre
+    aguaCaliente
+  }
+}
+
+# Solo por agua caliente
+
+query {
+  programasPorFiltro(aguaCaliente: false) {
+    codigo
+    nombre
+  }
+}
+
+
+----------------------------------------------------------
+4. INSERTAR UN PROGRAMA
+----------------------------------------------------------
+
+mutation {
+  addPrograma(input: {
+    codigo: 5
+    nombre: "Delicado"
+    minMinutos: 181
+    maxMinutos: 240
+    consumoAguaLitros: 40.0
+    fechaCreacion: "2025-02-01T09:00:00"
+    aguaCaliente: false
+  }) {
+    codigo
+    nombre
+    cantidadLavadoras
+  }
+}
+
+
+----------------------------------------------------------
+5. ACTUALIZAR UN PROGRAMA (solo lo que se manda)
+----------------------------------------------------------
+
+mutation {
+  actualizarPrograma(codigo: 5, input: {
+    nombre: "Delicado Plus"
+    maxMinutos: 260
+    aguaCaliente: true
+  }) {
+    codigo
+    nombre
+    maxMinutos
+    aguaCaliente
+  }
+}
+
+
+----------------------------------------------------------
+6. ELIMINAR UN PROGRAMA
+----------------------------------------------------------
+
+mutation {
+  eliminarPrograma(codigo: 5)
+}
+
+Responde true si pudo. Si el programa lo usan lavadoras NO se puede eliminar (ver punto 9).
+
+
+==========================================================
+PARTE 2. LAVADORAS (detalle)
+==========================================================
+
+----------------------------------------------------------
+7. LISTAR, CONSULTAR Y FILTRAR LAVADORAS
+----------------------------------------------------------
+
+# 7a. Listar todas, con el programa (maestro) que usa cada una
+
+query {
+  lavadoras {
+    codigo
+    marca
+    precioBase
+    fechaFabricacion
+    capacidadCargaKilos
+    velocidadCentrifugadoRPM
+    tecnologiaInverter
+    minutosLavado
+    precioFinal
+    programaLavado {
+      codigo
+      nombre
+    }
+  }
+}
+
+Que decir: "programaLavado es el objeto maestro. GraphQL deja pedir sus datos dentro de la
+lavadora, en una sola consulta."
+
+# 7b. Consultar UNA lavadora por uno o dos criterios (codigo y/o marca)
+
+query {
+  lavadoraPorCriterios(codigo: 101, marca: "lg") {
+    codigo
+    marca
+    precioFinal
+  }
+}
+
+# 7c. Listar con filtro: marca y tecnologia inverter (los dos son opcionales)
+
+query {
+  lavadorasPorFiltro(marca: "LG", tecnologiaInverter: true) {
+    codigo
+    marca
+    tecnologiaInverter
+  }
+}
+
+
+----------------------------------------------------------
+8. INSERTAR, ACTUALIZAR Y ELIMINAR UNA LAVADORA
+----------------------------------------------------------
+
+# 8a. Insertar (los minutos escogen el programa: 20 minutos es el programa Rapido)
+
+mutation {
+  addLavadora(input: {
+    codigo: 105
+    marca: "Mabe"
+    precioBase: 1100000
+    fechaFabricacion: "2025-09-15T11:30:00"
+    capacidadCargaKilos: 15.5
+    velocidadCentrifugadoRPM: 1100
+    tecnologiaInverter: true
+    minutosLavado: 20
+  }) {
+    codigo
+    marca
+    precioFinal
+    programaLavado {
+      nombre
+    }
+  }
+}
+
+# 8b. Actualizar (los minutos nuevos cambian el programa de la lavadora)
+
+mutation {
+  actualizarLavadora(codigo: 105, input: {
+    marca: "Mabe Plus"
+    minutosLavado: 70
+  }) {
+    codigo
+    marca
+    minutosLavado
+    programaLavado {
+      nombre
+    }
+  }
+}
+
+# 8c. Eliminar
+
+mutation {
+  eliminarLavadora(codigo: 105)
+}
+
+
+==========================================================
+PARTE 3. LA RELACION MAESTRO-DETALLE Y LOS ERRORES
+==========================================================
+
+----------------------------------------------------------
+9. REGLAS DE LA RELACION (probar con la lavadora 105 creada en 8a)
+----------------------------------------------------------
+
+# 9a. No se puede eliminar un programa que usan lavadoras
+# Respuesta esperada: "No se puede eliminar el programa Rapido porque lo usan N lavadora(s)"
+
+mutation {
+  eliminarPrograma(codigo: 1)
+}
+
+# 9b. No se puede cambiar el rango de un programa si una lavadora queda fuera
+# (la lavadora 102 usa 30 minutos, el programa 1 cubre 10 a 30)
+# Respuesta esperada: "No se puede cambiar el rango: la lavadora 102 (30 min) quedaria fuera del programa"
+
+mutation {
+  actualizarPrograma(codigo: 1, input: { maxMinutos: 20 }) {
+    codigo
+  }
+}
+
+# 9c. Una lavadora necesita un programa que cubra sus minutos
+# Respuesta esperada: "Ningun programa de lavado cubre 500 minutos. Cree primero un programa..."
+
+mutation {
+  addLavadora(input: {
+    codigo: 200
+    marca: "Haceb"
+    precioBase: 900000
+    fechaFabricacion: "2025-01-01T10:00:00"
+    capacidadCargaKilos: 10
+    velocidadCentrifugadoRPM: 1000
+    tecnologiaInverter: false
+    minutosLavado: 500
+  }) {
+    codigo
+  }
+}
+
+# 9d. Los rangos de dos programas no se pueden cruzar
+# Respuesta esperada: "El rango 20-40 se cruza con el programa Rapido (10-30)"
+
+mutation {
+  addPrograma(input: {
+    codigo: 6
+    nombre: "Cruce"
+    minMinutos: 20
+    maxMinutos: 40
+    consumoAguaLitros: 40.0
+    fechaCreacion: "2025-02-01T09:00:00"
+    aguaCaliente: false
+  }) {
+    codigo
+  }
+}
+
+
+----------------------------------------------------------
+10. OTROS ERRORES (el servidor valida los datos)
+----------------------------------------------------------
+
+# 10a. Codigo repetido -> "Ya existe una lavadora con el codigo 101"
+
+mutation {
+  addLavadora(input: {
+    codigo: 101
+    marca: "LG"
+    precioBase: 1000000
+    fechaFabricacion: "2025-01-01T10:00:00"
+    capacidadCargaKilos: 10
+    velocidadCentrifugadoRPM: 1000
+    tecnologiaInverter: false
+    minutosLavado: 30
+  }) {
+    codigo
+  }
+}
+
+# 10b. Fecha mal escrita (falta la hora) -> "Fecha invalida..."
+
+mutation {
+  addLavadora(input: {
+    codigo: 201
+    marca: "Haceb"
+    precioBase: 900000
+    fechaFabricacion: "2025-01-01"
+    capacidadCargaKilos: 10
+    velocidadCentrifugadoRPM: 1000
+    tecnologiaInverter: false
+    minutosLavado: 30
+  }) {
+    codigo
+  }
+}
+
+# 10c. Velocidad menor a 600 -> "La velocidad de centrifugado minima debe ser 600 RPM"
+
+mutation {
+  addLavadora(input: {
+    codigo: 202
+    marca: "Haceb"
+    precioBase: 900000
+    fechaFabricacion: "2025-01-01T10:00:00"
+    capacidadCargaKilos: 10
+    velocidadCentrifugadoRPM: 500
+    tecnologiaInverter: false
+    minutosLavado: 30
+  }) {
+    codigo
+  }
+}
+
+# 10d. Eliminar algo que no existe -> "No existe una lavadora con el codigo 999"
+
+mutation {
+  eliminarLavadora(codigo: 999)
+}
+
+
+----------------------------------------------------------
+DATOS DE REFERENCIA
+----------------------------------------------------------
+Programas de ejemplo (codigo, nombre, minutos):
+  1 Rapido 10-30 | 2 Normal 31-60 | 3 Intensivo 61-90 | 4 Ropa pesada 91-180
+
+PRECIO FINAL de la lavadora = precio base + 120.000 (si carga mas de 15 kg)
+                                          + 250.000 (si tiene inverter)
+
+Los datos viven en memoria. Si apagan y prenden el servidor, se pierde lo que hayan
+agregado y vuelven los datos de ejemplo (4 programas y 4 lavadoras).
