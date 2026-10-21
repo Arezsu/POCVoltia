@@ -491,52 +491,6 @@
           Esta lavadora no tiene mantenimientos con los filtros indicados (el detalle puede estar en cero).
         </p>
 
-        <!-- Formulario de alta y edicion del detalle -->
-        <form id="form-mantenimiento" class="form-mantenimiento" novalidate hidden>
-          <h3 id="titulo-form-mantenimiento">Agregar mantenimiento</h3>
-          <div class="rejilla-campos">
-            <div class="campo">
-              <label for="mat-descripcion">Descripcion</label>
-              <input type="text" id="mat-descripcion" placeholder="Cambio de bomba" autocomplete="off">
-              <span class="campo-error" id="error-mat-descripcion"></span>
-            </div>
-            <div class="campo">
-              <label for="mat-tecnico">Tecnico</label>
-              <input type="text" id="mat-tecnico" placeholder="Carlos Perez" autocomplete="off">
-              <span class="campo-error" id="error-mat-tecnico"></span>
-            </div>
-            <div class="campo">
-              <label for="mat-costo">Costo</label>
-              <input type="number" id="mat-costo" min="0" step="1000" placeholder="120000">
-              <span class="campo-error" id="error-mat-costo"></span>
-            </div>
-            <div class="campo">
-              <label for="mat-fecha">Fecha</label>
-              <input type="datetime-local" id="mat-fecha" step="60">
-              <span class="campo-error" id="error-mat-fecha"></span>
-            </div>
-            <div class="campo campo-casilla">
-              <label class="casilla" for="mat-completado">
-                <input type="checkbox" id="mat-completado">
-                <span>Completado</span>
-              </label>
-            </div>
-          </div>
-          <p class="error-formulario" id="error-mantenimiento" role="alert"></p>
-          <div class="modal-pie">
-            <button type="button" class="boton secundario" id="boton-cancelar-mantenimiento">Cancelar</button>
-            <button type="submit" class="boton primario" id="boton-guardar-mantenimiento">Guardar mantenimiento</button>
-          </div>
-        </form>
-
-        <!-- Confirmacion de borrado del detalle -->
-        <div class="confirmacion" id="confirmacion-mantenimiento" hidden>
-          <p class="confirmacion-texto" id="texto-confirmacion-mantenimiento"></p>
-          <div class="modal-pie">
-            <button type="button" class="boton secundario" id="boton-cancelar-eliminar-mantenimiento">Cancelar</button>
-            <button type="button" class="boton peligro" id="boton-confirmar-eliminar-mantenimiento">Eliminar mantenimiento</button>
-          </div>
-        </div>
       </div>
       <footer class="modal-pie">
         <button type="button" class="boton secundario" data-cerrar="modal-mantenimientos">Cerrar</button>

@@ -95,6 +95,13 @@
         }
       }
     `,
+    MANTENIMIENTO_POR_ID: `
+      query MantenimientoPorId($codigoLavadora: Int!, $id: Int!) {
+        mantenimientoPorId(codigoLavadora: $codigoLavadora, id: $id) {
+          ${CAMPOS_MANTENIMIENTO}
+        }
+      }
+    `,
     AGREGAR_LAVADORA: `
       mutation AgregarLavadora($input: LavadoraInput!) {
         addLavadora(input: $input) {
@@ -283,6 +290,13 @@
         const variables = Object.assign({ codigoLavadora: codigoLavadora }, filtros || {});
         const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTOS_POR_FILTRO, variables);
         return datos.mantenimientosPorFiltro || [];
+      },
+
+      consultarMantenimientoPorId: async function (codigoLavadora, id) {
+        const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTO_POR_ID, {
+          codigoLavadora: Number(codigoLavadora), id: Number(id)
+        });
+        return datos.mantenimientoPorId || null;
       },
 
       agregarLavadora: async function (input) {

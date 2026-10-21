@@ -69,6 +69,7 @@
     iniciar(controladorLavadoras, controladorMantenimientos) {
       this.controladorLavadoras = controladorLavadoras;
       this.controladorMantenimientos = controladorMantenimientos;
+      this.crearVentanasMantenimiento();
       this.capturarReferencias();
       this.suscribirEventos();
       this.conectarEventos();
@@ -242,11 +243,20 @@
       this.escuchar(this.refs.botonEliminar, 'click', () => this.abrirEliminar());
       this.escuchar(this.refs.botonMantenimientos, 'click', () => this.abrirMantenimientos(null));
       this.escuchar(this.refs.botonListarMantenimientos, 'click', () => this.abrirMantenimientos(null, 'listar'));
-      this.escuchar(this.refs.botonAgregarMantenimientoMenu, 'click', () => this.abrirMantenimientos(null, 'agregar'));
-      this.escuchar(this.refs.botonConsultarMantenimiento, 'click', () => this.abrirMantenimientos(null, 'consultar'));
-      this.escuchar(this.refs.botonActualizarMantenimiento, 'click', () => this.abrirMantenimientos(null, 'actualizar'));
-      this.escuchar(this.refs.botonEliminarMantenimiento, 'click', () => this.abrirMantenimientos(null, 'eliminar'));
+      this.escuchar(this.refs.botonAgregarMantenimientoMenu, 'click', () => this.abrirCasoMantenimiento('agregar'));
+      this.escuchar(this.refs.botonConsultarMantenimiento, 'click', () => this.abrirCasoMantenimiento('consultar'));
+      this.escuchar(this.refs.botonActualizarMantenimiento, 'click', () => this.abrirCasoMantenimiento('actualizar'));
+      this.escuchar(this.refs.botonEliminarMantenimiento, 'click', () => this.abrirCasoMantenimiento('eliminar'));
       this.escuchar(this.refs.botonAcerca, 'click', () => this.abrirModal('modal-acerca'));
+
+      this.escuchar(document, 'submit', (evento) => {
+        const formulario = evento.target.closest('[data-form-mantenimiento-caso]');
+        if (formulario) this.enviarCasoMantenimiento(evento, formulario);
+      });
+      this.escuchar(document, 'click', (evento) => {
+        const boton = evento.target.closest('[data-accion-mantenimiento-caso]');
+        if (boton) this.ejecutarAccionMantenimientoCaso(boton);
+      });
 
       document.addEventListener('click', (evento) => {
         if (evento.target.closest('.boton-caso')) this.reproducirSonido('click');
@@ -316,12 +326,166 @@
         this.cerrarFormularioMantenimiento();
         this.cargarMantenimientos();
       });
-      this.escuchar(this.refs.botonAgregarMantenimiento, 'click', () => this.abrirFormularioMantenimiento(null));
+      this.escuchar(this.refs.botonAgregarMantenimiento, 'click', () => this.abrirCasoMantenimiento('agregar', this.refs.matLavadora.value));
       this.escuchar(this.refs.formMantenimiento, 'submit', (evento) => this.guardarMantenimiento(evento));
       this.escuchar(this.refs.botonCancelarMantenimiento, 'click', () => this.cerrarFormularioMantenimiento());
       this.escuchar(this.refs.cuerpoMantenimientos, 'click', (evento) => this.alHacerClicMantenimientos(evento));
       this.escuchar(this.refs.botonConfirmarEliminarMantenimiento, 'click', () => this.confirmarEliminarMantenimiento());
       this.escuchar(this.refs.botonCancelarEliminarMantenimiento, 'click', () => this.cancelarEliminarMantenimiento());
+    }
+
+    crearVentanasMantenimiento() {
+      const definiciones = {
+        agregar: ['Agregar mantenimiento', 'Guardar mantenimiento'],
+        consultar: ['Consultar mantenimiento', 'Buscar mantenimiento'],
+        actualizar: ['Actualizar mantenimiento', 'Buscar mantenimiento'],
+        eliminar: ['Eliminar mantenimiento', 'Buscar mantenimiento']
+      };
+      const campos = (prefijo, soloLectura) => `
+        <div class="rejilla-campos" data-detalle-mantenimiento hidden>
+          <div class="campo"><label>Descripción</label><input name="descripcion" required maxlength="160" ${soloLectura ? 'readonly' : ''}></div>
+          <div class="campo"><label>Técnico</label><input name="tecnico" required maxlength="100" ${soloLectura ? 'readonly' : ''}></div>
+          <div class="campo"><label>Costo (pesos)</label><input name="costo" type="number" min="0" step="0.01" required ${soloLectura ? 'readonly' : ''}></div>
+          <div class="campo"><label>Fecha</label><input name="fecha" type="datetime-local" required ${soloLectura ? 'readonly' : ''}></div>
+          <label class="casilla"><input name="completado" type="checkbox" ${soloLectura ? 'disabled' : ''}><span>Completado</span></label>
+        </div>`;
+      Object.entries(definiciones).forEach(([caso, [titulo, textoBoton]]) => {
+        const id = `modal-mantenimiento-${caso}`;
+        const alta = caso === 'agregar';
+        const formulario = alta ? `
+          <form data-form-mantenimiento-caso="${caso}" novalidate>
+            <div class="campo"><label>Lavadora</label><select name="codigoLavadora" required></select></div>
+            ${campos(caso, false)}
+            <p class="error-formulario" data-error-mantenimiento-caso role="alert"></p>
+            <div class="modal-pie"><button type="button" class="boton secundario" data-cerrar="${id}">Cancelar</button><button class="boton primario" type="submit">${textoBoton}</button></div>
+          </form>` : `
+          <form data-form-mantenimiento-caso="${caso}" novalidate>
+            <div class="rejilla-campos">
+              <div class="campo"><label>Código de lavadora</label><input name="codigoLavadora" type="number" min="1" step="1" required></div>
+              <div class="campo"><label>ID del mantenimiento</label><input name="idMantenimiento" type="number" min="1" step="1" required></div>
+            </div>
+            <p class="error-formulario" data-error-mantenimiento-caso role="alert"></p>
+            <button class="boton primario" type="submit">${textoBoton}</button>
+            ${campos(caso, caso !== 'actualizar')}
+            <div class="modal-pie" data-acciones-mantenimiento-caso hidden>
+              <button type="button" class="boton secundario" data-cerrar="${id}">Cerrar</button>
+              ${caso === 'actualizar' ? '<button type="button" class="boton primario" data-accion-mantenimiento-caso="guardar">Guardar cambios</button>' : ''}
+              ${caso === 'eliminar' ? '<button type="button" class="boton peligro" data-accion-mantenimiento-caso="eliminar">Confirmar eliminación</button>' : ''}
+            </div>
+          </form>`;
+        const fondo = document.createElement('div');
+        fondo.className = 'modal-fondo';
+        fondo.id = id;
+        fondo.hidden = true;
+        fondo.innerHTML = `<section class="modal ancho" role="dialog" aria-modal="true" aria-labelledby="titulo-${id}">
+          <header class="modal-cabecera"><h2 id="titulo-${id}">${titulo}</h2><button type="button" class="boton-cerrar" data-cerrar="${id}">Cerrar</button></header>
+          <div class="modal-cuerpo">${formulario}</div></section>`;
+        document.body.appendChild(fondo);
+      });
+    }
+
+    abrirCasoMantenimiento(caso, codigoLavadora) {
+      const fondo = document.getElementById(`modal-mantenimiento-${caso}`);
+      const formulario = fondo && fondo.querySelector('[data-form-mantenimiento-caso]');
+      if (!formulario) return;
+      formulario.reset();
+      formulario.querySelector('[data-error-mantenimiento-caso]').textContent = '';
+      formulario.querySelector('[data-detalle-mantenimiento]').hidden = caso !== 'agregar';
+      const acciones = formulario.querySelector('[data-acciones-mantenimiento-caso]');
+      if (acciones) acciones.hidden = true;
+      const selector = formulario.querySelector('[name="codigoLavadora"]');
+      if (selector && selector.tagName === 'SELECT') {
+        selector.replaceChildren(...(this.estado.lavadoras || []).map((lavadora) => {
+          const opcion = document.createElement('option');
+          opcion.value = String(lavadora.codigo);
+          opcion.textContent = lavadora.titulo;
+          return opcion;
+        }));
+        if (codigoLavadora) selector.value = String(codigoLavadora);
+        selector.disabled = selector.options.length === 0;
+      } else if (codigoLavadora) selector.value = String(codigoLavadora);
+      this.abrirModal(fondo.id);
+      if (caso === 'agregar') formulario.querySelector('[name="descripcion"]').focus();
+    }
+
+    async enviarCasoMantenimiento(evento, formulario) {
+      evento.preventDefault();
+      const caso = formulario.dataset.formMantenimientoCaso;
+      const error = formulario.querySelector('[data-error-mantenimiento-caso]');
+      error.textContent = '';
+      if (caso === 'agregar') {
+        const datos = this.leerDatosCasoMantenimiento(formulario);
+        const errores = Voltia.Validaciones.validarMantenimiento(datos);
+        if (Voltia.Validaciones.hayErrores(errores)) {
+          error.textContent = Object.values(errores).filter(Boolean).join(' ');
+          return;
+        }
+        const codigo = Number(formulario.elements.codigoLavadora.value);
+        try {
+          await this.controladorMantenimientos.agregar(codigo, datos);
+          this.reproducirSonido('lavadora');
+          this.cerrarModal('modal-mantenimiento-agregar');
+          this.llenarSelectorLavadoras(this.refs.matLavadora.value);
+        } catch (e) { error.textContent = e.message; }
+        return;
+      }
+      const codigo = Number(formulario.elements.codigoLavadora.value);
+      const id = Number(formulario.elements.idMantenimiento.value);
+      if (!Number.isSafeInteger(codigo) || codigo < 1 || !Number.isSafeInteger(id) || id < 1) {
+        error.textContent = 'Ingrese un código de lavadora y un ID de mantenimiento válidos.';
+        return;
+      }
+      formulario.querySelector('[data-detalle-mantenimiento]').hidden = true;
+      formulario.querySelector('[data-acciones-mantenimiento-caso]').hidden = true;
+      this.datosMantenimientoCaso = null;
+      try {
+        const mantenimiento = await this.controladorMantenimientos.consultarPorId(codigo, id);
+        if (!mantenimiento) { error.textContent = 'No se encontró ese mantenimiento para la lavadora indicada.'; return; }
+        this.datosMantenimientoCaso = { codigo, id, mantenimiento };
+        const detalle = formulario.querySelector('[data-detalle-mantenimiento]');
+        detalle.hidden = false;
+        detalle.querySelector('[name="descripcion"]').value = mantenimiento.descripcion;
+        detalle.querySelector('[name="tecnico"]').value = mantenimiento.tecnico;
+        detalle.querySelector('[name="costo"]').value = mantenimiento.costo;
+        detalle.querySelector('[name="fecha"]').value = this.fechaCalendario(mantenimiento.fecha);
+        detalle.querySelector('[name="completado"]').checked = mantenimiento.completado;
+        formulario.querySelector('[data-acciones-mantenimiento-caso]').hidden = false;
+      } catch (e) { error.textContent = e.message; }
+    }
+
+    leerDatosCasoMantenimiento(formulario) {
+      return {
+        descripcion: formulario.elements.descripcion.value.trim(),
+        tecnico: formulario.elements.tecnico.value.trim(),
+        costo: Number(formulario.elements.costo.value),
+        fecha: this.fechaServidor(formulario.elements.fecha.value),
+        completado: formulario.elements.completado.checked
+      };
+    }
+
+    async ejecutarAccionMantenimientoCaso(boton) {
+      const datos = this.datosMantenimientoCaso;
+      if (!datos) return;
+      const caso = boton.dataset.accionMantenimientoCaso;
+      const formulario = boton.closest('form');
+      const error = formulario.querySelector('[data-error-mantenimiento-caso]');
+      error.textContent = '';
+      try {
+        if (caso === 'guardar') {
+          const cambios = this.leerDatosCasoMantenimiento(formulario);
+          const errores = Voltia.Validaciones.validarMantenimiento(cambios);
+          if (Voltia.Validaciones.hayErrores(errores)) { error.textContent = Object.values(errores).filter(Boolean).join(' '); return; }
+          await this.controladorMantenimientos.actualizar(datos.codigo, datos.id, cambios);
+          this.reproducirSonido('click');
+        } else {
+          if (!global.confirm(`¿Eliminar el mantenimiento ${datos.id} de la lavadora ${datos.codigo}?`)) return;
+          await this.controladorMantenimientos.eliminar(datos.codigo, datos.id);
+          this.reproducirSonido('click');
+        }
+        this.datosMantenimientoCaso = null;
+        this.cerrarModal(`modal-mantenimiento-${caso === 'guardar' ? 'actualizar' : 'eliminar'}`);
+        this.llenarSelectorLavadoras(this.refs.matLavadora.value);
+      } catch (e) { error.textContent = e.message; }
     }
 
     // =================================================================
@@ -1305,13 +1469,13 @@
       const esAlta = this.modoMantenimientos === 'agregar';
       this.refs.filtrosMantenimientos.hidden = esAlta;
       this.refs.tablaMantenimientos.hidden = esAlta;
-      this.refs.accionesListadoMantenimientos.hidden = true;
-      this.refs.encabezadoAccionesMantenimiento.hidden = this.modoMantenimientos === 'listar';
+      this.refs.accionesListadoMantenimientos.hidden = false;
+      this.refs.encabezadoAccionesMantenimiento.hidden = true;
       this.llenarSelectorLavadoras(codigoLavadora);
       this.refs.matFiltroTecnico.value = '';
       this.refs.matFiltroCompletado.value = '';
       this.refs.errorMantenimientos.textContent = '';
-      this.refs.errorMantenimiento.textContent = '';
+      if (this.refs.errorMantenimiento) this.refs.errorMantenimiento.textContent = '';
       this.refs.cuerpoMantenimientos.textContent = '';
       this.refs.mantenimientosVacio.hidden = true;
       this.refs.contadorMantenimientos.textContent = 'Sin datos';
@@ -1405,7 +1569,7 @@
       const cuerpo = this.refs.cuerpoMantenimientos;
       cuerpo.textContent = '';
 
-      const conAcciones = this.modoMantenimientos !== 'listar';
+      const conAcciones = false;
       lista.forEach((mantenimiento) => {
         cuerpo.appendChild(this.crearFilaMantenimiento(mantenimiento, conAcciones));
       });
