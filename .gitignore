@@ -11,10 +11,8 @@ obj/
 *.user
 packages/
 
-# Python
-__pycache__/
-*.pyc
-.venv/
+# Node / cliente web
+node_modules/
 
 # Sistema
 Thumbs.db

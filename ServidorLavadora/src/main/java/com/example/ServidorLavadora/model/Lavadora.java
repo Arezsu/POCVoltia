@@ -1,54 +1,119 @@
 package com.example.ServidorLavadora.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Objeto DETALLE del proyecto: la lavadora. Hija de Electrodomestico.
- * Hereda codigo, marca, precioBase (double) y fechaFabricacion (LocalDateTime)
- * y agrega lo suyo:
+ * Objeto MAESTRO del proyecto (lado 1..1 de la Figura 1) e hija de Electrodomestico.
+ *
+ * La lavadora es el objeto principal del sistema y cada lavadora tiene CERO, UNO
+ * O MUCHOS mantenimientos (lado 0..*). Queda descartada la idea equivocada de que
+ * una lavadora tiene un solo programa fijo: aqui la relacion maestro-detalle
+ * permite cualquier cantidad de registros hijos, incluso cero.
+ *
+ * Atributos (mas de cinco y de tipos variados):
+ *  - codigo (int), marca (String), precioBase (double), fechaFabricacion (LocalDateTime): heredados
  *  - capacidadCargaKilos (double)
  *  - velocidadCentrifugadoRPM (int)
  *  - tecnologiaInverter (boolean)
  *  - minutosLavado (int)
- *  - programaLavado: el programa (maestro) que usa esta lavadora
+ *  - mantenimientos: la coleccion de detalle
  *
- * Se crea con el patron Builder: Lavadora.builder().codigo(101).marca("LG")...build()
+ * Se construye con el patron Builder:
+ * Lavadora.builder().codigo(101).marca("LG").precioBase(1450000).build()
  */
 public class Lavadora extends Electrodomestico {
+
+    // Reglas de negocio del precio final (se explican en calcularPrecioFinal).
+    private static final double BONO_CAPACIDAD = 120000;
+    private static final double BONO_INVERTER = 250000;
+    private static final double KILOS_QUE_ACTIVAN_EL_BONO = 15;
+
     private double capacidadCargaKilos;
     private int velocidadCentrifugadoRPM;
     private boolean tecnologiaInverter;
     private int minutosLavado;
-    private ProgramaLavado programaLavado;
 
-    private Lavadora(Builder b) {
-        super(b.codigo, b.marca, b.precioBase, b.fechaFabricacion);
-        this.capacidadCargaKilos = b.capacidadCargaKilos;
-        this.velocidadCentrifugadoRPM = b.velocidadCentrifugadoRPM;
-        this.tecnologiaInverter = b.tecnologiaInverter;
-        this.minutosLavado = b.minutosLavado;
-        this.programaLavado = b.programaLavado;
+    /**
+     * Lista de mantenimientos (el detalle). Se usa CopyOnWriteArrayList porque
+     * el servidor atiende varias peticiones al mismo tiempo: esta lista se puede
+     * leer mientras otro hilo la modifica sin romper nada.
+     */
+    private final List<Mantenimiento> mantenimientos = new CopyOnWriteArrayList<>();
+
+    private Lavadora(Builder builder) {
+        super(builder.codigo, builder.marca, builder.precioBase, builder.fechaFabricacion);
+        this.capacidadCargaKilos = builder.capacidadCargaKilos;
+        this.velocidadCentrifugadoRPM = builder.velocidadCentrifugadoRPM;
+        this.tecnologiaInverter = builder.tecnologiaInverter;
+        this.minutosLavado = builder.minutosLavado;
     }
 
+    /** Punto de entrada del patron Builder. */
     public static Builder builder() {
         return new Builder();
     }
 
+    // ================= Relacion maestro - detalle =================
+
+    /** Agrega un mantenimiento a esta lavadora (la lista admite 0..* elementos). */
+    public void agregarMantenimiento(Mantenimiento mantenimiento) {
+        mantenimientos.add(mantenimiento);
+    }
+
+    /** Quita un mantenimiento. Devuelve true si estaba en la lista. */
+    public boolean quitarMantenimiento(Mantenimiento mantenimiento) {
+        return mantenimientos.remove(mantenimiento);
+    }
+
+    /** Busca un mantenimiento por su id dentro de esta lavadora. */
+    public Optional<Mantenimiento> buscarMantenimiento(int id) {
+        return mantenimientos.stream()
+                .filter(m -> m.getId() == id)
+                .findFirst();
+    }
+
+    /** Copia de la lista: quien la reciba no puede modificar los datos por accidente. */
+    public List<Mantenimiento> getMantenimientos() {
+        return List.copyOf(mantenimientos);
+    }
+
+    /** Campo calculado que usa GraphQL: cuantos mantenimientos tiene la lavadora. */
+    public int getCantidadMantenimientos() {
+        return mantenimientos.size();
+    }
+
+    /** Campo calculado que usa GraphQL: cuantos mantenimientos siguen pendientes. */
+    public int getMantenimientosPendientes() {
+        return (int) mantenimientos.stream().filter(m -> !m.isCompletado()).count();
+    }
+
+    /** Campo calculado que usa GraphQL: suma del costo de todos sus mantenimientos. */
+    public double getCostoMantenimientos() {
+        return mantenimientos.stream().mapToDouble(Mantenimiento::getCosto).sum();
+    }
+
+    // ================= Reglas de negocio =================
+
     /**
-     * Reglas del proyecto en Java:
-     * +120.000 si carga mas de 15 kg y +250.000 si tiene inverter.
+     * Polimorfismo: cada electrodomestico calcula su precio final a su manera.
+     * Una lavadora suma 120.000 si carga mas de 15 kilos y 250.000 si es inverter.
      */
     @Override
     public double calcularPrecioFinal() {
         double precio = getPrecioBase();
-        if (capacidadCargaKilos > 15) {
-            precio += 120000;
+        if (capacidadCargaKilos > KILOS_QUE_ACTIVAN_EL_BONO) {
+            precio += BONO_CAPACIDAD;
         }
         if (tecnologiaInverter) {
-            precio += 250000;
+            precio += BONO_INVERTER;
         }
         return precio;
     }
+
+    // ================= Getters y setters =================
 
     public double getCapacidadCargaKilos() {
         return capacidadCargaKilos;
@@ -82,15 +147,12 @@ public class Lavadora extends Electrodomestico {
         this.minutosLavado = minutosLavado;
     }
 
-    public ProgramaLavado getProgramaLavado() {
-        return programaLavado;
-    }
-
-    public void setProgramaLavado(ProgramaLavado programaLavado) {
-        this.programaLavado = programaLavado;
-    }
-
-    /** Patron BUILDER: la lavadora tiene 9 datos, el Builder evita un constructor enorme. */
+    /**
+     * Patron BUILDER: la lavadora tiene ocho datos escalares. Con un constructor
+     * tradicional habria que escribir ocho parametros seguidos en el orden exacto
+     * (y seria facil equivocarse). El Builder permite armarla paso a paso y leer
+     * claramente que valor tiene cada atributo.
+     */
     public static class Builder {
         private int codigo;
         private String marca;
@@ -100,7 +162,6 @@ public class Lavadora extends Electrodomestico {
         private int velocidadCentrifugadoRPM;
         private boolean tecnologiaInverter;
         private int minutosLavado;
-        private ProgramaLavado programaLavado;
 
         public Builder codigo(int codigo) {
             this.codigo = codigo;
@@ -139,11 +200,6 @@ public class Lavadora extends Electrodomestico {
 
         public Builder minutosLavado(int minutosLavado) {
             this.minutosLavado = minutosLavado;
-            return this;
-        }
-
-        public Builder programaLavado(ProgramaLavado programaLavado) {
-            this.programaLavado = programaLavado;
             return this;
         }
 

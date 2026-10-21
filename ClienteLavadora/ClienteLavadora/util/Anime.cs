@@ -235,7 +235,7 @@ namespace ClienteLavadora.util
             Lanzar(escala, ScaleTransform.ScaleYProperty, null, destino, 450, Elastico(), 0, false, false);
         }
 
-        /// <summary>Gira el elemento "grados" mas de donde estaba (la perilla de la lavadora).</summary>
+        /// <summary>Gira el elemento "grados" mas de donde estaba (por ejemplo un indicador circular).</summary>
         public static void GirarMas(UIElement elemento, double grados, int ms)
         {
             RotateTransform giro = Giro(elemento);
@@ -318,7 +318,7 @@ namespace ClienteLavadora.util
             elemento.BeginAnimation(UIElement.OpacityProperty, desvanecer);
         }
 
-        /// <summary>Cambia la velocidad de un giro infinito (la ropa gira mas rapido al pasar el mouse).</summary>
+        /// <summary>Cambia la velocidad de un giro infinito (el tambor del ojo de buey gira mas rapido al procesar).</summary>
         public static void Acelerar(UIElement elemento, int msPorVuelta)
         {
             RotateTransform giro = Giro(elemento);

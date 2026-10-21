@@ -1,50 +1,55 @@
-# Contrato del servicio: lo que el servidor sabe hacer.
-# Cada operacion se une con un metodo de un controller por el nombre.
+# =====================================================================
+#  CONTRATO DEL SERVICIO GRAPHQL - VOLTIA
+#  Segundo Proyecto 2026B - Diseno de Soluciones
 #
-# Dos objetos con relacion maestro-detalle:
-#   ProgramaLavado (maestro, 1..1)  <-  Lavadora (detalle, 0..*)
-# Un programa lo usan muchas lavadoras y cada lavadora tiene un solo programa.
+#  Relacion MAESTRO - DETALLE (Figura 1 de la guia):
+#    Lavadora (1..1)  *--  Mantenimiento (0..*)
+#
+#  La lavadora es el objeto principal. Cada lavadora puede tener CERO, UNO o
+#  MUCHOS mantenimientos guardados dentro de ella. No existe la idea de que
+#  una lavadora tenga un solo programa fijo.
+#
+#  Las fechas viajan como texto con el formato yyyy-MM-ddTHH:mm:ss.
+# =====================================================================
 
 type Query {
-    # ----- Programas de lavado (maestro) -----
-    programas: [ProgramaLavado]
-    programaPorCodigo(codigo: Int!): ProgramaLavado
-    # Consulta de UN programa por uno o dos criterios (codigo y/o nombre)
-    programaPorCriterios(codigo: Int, nombre: String): ProgramaLavado
-    # Listar con filtro (lo hace el servidor)
-    programasPorFiltro(nombre: String, aguaCaliente: Boolean): [ProgramaLavado]
-
-    # ----- Lavadoras (detalle) -----
+    # ---------- Lavadora (maestro, 1..1) ----------
     lavadoras: [Lavadora]
     lavadoraPorCodigo(codigo: Int!): Lavadora
     # Consulta de UNA lavadora por uno o dos criterios (codigo y/o marca)
     lavadoraPorCriterios(codigo: Int, marca: String): Lavadora
-    # Listar con filtro (lo hace el servidor)
-    lavadorasPorFiltro(marca: String, tecnologiaInverter: Boolean): [Lavadora]
+    # Listar con filtros que aplica el SERVIDOR
+    lavadorasPorFiltro(marca: String, tecnologiaInverter: Boolean, conMantenimientos: Boolean): [Lavadora]
+
+    # ---------- Mantenimiento (detalle, 0..*) ----------
+    mantenimientos(codigoLavadora: Int!): [Mantenimiento]
+    mantenimientoPorId(codigoLavadora: Int!, id: Int!): Mantenimiento
+    # Listar con filtros que aplica el SERVIDOR
+    mantenimientosPorFiltro(codigoLavadora: Int!, tecnico: String, completado: Boolean): [Mantenimiento]
+
+    # ---------- Estado del servidor ----------
+    # Sube en 1 cada vez que cualquier cliente cambia algo. Los clientes lo
+    # consultan cada pocos segundos para refrescar su grilla automaticamente.
+    versionDatos: Int!
 }
 
 type Mutation {
-    addPrograma(input: ProgramaInput!): ProgramaLavado
-    actualizarPrograma(codigo: Int!, input: ProgramaUpdateInput!): ProgramaLavado
-    eliminarPrograma(codigo: Int!): Boolean
-
+    # ---------- Lavadora (maestro) ----------
     addLavadora(input: LavadoraInput!): Lavadora
     actualizarLavadora(codigo: Int!, input: LavadoraUpdateInput!): Lavadora
     eliminarLavadora(codigo: Int!): Boolean
+
+    # ---------- Mantenimiento (detalle) ----------
+    addMantenimiento(codigoLavadora: Int!, input: MantenimientoInput!): Mantenimiento
+    actualizarMantenimiento(codigoLavadora: Int!, id: Int!, input: MantenimientoUpdateInput!): Mantenimiento
+    eliminarMantenimiento(codigoLavadora: Int!, id: Int!): Boolean
 }
 
-type ProgramaLavado {
-    codigo: Int
-    nombre: String
-    minMinutos: Int
-    maxMinutos: Int
-    consumoAguaLitros: Float
-    fechaCreacion: String
-    aguaCaliente: Boolean
-    # Calculado: cuantas lavadoras usan este programa
-    cantidadLavadoras: Int
-}
+# =====================================================================
+#  TIPOS DE SALIDA
+# =====================================================================
 
+# Objeto maestro: la lavadora industrial.
 type Lavadora {
     codigo: Int
     marca: String
@@ -54,33 +59,31 @@ type Lavadora {
     velocidadCentrifugadoRPM: Int
     tecnologiaInverter: Boolean
     minutosLavado: Int
-    # El programa (maestro) que usa esta lavadora
-    programaLavado: ProgramaLavado
-    # Calculado: precio base mas extras
+    # Calculado por el servidor: precio base mas los extras (capacidad e inverter)
     precioFinal: Float
+    # Coleccion de detalle: puede venir vacia
+    mantenimientos: [Mantenimiento]
+    # Campos calculados a partir del detalle
+    cantidadMantenimientos: Int
+    mantenimientosPendientes: Int
+    costoMantenimientos: Float
 }
 
-# La fecha va como texto yyyy-MM-ddTHH:mm:ss
-input ProgramaInput {
-    codigo: Int!
-    nombre: String!
-    minMinutos: Int!
-    maxMinutos: Int!
-    consumoAguaLitros: Float!
-    fechaCreacion: String!
-    aguaCaliente: Boolean!
+# Objeto detalle: un mantenimiento de una lavadora concreta.
+type Mantenimiento {
+    id: Int
+    descripcion: String
+    tecnico: String
+    costo: Float
+    fecha: String
+    completado: Boolean
 }
 
-# Todos opcionales: solo se manda lo que cambia
-input ProgramaUpdateInput {
-    nombre: String
-    minMinutos: Int
-    maxMinutos: Int
-    consumoAguaLitros: Float
-    fechaCreacion: String
-    aguaCaliente: Boolean
-}
+# =====================================================================
+#  ENTRADAS (lo que manda el cliente)
+# =====================================================================
 
+# Todos los datos para crear una lavadora.
 input LavadoraInput {
     codigo: Int!
     marca: String!
@@ -92,6 +95,7 @@ input LavadoraInput {
     minutosLavado: Int!
 }
 
+# Todos opcionales: solo se manda lo que cambia.
 input LavadoraUpdateInput {
     marca: String
     precioBase: Float
@@ -100,4 +104,22 @@ input LavadoraUpdateInput {
     velocidadCentrifugadoRPM: Int
     tecnologiaInverter: Boolean
     minutosLavado: Int
+}
+
+# El id no se manda: lo calcula el servidor.
+input MantenimientoInput {
+    descripcion: String!
+    tecnico: String!
+    costo: Float!
+    fecha: String!
+    completado: Boolean!
+}
+
+# Todos opcionales: solo se manda lo que cambia.
+input MantenimientoUpdateInput {
+    descripcion: String
+    tecnico: String
+    costo: Float
+    fecha: String
+    completado: Boolean
 }

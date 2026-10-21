@@ -6,25 +6,29 @@ using System.Media;
 namespace ClienteLavadora.util
 {
     /// <summary>
-    /// Sonidos de la aplicacion. Los archivos .wav estan en la carpeta Assets
-    /// (se copian junto al .exe). Si un sonido falla, la aplicacion sigue normal.
+    /// Sonidos de la aplicacion. Los archivos .wav viven en la carpeta Assets y se
+    /// copian junto al .exe al compilar.
+    ///
+    /// REGLA DE ORO: un adorno NUNCA debe tumbar el programa. Por eso todo esta
+    /// dentro de try/catch: si el archivo no existe o la tarjeta de sonido esta
+    /// ocupada, el programa sigue funcionando en silencio.
     /// </summary>
     public static class Sonidos
     {
-        // Un reproductor por archivo, para no cargarlo cada vez
+        // Un reproductor por archivo, para no cargar el .wav en cada clic.
         private static readonly Dictionary<string, SoundPlayer> reproductores =
             new Dictionary<string, SoundPlayer>();
 
-        /// <summary>Suena al adicionar una lavadora.</summary>
-        public static void Lavadora()
-        {
-            Reproducir("lavadora.wav");
-        }
-
-        /// <summary>Suena una sola vez, cuando se abre la aplicacion.</summary>
+        /// <summary>Sonido de clic (se usa al abrir ventanas y en los botones importantes).</summary>
         public static void Click()
         {
             Reproducir("click.wav");
+        }
+
+        /// <summary>Sonido de la lavadora: se usa cuando una operacion sale bien.</summary>
+        public static void Lavadora()
+        {
+            Reproducir("lavadora.wav");
         }
 
         private static void Reproducir(string archivo)
@@ -37,16 +41,16 @@ namespace ClienteLavadora.util
                     string ruta = Path.Combine(AppContext.BaseDirectory, "Assets", archivo);
                     if (!File.Exists(ruta))
                     {
-                        return;
+                        return; // No hay archivo: no suena nada, pero no falla
                     }
                     reproductor = new SoundPlayer(ruta);
                     reproductores[archivo] = reproductor;
                 }
-                reproductor.Play(); // No bloquea la ventana
+                reproductor.Play(); // Play (y no PlaySync) para no congelar la ventana
             }
             catch (Exception)
             {
-                // El sonido es solo decoracion: nunca debe tumbar la aplicacion.
+                // El sonido es decoracion: se ignora cualquier problema.
             }
         }
     }

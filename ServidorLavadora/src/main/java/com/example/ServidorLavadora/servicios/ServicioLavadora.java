@@ -3,7 +3,6 @@ package com.example.ServidorLavadora.servicios;
 import com.example.ServidorLavadora.model.Lavadora;
 import com.example.ServidorLavadora.model.LavadoraInput;
 import com.example.ServidorLavadora.model.LavadoraUpdateInput;
-import com.example.ServidorLavadora.model.ProgramaLavado;
 import com.example.ServidorLavadora.repositorio.AlmacenDatos;
 import com.example.ServidorLavadora.util.Validaciones;
 import org.springframework.stereotype.Service;
@@ -14,37 +13,52 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Logica del objeto DETALLE: la lavadora.
- * Depende de la abstraccion AlmacenDatos y del servicio de programas
- * (para saber que programa le toca segun los minutos de lavado).
+ * Logica de negocio del objeto MAESTRO: la lavadora.
+ *
+ * El servicio recibe el AlmacenDatos por el constructor (inyeccion de dependencias):
+ * no sabe si los datos estan en memoria o en una base de datos, solo conoce la
+ * interface. Eso es el principio de inversion de dependencias (la D de SOLID).
+ *
+ * Aqui se valida todo antes de guardar y se avisa a los observadores en cada cambio.
  */
-@Service // Spring crea un unico objeto de esta clase
+@Service // Spring crea un unico objeto de esta clase y lo entrega donde se pida
 public class ServicioLavadora {
 
     private static final int RPM_MINIMO = 600;
+    private static final int MINUTOS_MINIMOS = 1;
+    private static final int MINUTOS_MAXIMOS = 300;
 
     private final AlmacenDatos almacen;
-    private final ServicioProgramaLavado servicioPrograma;
 
-    public ServicioLavadora(AlmacenDatos almacen, ServicioProgramaLavado servicioPrograma) {
+    public ServicioLavadora(AlmacenDatos almacen) {
         this.almacen = almacen;
-        this.servicioPrograma = servicioPrograma;
     }
 
-    // ---------------- Read ----------------
+    // ==================================================================
+    //  Consultas (queries)
+    // ==================================================================
 
+    /** Devuelve una copia de la lista de lavadoras. */
     public List<Lavadora> listar() {
         synchronized (almacen.candado()) {
-            return new ArrayList<>(almacen.lavadoras()); // Copia de la lista
+            return new ArrayList<>(almacen.lavadoras());
         }
     }
 
+    /** Busca una lavadora por su codigo. Devuelve Optional porque puede no existir. */
     public Optional<Lavadora> buscarPorCodigo(int codigo) {
         synchronized (almacen.candado()) {
             return almacen.lavadoras().stream()
-                    .filter(l -> l.getCodigo() == codigo) // Filtra la lista
+                    .filter(lavadora -> lavadora.getCodigo() == codigo)
                     .findFirst();
         }
+    }
+
+    /** Igual que buscarPorCodigo pero lanza un error claro si no existe. */
+    public Lavadora exigirPorCodigo(int codigo) {
+        return buscarPorCodigo(codigo)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No existe una lavadora con el codigo " + codigo));
     }
 
     /**
@@ -58,39 +72,58 @@ public class ServicioLavadora {
         String texto = (marca == null) ? "" : marca.trim().toLowerCase();
         synchronized (almacen.candado()) {
             return almacen.lavadoras().stream()
-                    .filter(l -> codigo == null || l.getCodigo() == codigo)
-                    .filter(l -> texto.isEmpty() || l.getMarca().toLowerCase().contains(texto))
+                    .filter(lavadora -> codigo == null || lavadora.getCodigo() == codigo)
+                    .filter(lavadora -> texto.isEmpty() || lavadora.getMarca().toLowerCase().contains(texto))
                     .findFirst();
         }
     }
 
     /**
-     * Listado filtrado en el servidor por 2 parametros opcionales:
-     * marca (contiene el texto, sin importar mayusculas) y tecnologiaInverter (true o false).
+     * Listado con filtros que se aplican EN EL SERVIDOR (no en el cliente):
+     *  - marca: texto que debe aparecer en la marca (sin importar mayusculas)
+     *  - tecnologiaInverter: true o false
+     *  - conMantenimientos: true = solo las que tienen al menos un mantenimiento,
+     *                       false = solo las que no tienen ninguno, null = todas
      */
-    public List<Lavadora> listarPorFiltro(String marca, Boolean tecnologiaInverter) {
+    public List<Lavadora> listarPorFiltro(String marca, Boolean tecnologiaInverter, Boolean conMantenimientos) {
         String texto = (marca == null) ? "" : marca.trim().toLowerCase();
         return listar().stream()
-                .filter(l -> texto.isEmpty() || l.getMarca().toLowerCase().contains(texto))
-                .filter(l -> tecnologiaInverter == null || l.isTecnologiaInverter() == tecnologiaInverter)
+                .filter(lavadora -> texto.isEmpty() || lavadora.getMarca().toLowerCase().contains(texto))
+                .filter(lavadora -> tecnologiaInverter == null
+                        || lavadora.isTecnologiaInverter() == tecnologiaInverter)
+                .filter(lavadora -> conMantenimientos == null
+                        || (lavadora.getCantidadMantenimientos() > 0) == conMantenimientos)
                 .toList();
     }
 
-    // ---------------- Create ----------------
+    /** Numero de version de los datos (lo usan los clientes para refrescar la grilla). */
+    public int version() {
+        return almacen.version();
+    }
 
+    // ==================================================================
+    //  Crear (mutation addLavadora)
+    // ==================================================================
+
+    /** Crea una lavadora nueva. Empieza con cero mantenimientos (lado 0..* de la relacion). */
     public Lavadora agregar(LavadoraInput input) {
         synchronized (almacen.candado()) {
             if (buscarPorCodigo(input.codigo()).isPresent()) {
                 throw new IllegalArgumentException("Ya existe una lavadora con el codigo " + input.codigo());
             }
+
+            // Primero se valida TODO. Asi no se guarda nada a medias.
+            Validaciones.enteroPositivo(input.codigo(), "El codigo de la lavadora");
             Validaciones.texto(input.marca(), "La marca");
             Validaciones.positivo(input.precioBase(), "El precio base");
             Validaciones.positivo(input.capacidadCargaKilos(), "La capacidad de carga en kilos");
             validarRpm(input.velocidadCentrifugadoRPM());
+            Validaciones.rango(input.minutosLavado(), MINUTOS_MINIMOS, MINUTOS_MAXIMOS,
+                    "Los minutos de lavado");
             LocalDateTime fecha = Validaciones.fecha(input.fechaFabricacion());
-            ProgramaLavado programa = servicioPrograma.determinarPorMinutos(input.minutosLavado());
 
-            Lavadora lavadora = Lavadora.builder() // Patron Builder
+            // Patron Builder: se arma paso a paso, sin un constructor de ocho parametros.
+            Lavadora lavadora = Lavadora.builder()
                     .codigo(input.codigo())
                     .marca(input.marca().trim())
                     .precioBase(input.precioBase())
@@ -99,22 +132,27 @@ public class ServicioLavadora {
                     .velocidadCentrifugadoRPM(input.velocidadCentrifugadoRPM())
                     .tecnologiaInverter(input.tecnologiaInverter())
                     .minutosLavado(input.minutosLavado())
-                    .programaLavado(programa)
                     .build();
+
             almacen.lavadoras().add(lavadora);
             almacen.notificar("Lavadora " + lavadora.getCodigo() + " (" + lavadora.getMarca() + ") agregada");
             return lavadora;
         }
     }
 
-    // ---------------- Update ----------------
+    // ==================================================================
+    //  Actualizar (mutation actualizarLavadora)
+    // ==================================================================
 
-    /** Cambia solo lo que venga en el input. Primero se valida todo y despues se cambia. */
+    /**
+     * Actualiza una lavadora. Primero BUSCA (si no existe, responde error) y despues
+     * cambia solo los campos que llegaron; lo que viene null se queda como estaba.
+     */
     public Lavadora actualizar(int codigo, LavadoraUpdateInput input) {
         synchronized (almacen.candado()) {
-            Lavadora lavadora = buscarPorCodigo(codigo)
-                    .orElseThrow(() -> new IllegalArgumentException("No existe una lavadora con el codigo " + codigo));
+            Lavadora lavadora = exigirPorCodigo(codigo);
 
+            // Validar lo que llego antes de modificar el objeto.
             if (input.marca() != null) {
                 Validaciones.texto(input.marca(), "La marca");
             }
@@ -127,9 +165,12 @@ public class ServicioLavadora {
             if (input.velocidadCentrifugadoRPM() != null) {
                 validarRpm(input.velocidadCentrifugadoRPM());
             }
-            LocalDateTime fecha = (input.fechaFabricacion() != null) ? Validaciones.fecha(input.fechaFabricacion()) : null;
-            ProgramaLavado programa = (input.minutosLavado() != null)
-                    ? servicioPrograma.determinarPorMinutos(input.minutosLavado())
+            if (input.minutosLavado() != null) {
+                Validaciones.rango(input.minutosLavado(), MINUTOS_MINIMOS, MINUTOS_MAXIMOS,
+                        "Los minutos de lavado");
+            }
+            LocalDateTime fecha = (input.fechaFabricacion() != null)
+                    ? Validaciones.fecha(input.fechaFabricacion())
                     : null;
 
             if (input.marca() != null) {
@@ -150,32 +191,41 @@ public class ServicioLavadora {
             if (input.tecnologiaInverter() != null) {
                 lavadora.setTecnologiaInverter(input.tecnologiaInverter());
             }
-            if (programa != null) {
+            if (input.minutosLavado() != null) {
                 lavadora.setMinutosLavado(input.minutosLavado());
-                lavadora.setProgramaLavado(programa);
             }
+
             almacen.notificar("Lavadora " + codigo + " actualizada");
             return lavadora;
         }
     }
 
-    // ---------------- Delete ----------------
+    // ==================================================================
+    //  Eliminar (mutation eliminarLavadora)
+    // ==================================================================
 
+    /**
+     * Elimina una lavadora. Primero se BUSCA para confirmar que existe.
+     * Al borrar el maestro se borran tambien sus mantenimientos, porque el detalle
+     * esta guardado dentro de la lavadora (relacion de composicion).
+     */
     public boolean eliminar(int codigo) {
         synchronized (almacen.candado()) {
-            Lavadora lavadora = buscarPorCodigo(codigo)
-                    .orElseThrow(() -> new IllegalArgumentException("No existe una lavadora con el codigo " + codigo));
+            Lavadora lavadora = exigirPorCodigo(codigo);
             boolean eliminada = almacen.lavadoras().remove(lavadora);
             almacen.notificar("Lavadora " + codigo + " eliminada");
             return eliminada;
         }
     }
 
-    // ---------------- Validaciones propias de la lavadora ----------------
+    // ==================================================================
+    //  Validaciones propias de la lavadora
+    // ==================================================================
 
     private void validarRpm(int rpm) {
         if (rpm < RPM_MINIMO) {
-            throw new IllegalArgumentException("La velocidad de centrifugado minima debe ser " + RPM_MINIMO + " RPM");
+            throw new IllegalArgumentException(
+                    "La velocidad de centrifugado minima debe ser " + RPM_MINIMO + " RPM");
         }
     }
 }

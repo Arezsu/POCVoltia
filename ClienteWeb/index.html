@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Voltia: panel web de control de lavadoras y sus mantenimientos.">
+  <title>Voltia | Panel de lavadoras</title>
+  <!-- Icono de la pestana: un tambor dibujado en SVG, incrustado para que no
+       haga una peticion extra al servidor (asi no aparece un 404 de favicon). -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='29' fill='%230B1016' stroke='%236FD3E8' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='18' fill='none' stroke='%23E8B15A' stroke-width='5'/%3E%3Ccircle cx='32' cy='32' r='7' fill='%236FD3E8'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body data-estado="LISTO">
+
+  <!-- Textura discreta de fondo: lineas muy tenues, sin distraer -->
+  <div class="textura" aria-hidden="true"></div>
+
+  <!-- ================================================================
+       ENCABEZADO: panel de control superior de la lavadora
+       ================================================================ -->
+  <header class="panel-control">
+    <div class="marca-bloque">
+      <span class="marca-icono" aria-hidden="true">
+        <svg viewBox="0 0 48 48" width="44" height="44" focusable="false">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="2"></circle>
+          <circle cx="24" cy="24" r="13" fill="none" stroke="currentColor" stroke-width="1.4" stroke-dasharray="3 4"></circle>
+          <path d="M14 30c4 4 12 5 17 1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          <circle cx="31" cy="17" r="1.8" fill="currentColor"></circle>
+        </svg>
+      </span>
+      <div class="marca-textos">
+        <h1>VOLTIA</h1>
+        <p>Panel de control de lavadoras</p>
+      </div>
+    </div>
+
+    <!-- Pantalla digital: version de datos y estado de la maquina -->
+    <div class="pantalla-digital" role="status" aria-live="polite">
+      <div class="pantalla-fila">
+        <span class="pantalla-etiqueta">ESTADO</span>
+        <span class="pantalla-valor" id="pantalla-estado">LISTO</span>
+      </div>
+      <div class="pantalla-fila">
+        <span class="pantalla-etiqueta">DATOS</span>
+        <span class="pantalla-valor" id="pantalla-version">v--</span>
+      </div>
+      <div class="pantalla-barra" id="barra-progreso" aria-hidden="true"></div>
+    </div>
+
+    <div class="conexion">
+      <span class="piloto" id="indicador-conexion" data-estado="desconectado" aria-hidden="true"></span>
+      <span class="conexion-texto" id="texto-conexion" role="status">Sin conexion</span>
+      <span class="conexion-url">localhost:8081</span>
+    </div>
+  </header>
+
+  <!-- ================================================================
+       CONTENIDO: compuerta lateral, tabla principal y panel de detalle
+       ================================================================ -->
+  <main class="tablero">
+
+    <aside class="columna-compuerta" aria-label="Compuerta de la lavadora">
+      <div class="compuerta" aria-hidden="true">
+        <div class="compuerta-marco">
+          <div class="compuerta-vidrio">
+            <div class="compuerta-tambor">
+              <span class="ropa ropa-a"></span>
+              <span class="ropa ropa-b"></span>
+              <span class="ropa ropa-c"></span>
+            </div>
+            <div class="compuerta-agua"></div>
+            <div class="compuerta-brillo"></div>
+          </div>
+        </div>
+        <span class="compuerta-led" id="compuerta-led"></span>
+      </div>
+      <p class="compuerta-texto">Tambor industrial<br><span id="compuerta-estado">en reposo</span></p>
+      <div class="compuerta-datos">
+        <span>Voltia 2026B</span>
+        <span>Diseno de Soluciones</span>
+      </div>
+    </aside>
+
+    <div class="columna-central">
+
+      <!-- Filtros y acciones -->
+      <section class="panel panel-filtros" aria-labelledby="titulo-filtros">
+        <div class="panel-cabecera">
+          <h2 id="titulo-filtros">Lavadoras registradas</h2>
+          <p class="panel-nota" id="resumen-filtros">Sin filtros aplicados</p>
+        </div>
+
+        <form class="filtros" id="form-filtros" novalidate>
+          <div class="campo campo-filtro">
+            <label for="filtro-marca">Marca contiene</label>
+            <input type="search" id="filtro-marca" name="marca" placeholder="LG, Samsung..." autocomplete="off">
+          </div>
+          <div class="campo campo-filtro">
+            <label for="filtro-inverter">Inverter</label>
+            <select id="filtro-inverter" name="inverter">
+              <option value="">Todos</option>
+              <option value="true">Solo con inverter</option>
+              <option value="false">Solo sin inverter</option>
+            </select>
+          </div>
+          <div class="campo campo-filtro">
+            <label for="filtro-mantenimientos">Mantenimientos</label>
+            <select id="filtro-mantenimientos" name="mantenimientos">
+              <option value="">Todos</option>
+              <option value="true">Solo con mantenimientos</option>
+              <option value="false">Solo sin mantenimientos</option>
+            </select>
+          </div>
+          <div class="campo-acciones-filtro">
+            <button type="submit" class="boton primario">Aplicar filtros</button>
+            <button type="button" class="boton secundario" id="boton-limpiar-filtros">Limpiar filtros</button>
+          </div>
+        </form>
+
+        <div class="acciones" role="group" aria-label="Acciones sobre lavadoras">
+          <button type="button" class="boton primario" id="boton-agregar">Agregar lavadora</button>
+          <button type="button" class="boton secundario" id="boton-consultar">Consultar</button>
+          <button type="button" class="boton secundario" id="boton-actualizar">Actualizar</button>
+          <button type="button" class="boton peligro" id="boton-eliminar">Eliminar</button>
+          <button type="button" class="boton acero" id="boton-mantenimientos">Mantenimientos</button>
+        </div>
+      </section>
+
+      <!-- Tabla de lavadoras -->
+      <section class="panel panel-tabla" aria-labelledby="titulo-tabla">
+        <div class="panel-cabecera panel-cabecera-tabla">
+          <h2 id="titulo-tabla">Listado</h2>
+          <span class="contador" id="contador-lavadoras">0 lavadoras</span>
+        </div>
+        <p class="tabla-ayuda" id="tabla-ayuda">
+          Seleccione una fila (clic o tecla Enter) para ver sus mantenimientos en el panel de detalle.
+          Si la ventana es angosta, desplace la tabla hacia la derecha para ver todas las columnas.
+        </p>
+        <div class="tabla-scroll" id="tabla-scroll">
+          <table class="tabla" id="tabla-lavadoras" aria-describedby="tabla-ayuda">
+            <caption class="visualmente-oculto">Lavadoras registradas con sus datos tecnicos y costos</caption>
+            <thead>
+              <tr>
+                <th scope="col">Codigo</th>
+                <th scope="col">Marca</th>
+                <th scope="col">Fabricacion</th>
+                <th scope="col">Precio base</th>
+                <th scope="col">Capacidad</th>
+                <th scope="col">RPM</th>
+                <th scope="col">Inverter</th>
+                <th scope="col">Minutos</th>
+                <th scope="col">Manten.</th>
+                <th scope="col">Pend.</th>
+                <th scope="col">Precio final</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-tabla"></tbody>
+          </table>
+        </div>
+        <p class="vacio" id="tabla-vacio" hidden>
+          No hay lavadoras para mostrar. Use "Agregar lavadora" o cambie los filtros.
+        </p>
+      </section>
+
+    </div>
+
+    <!-- Panel de detalle: mantenimientos de la lavadora seleccionada -->
+    <section class="columna-detalle" aria-labelledby="titulo-detalle">
+      <div class="panel panel-detalle">
+        <h2 class="visualmente-oculto" id="titulo-detalle">Detalle de la lavadora seleccionada</h2>
+        <div id="detalle-contenido" aria-live="polite">
+          <div class="detalle-vacio">
+            <p>Seleccione una lavadora en la tabla para ver su ficha y sus mantenimientos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="pie">
+    <span>Voltia - Segundo Proyecto 2026B</span>
+    <span>Cliente web en JavaScript puro</span>
+  </footer>
+
+  <!-- Avisos tipo toast -->
+  <div class="toasts" id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
+
+  <noscript>
+    <p class="aviso-noscript">
+      Este panel necesita JavaScript activado para conectarse con el servidor GraphQL.
+    </p>
+  </noscript>
+
+  <!-- ================================================================
+       MODAL: agregar lavadora
+       ================================================================ -->
+  <div class="modal-fondo" id="modal-agregar" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-agregar">
+      <header class="modal-cabecera">
+        <h2 id="titulo-agregar">Agregar lavadora</h2>
+        <button type="button" class="boton-cerrar" data-cerrar="modal-agregar" aria-label="Cerrar la ventana">Cerrar</button>
+      </header>
+      <form class="modal-cuerpo" id="form-agregar" novalidate>
+        <p class="modal-nota">Los datos se revisan antes de enviarse. El precio final se calcula con las reglas del servidor.</p>
+        <div class="rejilla-campos">
+          <div class="campo">
+            <label for="ag-codigo">Codigo</label>
+            <input type="number" id="ag-codigo" name="codigo" inputmode="numeric" min="1" step="1" placeholder="101" required>
+            <span class="campo-error" id="error-ag-codigo"></span>
+          </div>
+          <div class="campo">
+            <label for="ag-marca">Marca</label>
+            <input type="text" id="ag-marca" name="marca" placeholder="LG" autocomplete="off" required>
+            <span class="campo-error" id="error-ag-marca"></span>
+          </div>
+          <div class="campo">
+            <label for="ag-precio">Precio base</label>
+            <input type="number" id="ag-precio" name="precioBase" min="1" step="1000" placeholder="1450000" required>
+            <span class="campo-error" id="error-ag-precio"></span>
+          </div>
+          <div class="campo">
+            <label for="ag-fecha">Fecha de fabricacion</label>
+            <input type="text" id="ag-fecha" name="fechaFabricacion" placeholder="2025-06-18T10:45:00" autocomplete="off" required>
+            <span class="campo-error" id="error-ag-fecha"></span>
+          </div>
+          <div class="campo">
+            <label for="ag-capacidad">Capacidad de carga (kg)</label>
+            <input type="number" id="ag-capacidad" name="capacidadCargaKilos" min="1" step="0.1" placeholder="18" required>
+            <span class="campo-error" id="error-ag-capacidad"></span>
+          </div>
+          <div class="campo">
+            <label for="ag-rpm">Velocidad de centrifugado (RPM)</label>
+            <input type="number" id="ag-rpm" name="velocidadCentrifugadoRPM" min="600" step="1" placeholder="1200" required>
+            <span class="campo-error" id="error-ag-rpm"></span>
+          </div>
+          <div class="campo">
+            <label for="ag-minutos">Minutos de lavado</label>
+            <input type="number" id="ag-minutos" name="minutosLavado" min="1" max="300" step="1" placeholder="45" required>
+            <span class="campo-error" id="error-ag-minutos"></span>
+          </div>
+          <div class="campo campo-casilla">
+            <label class="casilla" for="ag-inverter">
+              <input type="checkbox" id="ag-inverter" name="tecnologiaInverter">
+              <span>Tecnologia inverter</span>
+            </label>
+            <span class="campo-error" id="error-ag-inverter"></span>
+          </div>
+        </div>
+
+        <div class="vista-precio">
+          <span>Precio final estimado</span>
+          <output id="ag-precio-final">$ 0</output>
+        </div>
+        <p class="error-formulario" id="error-agregar" role="alert"></p>
+
+        <footer class="modal-pie">
+          <button type="button" class="boton secundario" data-cerrar="modal-agregar">Cancelar</button>
+          <button type="submit" class="boton primario" id="boton-guardar-lavadora">Guardar lavadora</button>
+        </footer>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: consultar por uno o dos criterios
+       ================================================================ -->
+  <div class="modal-fondo" id="modal-consultar" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-consultar">
+      <header class="modal-cabecera">
+        <h2 id="titulo-consultar">Consultar lavadora</h2>
+        <button type="button" class="boton-cerrar" data-cerrar="modal-consultar" aria-label="Cerrar la ventana">Cerrar</button>
+      </header>
+      <div class="modal-cuerpo">
+        <form id="form-consultar" class="form-busqueda" novalidate>
+          <div class="campo">
+            <label for="co-codigo">Codigo</label>
+            <input type="number" id="co-codigo" name="codigo" inputmode="numeric" min="1" step="1" placeholder="101">
+            <span class="campo-error" id="error-co-codigo"></span>
+          </div>
+          <div class="campo">
+            <label for="co-marca">Marca contiene</label>
+            <input type="search" id="co-marca" name="marca" placeholder="LG" autocomplete="off">
+            <span class="campo-error" id="error-co-marca"></span>
+          </div>
+          <button type="submit" class="boton primario" id="boton-buscar-consulta">Buscar</button>
+        </form>
+        <p class="error-formulario" id="error-consultar" role="alert"></p>
+        <div class="resultado" id="resultado-consulta">
+          <p class="vacio">Escriba el codigo, la marca o ambos criterios y pulse Buscar.</p>
+        </div>
+      </div>
+      <footer class="modal-pie">
+        <button type="button" class="boton secundario" data-cerrar="modal-consultar">Cerrar</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: actualizar (busqueda previa obligatoria)
+       ================================================================ -->
+  <div class="modal-fondo" id="modal-actualizar" hidden>
+    <div class="modal ancho" role="dialog" aria-modal="true" aria-labelledby="titulo-actualizar">
+      <header class="modal-cabecera">
+        <h2 id="titulo-actualizar">Actualizar lavadora</h2>
+        <button type="button" class="boton-cerrar" data-cerrar="modal-actualizar" aria-label="Cerrar la ventana">Cerrar</button>
+      </header>
+      <div class="modal-cuerpo">
+        <form id="form-buscar-actualizar" class="form-busqueda" novalidate>
+          <div class="campo">
+            <label for="ac-codigo">Codigo de la lavadora</label>
+            <input type="number" id="ac-codigo" name="codigo" inputmode="numeric" min="1" step="1" placeholder="101">
+          </div>
+          <button type="submit" class="boton primario" id="boton-buscar-actualizar">Buscar lavadora</button>
+        </form>
+        <p class="error-formulario" id="error-buscar-actualizar" role="alert"></p>
+        <div class="resultado" id="resultado-actualizar">
+          <p class="vacio">Primero busque la lavadora que desea modificar.</p>
+        </div>
+
+        <form id="form-actualizar" class="formulario-oculto" novalidate hidden>
+          <div class="rejilla-campos">
+            <div class="campo">
+              <label for="ac-marca">Marca</label>
+              <input type="text" id="ac-marca" name="marca" autocomplete="off">
+              <span class="campo-error" id="error-ac-marca"></span>
+            </div>
+            <div class="campo">
+              <label for="ac-precio">Precio base</label>
+              <input type="number" id="ac-precio" name="precioBase" min="1" step="1000">
+              <span class="campo-error" id="error-ac-precio"></span>
+            </div>
+            <div class="campo">
+              <label for="ac-fecha">Fecha de fabricacion</label>
+              <input type="text" id="ac-fecha" name="fechaFabricacion" placeholder="2025-06-18T10:45:00" autocomplete="off">
+              <span class="campo-error" id="error-ac-fecha"></span>
+            </div>
+            <div class="campo">
+              <label for="ac-capacidad">Capacidad de carga (kg)</label>
+              <input type="number" id="ac-capacidad" name="capacidadCargaKilos" min="1" step="0.1">
+              <span class="campo-error" id="error-ac-capacidad"></span>
+            </div>
+            <div class="campo">
+              <label for="ac-rpm">Velocidad de centrifugado (RPM)</label>
+              <input type="number" id="ac-rpm" name="velocidadCentrifugadoRPM" min="600" step="1">
+              <span class="campo-error" id="error-ac-rpm"></span>
+            </div>
+            <div class="campo">
+              <label for="ac-minutos">Minutos de lavado</label>
+              <input type="number" id="ac-minutos" name="minutosLavado" min="1" max="300" step="1">
+              <span class="campo-error" id="error-ac-minutos"></span>
+            </div>
+            <div class="campo campo-casilla">
+              <label class="casilla" for="ac-inverter">
+                <input type="checkbox" id="ac-inverter" name="tecnologiaInverter">
+                <span>Tecnologia inverter</span>
+              </label>
+              <span class="campo-error" id="error-ac-inverter"></span>
+            </div>
+          </div>
+          <div class="vista-precio">
+            <span>Precio final estimado</span>
+            <output id="ac-precio-final">$ 0</output>
+          </div>
+          <p class="error-formulario" id="error-actualizar" role="alert"></p>
+        </form>
+      </div>
+      <footer class="modal-pie">
+        <button type="button" class="boton secundario" data-cerrar="modal-actualizar">Cancelar</button>
+        <button type="submit" class="boton primario" id="boton-guardar-actualizar" form="form-actualizar" disabled>
+          Guardar cambios
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: eliminar (busqueda previa y confirmacion destructiva)
+       ================================================================ -->
+  <div class="modal-fondo" id="modal-eliminar" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-eliminar">
+      <header class="modal-cabecera">
+        <h2 id="titulo-eliminar">Eliminar lavadora</h2>
+        <button type="button" class="boton-cerrar" data-cerrar="modal-eliminar" aria-label="Cerrar la ventana">Cerrar</button>
+      </header>
+      <div class="modal-cuerpo">
+        <form id="form-buscar-eliminar" class="form-busqueda" novalidate>
+          <div class="campo">
+            <label for="el-codigo">Codigo de la lavadora</label>
+            <input type="number" id="el-codigo" name="codigo" inputmode="numeric" min="1" step="1" placeholder="101">
+          </div>
+          <button type="submit" class="boton primario" id="boton-buscar-eliminar">Buscar lavadora</button>
+        </form>
+        <p class="error-formulario" id="error-eliminar" role="alert"></p>
+        <div class="resultado" id="resultado-eliminar">
+          <p class="vacio">Primero busque la lavadora que desea eliminar.</p>
+        </div>
+
+        <div class="confirmacion" id="confirmacion-eliminar" hidden>
+          <p class="confirmacion-texto" id="texto-confirmacion-eliminar"></p>
+          <div class="campo">
+            <label for="el-confirmar">Escriba el codigo para confirmar</label>
+            <input type="text" id="el-confirmar" inputmode="numeric" autocomplete="off" placeholder="Codigo">
+          </div>
+          <p class="error-formulario" id="error-confirmacion-eliminar" role="alert"></p>
+        </div>
+      </div>
+      <footer class="modal-pie">
+        <button type="button" class="boton secundario" data-cerrar="modal-eliminar">Cancelar</button>
+        <button type="button" class="boton peligro" id="boton-confirmar-eliminar" disabled>
+          Eliminar definitivamente
+        </button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: gestion de mantenimientos (detalle)
+       ================================================================ -->
+  <div class="modal-fondo" id="modal-mantenimientos" hidden>
+    <div class="modal ancho" role="dialog" aria-modal="true" aria-labelledby="titulo-mantenimientos">
+      <header class="modal-cabecera">
+        <h2 id="titulo-mantenimientos">Mantenimientos</h2>
+        <button type="button" class="boton-cerrar" data-cerrar="modal-mantenimientos" aria-label="Cerrar la ventana">Cerrar</button>
+      </header>
+      <div class="modal-cuerpo">
+        <div class="barra-mantenimientos">
+          <div class="campo">
+            <label for="mat-lavadora">Lavadora</label>
+            <select id="mat-lavadora"></select>
+          </div>
+          <form id="form-filtros-mantenimientos" class="form-filtros-mantenimientos" novalidate>
+            <div class="campo">
+              <label for="mat-filtro-tecnico">Tecnico contiene</label>
+              <input type="search" id="mat-filtro-tecnico" placeholder="Nombre" autocomplete="off">
+            </div>
+            <div class="campo">
+              <label for="mat-filtro-completado">Estado</label>
+              <select id="mat-filtro-completado">
+                <option value="">Todos</option>
+                <option value="true">Completados</option>
+                <option value="false">Pendientes</option>
+              </select>
+            </div>
+            <button type="submit" class="boton secundario">Filtrar</button>
+            <button type="button" class="boton secundario" id="boton-limpiar-filtros-mantenimientos">Limpiar</button>
+          </form>
+        </div>
+
+        <div class="barra-acciones-mantenimientos">
+          <span class="contador" id="contador-mantenimientos">Sin datos</span>
+          <button type="button" class="boton primario" id="boton-agregar-mantenimiento">Agregar mantenimiento</button>
+        </div>
+
+        <p class="error-formulario" id="error-mantenimientos" role="alert"></p>
+
+        <div class="tabla-scroll tabla-scroll-mantenimientos">
+          <table class="tabla tabla-mantenimientos">
+            <caption class="visualmente-oculto">Mantenimientos de la lavadora elegida</caption>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Descripcion</th>
+                <th scope="col">Tecnico</th>
+                <th scope="col">Costo</th>
+                <th scope="col">Fecha</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cuerpo-mantenimientos"></tbody>
+          </table>
+        </div>
+        <p class="vacio" id="mantenimientos-vacio" hidden>
+          Esta lavadora no tiene mantenimientos con los filtros indicados (el detalle puede estar en cero).
+        </p>
+
+        <!-- Formulario de alta y edicion del detalle -->
+        <form id="form-mantenimiento" class="form-mantenimiento" novalidate hidden>
+          <h3 id="titulo-form-mantenimiento">Agregar mantenimiento</h3>
+          <div class="rejilla-campos">
+            <div class="campo">
+              <label for="mat-descripcion">Descripcion</label>
+              <input type="text" id="mat-descripcion" placeholder="Cambio de bomba" autocomplete="off">
+              <span class="campo-error" id="error-mat-descripcion"></span>
+            </div>
+            <div class="campo">
+              <label for="mat-tecnico">Tecnico</label>
+              <input type="text" id="mat-tecnico" placeholder="Carlos Perez" autocomplete="off">
+              <span class="campo-error" id="error-mat-tecnico"></span>
+            </div>
+            <div class="campo">
+              <label for="mat-costo">Costo</label>
+              <input type="number" id="mat-costo" min="0" step="1000" placeholder="120000">
+              <span class="campo-error" id="error-mat-costo"></span>
+            </div>
+            <div class="campo">
+              <label for="mat-fecha">Fecha</label>
+              <input type="text" id="mat-fecha" placeholder="2025-06-18T10:45:00" autocomplete="off">
+              <span class="campo-error" id="error-mat-fecha"></span>
+            </div>
+            <div class="campo campo-casilla">
+              <label class="casilla" for="mat-completado">
+                <input type="checkbox" id="mat-completado">
+                <span>Completado</span>
+              </label>
+            </div>
+          </div>
+          <p class="error-formulario" id="error-mantenimiento" role="alert"></p>
+          <div class="modal-pie">
+            <button type="button" class="boton secundario" id="boton-cancelar-mantenimiento">Cancelar</button>
+            <button type="submit" class="boton primario" id="boton-guardar-mantenimiento">Guardar mantenimiento</button>
+          </div>
+        </form>
+
+        <!-- Confirmacion de borrado del detalle -->
+        <div class="confirmacion" id="confirmacion-mantenimiento" hidden>
+          <p class="confirmacion-texto" id="texto-confirmacion-mantenimiento"></p>
+          <div class="modal-pie">
+            <button type="button" class="boton secundario" id="boton-cancelar-eliminar-mantenimiento">Cancelar</button>
+            <button type="button" class="boton peligro" id="boton-confirmar-eliminar-mantenimiento">Eliminar mantenimiento</button>
+          </div>
+        </div>
+      </div>
+      <footer class="modal-pie">
+        <button type="button" class="boton secundario" data-cerrar="modal-mantenimientos">Cerrar</button>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Scripts clasicos, en el orden que exige la arquitectura MVC -->
+  <script src="js/modelo.js"></script>
+  <script src="js/observador.js"></script>
+  <script src="js/servicios/graphql.js"></script>
+  <script src="js/controlador.js"></script>
+  <script src="js/vista.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

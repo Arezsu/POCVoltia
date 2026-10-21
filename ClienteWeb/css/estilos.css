@@ -1,0 +1,1793 @@
+/* =====================================================================
+   ESTILOS DEL CLIENTE WEB VOLTIA
+   =====================================================================
+   Metafora visual: lavadora industrial moderna con panel de cristal.
+   - Fondo oscuro con gradiente y textura de lineas muy tenues.
+   - Paneles de "glassmorphism" tenue (fondo translucido + blur + borde).
+   - Compuerta circular siempre visible, con tambor, agua y ropa girando.
+   - Paleta de la casa: cian, ambar, acero y grafito (sin colores chillones).
+   Todo el diseno se controla con variables CSS para cambiar la casa entera
+   desde un solo lugar.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------
+   1. Variables de la casa
+   --------------------------------------------------------------- */
+:root {
+  --fondo-1: #0B1016;
+  --fondo-2: #111A22;
+  --chasis: #1A242D;
+  --acero: #22303B;
+  --cristal: rgba(255, 255, 255, 0.06);
+  --cristal-fuerte: rgba(255, 255, 255, 0.09);
+  --borde: rgba(255, 255, 255, 0.14);
+  --borde-suave: rgba(255, 255, 255, 0.08);
+  --cian: #6FD3E8;
+  --cian-oscuro: rgba(111, 211, 232, 0.16);
+  --ambar: #E8B15A;
+  --texto: #E6EDF3;
+  --secundario: #9FB0BF;
+  --error: #E06C6C;
+  --exito: #7ED09A;
+  --fuente: "Segoe UI", "Segoe UI Web", Tahoma, Verdana, sans-serif;
+  --mono: Consolas, "Courier New", monospace;
+  --radio: 18px;
+  --radio-chico: 10px;
+  --sombra-panel: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --transicion: 160ms ease;
+}
+
+/* ---------------------------------------------------------------
+   2. Base
+   --------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  height: 100vh;
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  /* El scroll de la aplicacion vive dentro de los paneles: asi la ventana
+     no queda con un hueco vacio debajo del contenido. */
+  overflow: hidden;
+  font-family: var(--fuente);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--texto);
+  background:
+    radial-gradient(1100px 600px at 15% -10%, rgba(111, 211, 232, 0.07), transparent 60%),
+    radial-gradient(900px 500px at 95% 8%, rgba(232, 177, 90, 0.05), transparent 55%),
+    linear-gradient(160deg, var(--fondo-1) 0%, var(--fondo-2) 100%);
+  background-attachment: fixed;
+}
+
+body.con-modal {
+  overflow: hidden;
+}
+
+h1, h2, h3, p, dl, dd, dt {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Textura discreta: lineas finas y un grano suave, sin llamar la atencion */
+.textura {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.014) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.010) 0 1px, transparent 1px 6px);
+  opacity: 0.85;
+}
+
+/* Foco visible siempre (accesibilidad por teclado) */
+:focus-visible {
+  outline: 2px solid var(--cian);
+  outline-offset: 2px;
+}
+
+.visualmente-oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------------
+   3. Encabezado: panel de control de la lavadora
+   --------------------------------------------------------------- */
+.panel-control {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 22px;
+  background: linear-gradient(180deg, rgba(26, 36, 45, 0.94), rgba(16, 24, 31, 0.88));
+  border-bottom: 1px solid var(--borde-suave);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+
+.marca-bloque {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 240px;
+  color: var(--cian);
+}
+
+.marca-icono {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: linear-gradient(150deg, rgba(111, 211, 232, 0.14), rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--borde);
+  box-shadow: inset 0 0 12px rgba(111, 211, 232, 0.18);
+}
+
+.marca-textos h1 {
+  font-size: 1.35rem;
+  letter-spacing: 0.32em;
+  font-weight: 600;
+}
+
+.marca-textos p {
+  font-size: 0.74rem;
+  color: var(--secundario);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.pantalla-digital {
+  position: relative;
+  flex: 1;
+  max-width: 340px;
+  margin-left: auto;
+  padding: 8px 14px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(111, 211, 232, 0.35);
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 0%, rgba(111, 211, 232, 0.14), rgba(5, 12, 15, 0.92));
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.8), 0 0 18px rgba(111, 211, 232, 0.08);
+  font-family: var(--mono);
+  overflow: hidden;
+}
+
+.pantalla-fila {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pantalla-etiqueta {
+  font-size: 0.66rem;
+  letter-spacing: 0.22em;
+  color: rgba(159, 176, 191, 0.8);
+}
+
+.pantalla-valor {
+  font-size: 1rem;
+  letter-spacing: 0.14em;
+  color: var(--cian);
+  text-shadow: 0 0 10px rgba(111, 211, 232, 0.55);
+}
+
+.pantalla-barra {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0%;
+  background: linear-gradient(90deg, transparent, var(--cian), transparent);
+  transition: width var(--transicion);
+}
+
+body[data-estado="LAVANDO"] .pantalla-barra {
+  width: 100%;
+  animation: barrido 1.4s linear infinite;
+}
+
+body[data-estado="LAVANDO"] .pantalla-valor {
+  color: #A8E8F5;
+}
+
+body[data-estado="ERROR"] .pantalla-valor {
+  color: var(--error);
+  text-shadow: 0 0 10px rgba(224, 108, 108, 0.6);
+}
+
+.conexion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--secundario);
+  white-space: nowrap;
+}
+
+.piloto {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--error);
+  box-shadow: 0 0 0 3px rgba(224, 108, 108, 0.14), 0 0 10px rgba(224, 108, 108, 0.55);
+  transition: box-shadow var(--transicion);
+}
+
+.piloto[data-estado="conectado"] {
+  background: var(--exito);
+  box-shadow: 0 0 0 3px rgba(126, 208, 154, 0.14), 0 0 10px rgba(126, 208, 154, 0.6);
+}
+
+.conexion-url {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: rgba(159, 176, 191, 0.6);
+  padding-left: 6px;
+  border-left: 1px solid var(--borde-suave);
+}
+
+/* ---------------------------------------------------------------
+   4. Tablero: compuerta, centro y detalle
+   --------------------------------------------------------------- */
+.tablero {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr) 340px;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
+  padding: 16px 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.columna-compuerta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+  padding-top: 6px;
+}
+
+.columna-central {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.columna-detalle {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* El panel de detalle ocupa toda la altura de su columna y desplaza solo su
+   contenido interno: la cabecera de la pagina no se mueve. */
+.columna-detalle .panel {
+  position: static;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------------------------------------------------------------
+   5. Compuerta circular (aro metalico, vidrio, agua y ropa girando)
+   --------------------------------------------------------------- */
+.compuerta {
+  position: relative;
+  width: 100%;
+  max-width: 188px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+  filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.5));
+}
+
+.compuerta-marco {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 11px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    #6C7B87, #DCE6EE, #8B9AA6, #C6D3DD, #66757F,
+    #E6EEF4, #8494A0, #B9C7D1, #6C7B87
+  );
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.45),
+    inset 0 2px 6px rgba(255, 255, 255, 0.25),
+    0 0 0 6px rgba(255, 255, 255, 0.03);
+}
+
+.compuerta-vidrio {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(111, 211, 232, 0.20) 0%, transparent 42%),
+    radial-gradient(circle at 50% 50%, #1B2A34 0%, #0B141A 55%, #05090D 100%);
+  box-shadow:
+    inset 0 8px 24px rgba(0, 0, 0, 0.85),
+    inset 0 -6px 18px rgba(111, 211, 232, 0.10);
+  border: 3px solid #0C1319;
+}
+
+/* Tambor: anillos perforados que giran siempre */
+.compuerta-tambor {
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  background:
+    repeating-conic-gradient(
+      from 0deg,
+      rgba(255, 255, 255, 0.10) 0deg 4deg,
+      rgba(255, 255, 255, 0.01) 4deg 9deg
+    ),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 62%),
+    radial-gradient(circle at 50% 50%, #16232C 0%, #0A1217 78%);
+  box-shadow:
+    inset 0 0 0 4px rgba(255, 255, 255, 0.06),
+    inset 0 0 22px rgba(0, 0, 0, 0.9);
+  animation: girar 11s linear infinite;
+}
+
+/* Ropa: tres prendas que dan vueltas con el tambor */
+.ropa {
+  position: absolute;
+  border-radius: 46% 54% 58% 42% / 52% 46% 54% 48%;
+  opacity: 0.9;
+  box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.35);
+}
+
+.ropa-a {
+  width: 30%;
+  height: 21%;
+  left: 22%;
+  top: 56%;
+  background: linear-gradient(140deg, rgba(111, 211, 232, 0.75), rgba(54, 120, 138, 0.6));
+}
+
+.ropa-b {
+  width: 26%;
+  height: 18%;
+  left: 52%;
+  top: 38%;
+  background: linear-gradient(140deg, rgba(232, 177, 90, 0.65), rgba(140, 103, 47, 0.55));
+}
+
+.ropa-c {
+  width: 22%;
+  height: 16%;
+  left: 38%;
+  top: 24%;
+  background: linear-gradient(140deg, rgba(230, 237, 243, 0.45), rgba(120, 136, 148, 0.35));
+}
+
+/* Agua: capa que se mece en el fondo del vidrio */
+.compuerta-agua {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -6%;
+  height: 42%;
+  border-radius: 50% 50% 0 0 / 26% 26% 0 0;
+  background:
+    linear-gradient(180deg, rgba(111, 211, 232, 0.38), rgba(38, 96, 112, 0.55));
+  filter: blur(1px);
+  animation: oleaje 6s ease-in-out infinite alternate;
+}
+
+.compuerta-brillo {
+  position: absolute;
+  left: 12%;
+  top: 8%;
+  width: 42%;
+  height: 26%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.30), transparent 70%);
+  transform: rotate(-18deg);
+  pointer-events: none;
+}
+
+.compuerta-led {
+  position: absolute;
+  right: 4%;
+  bottom: 8%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--exito);
+  box-shadow: 0 0 8px rgba(126, 208, 154, 0.8);
+  animation: latido 3.4s ease-in-out infinite;
+}
+
+body[data-estado="LAVANDO"] .compuerta-led {
+  background: var(--ambar);
+  box-shadow: 0 0 12px rgba(232, 177, 90, 0.9);
+}
+
+body[data-estado="ERROR"] .compuerta-led {
+  background: var(--error);
+  box-shadow: 0 0 12px rgba(224, 108, 108, 0.9);
+}
+
+/* Durante una peticion de red el tambor acelera */
+body[data-estado="LAVANDO"] .compuerta-tambor {
+  animation-duration: 1.15s;
+}
+
+body[data-estado="LAVANDO"] .compuerta-agua {
+  animation-duration: 1.6s;
+}
+
+.compuerta-texto {
+  text-align: center;
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--secundario);
+  letter-spacing: 0.04em;
+}
+
+.compuerta-texto span {
+  color: var(--cian);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.compuerta-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: auto;
+  padding-top: 12px;
+  text-align: center;
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(159, 176, 191, 0.55);
+}
+
+/* ---------------------------------------------------------------
+   6. Paneles de cristal
+   --------------------------------------------------------------- */
+.panel {
+  position: relative;
+  padding: 16px 18px;
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: var(--cristal);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--sombra-panel), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.panel-cabecera h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.panel-cabecera h2::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 2px;
+  background: var(--cian);
+  box-shadow: 0 0 8px rgba(111, 211, 232, 0.6);
+  vertical-align: middle;
+}
+
+.panel-nota {
+  font-size: 0.76rem;
+  color: var(--secundario);
+}
+
+/* ---------------------------------------------------------------
+   7. Filtros y acciones
+   --------------------------------------------------------------- */
+.filtros {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.4fr) minmax(120px, 1fr) minmax(140px, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.campo label {
+  font-size: 0.74rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.campo input,
+.campo select {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: var(--radio-chico);
+  border: 1px solid var(--borde);
+  background: rgba(7, 13, 18, 0.72);
+  color: var(--texto);
+  transition: border-color var(--transicion), box-shadow var(--transicion), background var(--transicion);
+}
+
+.campo input::placeholder {
+  color: rgba(159, 176, 191, 0.45);
+}
+
+.campo input:hover,
+.campo select:hover {
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.campo input:focus,
+.campo select:focus {
+  border-color: var(--cian);
+  box-shadow: 0 0 0 3px rgba(111, 211, 232, 0.14);
+  outline: none;
+}
+
+.campo input.invalido,
+.campo select.invalido {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(224, 108, 108, 0.12);
+}
+
+.campo select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--secundario) 50%),
+    linear-gradient(135deg, var(--secundario) 50%, transparent 50%);
+  background-position: calc(100% - 16px) 50%, calc(100% - 11px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 30px;
+}
+
+.campo select option {
+  background: #101A21;
+  color: var(--texto);
+}
+
+.campo-casilla {
+  justify-content: flex-end;
+}
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: var(--radio-chico);
+  border: 1px solid var(--borde-suave);
+  background: rgba(7, 13, 18, 0.5);
+  font-size: 0.84rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--texto);
+  cursor: pointer;
+}
+
+.casilla input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #2E7F92;
+  cursor: pointer;
+}
+
+.campo-error {
+  font-size: 0.74rem;
+  color: var(--error);
+  line-height: 1.3;
+}
+
+.campo-error:empty {
+  display: none;
+}
+
+.error-formulario {
+  font-size: 0.82rem;
+  color: var(--error);
+  padding: 6px 0 0;
+}
+
+.error-formulario:empty {
+  display: none;
+}
+
+.campo-acciones-filtro {
+  display: flex;
+  gap: 8px;
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--borde-suave);
+}
+
+/* ---------------------------------------------------------------
+   8. Botones
+   --------------------------------------------------------------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 15px;
+  border-radius: 10px;
+  border: 1px solid var(--borde);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--texto);
+  font-size: 0.84rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background var(--transicion), border-color var(--transicion), transform var(--transicion), color var(--transicion);
+}
+
+.boton:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.boton:active {
+  transform: translateY(1px);
+}
+
+.boton[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.boton.primario {
+  background: linear-gradient(180deg, rgba(111, 211, 232, 0.22), rgba(46, 127, 146, 0.20));
+  border-color: rgba(111, 211, 232, 0.55);
+  color: #C8F1FA;
+}
+
+.boton.primario:hover {
+  background: linear-gradient(180deg, rgba(111, 211, 232, 0.32), rgba(46, 127, 146, 0.28));
+}
+
+.boton.secundario {
+  background: rgba(34, 48, 59, 0.75);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: var(--texto);
+}
+
+.boton.secundario:hover {
+  background: rgba(45, 62, 75, 0.9);
+}
+
+.boton.acero {
+  background: rgba(34, 48, 59, 0.45);
+  border-color: rgba(159, 176, 191, 0.3);
+  color: var(--secundario);
+}
+
+.boton.acero:hover {
+  color: var(--texto);
+}
+
+.boton.peligro {
+  background: rgba(224, 108, 108, 0.14);
+  border-color: rgba(224, 108, 108, 0.42);
+  color: #F0B4B4;
+}
+
+.boton.peligro:hover {
+  background: rgba(224, 108, 108, 0.24);
+}
+
+.boton.chico {
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  border-radius: 8px;
+}
+
+.boton-cerrar {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--borde-suave);
+  background: transparent;
+  color: var(--secundario);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color var(--transicion), border-color var(--transicion);
+}
+
+.boton-cerrar:hover {
+  color: var(--texto);
+  border-color: var(--borde);
+}
+
+/* ---------------------------------------------------------------
+   9. Tabla oscura legible
+   --------------------------------------------------------------- */
+.panel-filtros {
+  flex: 0 0 auto;
+}
+
+/* El panel del listado crece hasta llenar la columna y la tabla hace su
+   propio scroll vertical cuando hay muchas filas. */
+.panel-tabla {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 12px;
+}
+
+.panel-tabla .tabla-scroll {
+  flex: 1 1 auto;
+  min-height: 120px;
+}
+
+.panel-cabecera-tabla {
+  margin-bottom: 6px;
+}
+
+.contador {
+  font-family: var(--mono);
+  font-size: 0.76rem;
+  color: var(--secundario);
+  letter-spacing: 0.04em;
+}
+
+.tabla-ayuda {
+  font-size: 0.74rem;
+  color: rgba(159, 176, 191, 0.75);
+  margin-bottom: 10px;
+}
+
+/* Scroll visible en los dos ejes: si la ventana es angosta, la barra
+   horizontal permite llegar a las ultimas columnas sin cortar nada. */
+.tabla-scroll {
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--borde-suave);
+  background: rgba(7, 13, 18, 0.35);
+  scrollbar-color: rgba(111, 211, 232, 0.55) rgba(255, 255, 255, 0.06);
+  scrollbar-width: auto;
+}
+
+.tabla-scroll::-webkit-scrollbar {
+  width: 11px;
+  height: 12px;
+}
+
+.tabla-scroll::-webkit-scrollbar-thumb {
+  background: rgba(111, 211, 232, 0.45);
+  border-radius: 8px;
+  border: 2px solid rgba(7, 13, 18, 0.65);
+}
+
+.tabla-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(111, 211, 232, 0.7);
+}
+
+.tabla-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 8px;
+}
+
+.tabla-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.tabla {
+  width: 100%;
+  min-width: 780px;
+  font-size: 0.8rem;
+}
+
+.tabla thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 8px 6px;
+  background: var(--acero);
+  color: var(--texto);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.tabla thead th:first-child {
+  border-top-left-radius: 11px;
+}
+
+.tabla thead th:last-child {
+  border-top-right-radius: 11px;
+}
+
+.tabla tbody td {
+  padding: 8px 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+  color: var(--texto);
+  white-space: nowrap;
+}
+
+.tabla tbody tr {
+  cursor: default;
+  transition: background var(--transicion);
+}
+
+#tabla-lavadoras tbody tr {
+  cursor: pointer;
+}
+
+.tabla tbody tr:hover {
+  background: #1B2833;
+}
+
+.tabla tbody tr[aria-selected="true"] {
+  background: rgba(111, 211, 232, 0.10);
+  box-shadow: inset 3px 0 0 var(--cian);
+}
+
+.tabla tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tabla .num {
+  font-family: var(--mono);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabla .centro {
+  text-align: center;
+}
+
+.tabla .marca {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tabla .alerta {
+  color: var(--ambar);
+}
+
+.tabla .ok {
+  color: var(--exito);
+}
+
+.tabla .final {
+  color: var(--cian);
+  font-weight: 600;
+}
+
+/* Lista de mantenimientos en tarjetas (detalle y fichas dentro de modales) */
+.lista-mantenimientos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mantenimiento-item {
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--borde-suave);
+  background: rgba(7, 13, 18, 0.35);
+}
+
+.mantenimiento-linea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mantenimiento-id {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--secundario);
+}
+
+.mantenimiento-descripcion {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mantenimiento-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 12px;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--secundario);
+}
+
+/* ---------------------------------------------------------------
+   10. Panel de detalle
+   --------------------------------------------------------------- */
+.panel-detalle {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+#detalle-contenido {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-color: rgba(111, 211, 232, 0.4) transparent;
+  scrollbar-width: thin;
+}
+
+#detalle-contenido::-webkit-scrollbar {
+  width: 8px;
+}
+
+#detalle-contenido::-webkit-scrollbar-thumb {
+  background: rgba(111, 211, 232, 0.35);
+  border-radius: 8px;
+}
+
+#detalle-contenido::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.detalle-vacio {
+  padding: 26px 14px;
+  text-align: center;
+  color: var(--secundario);
+  font-size: 0.85rem;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(7, 13, 18, 0.25);
+}
+
+.detalle-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.detalle-etiqueta {
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.detalle-titulo {
+  font-size: 1.12rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(111, 211, 232, 0.35);
+  background: rgba(111, 211, 232, 0.10);
+  color: var(--cian);
+  font-size: 0.68rem;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.detalle-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.resumen-item {
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--borde-suave);
+  background: rgba(7, 13, 18, 0.32);
+}
+
+.resumen-item span {
+  display: block;
+  font-size: 0.6rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--secundario);
+  white-space: nowrap;
+}
+
+.resumen-item strong {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  color: var(--texto);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.resumen-item strong.alerta {
+  color: var(--ambar);
+}
+
+.detalle-seccion {
+  margin-top: 14px;
+}
+
+.detalle-seccion h3 {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--secundario);
+  margin-bottom: 8px;
+}
+
+.detalle-seccion-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.detalle-seccion-cabecera .boton {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.detalle-seccion-cabecera h3 {
+  margin-bottom: 0;
+}
+
+.ficha-datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  font-size: 0.8rem;
+}
+
+.ficha-datos dt {
+  color: var(--secundario);
+  white-space: nowrap;
+}
+
+.ficha-datos dd {
+  color: var(--texto);
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.ficha-datos dd.destacado {
+  color: var(--cian);
+}
+
+.ficha-datos dd.alerta {
+  color: var(--ambar);
+}
+
+.estado {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  border: 1px solid transparent;
+}
+
+.estado.completado {
+  color: var(--exito);
+  background: rgba(126, 208, 154, 0.12);
+  border-color: rgba(126, 208, 154, 0.38);
+}
+
+.estado.pendiente {
+  color: var(--ambar);
+  background: rgba(232, 177, 90, 0.12);
+  border-color: rgba(232, 177, 90, 0.38);
+}
+
+.vacio {
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--secundario);
+  border: 1px dashed rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+}
+
+/* ---------------------------------------------------------------
+   11. Avisos tipo toast
+   --------------------------------------------------------------- */
+.toasts {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(360px, calc(100vw - 36px));
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  border: 1px solid var(--borde);
+  border-left-width: 3px;
+  background: rgba(18, 27, 34, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45);
+  font-size: 0.84rem;
+  animation: entrar-toast 220ms ease-out;
+}
+
+.toast.exito {
+  border-left-color: var(--exito);
+}
+
+.toast.error {
+  border-left-color: var(--error);
+}
+
+.toast.info {
+  border-left-color: var(--cian);
+}
+
+.toast.advertencia {
+  border-left-color: var(--ambar);
+}
+
+.toast-texto {
+  flex: 1;
+  line-height: 1.4;
+}
+
+/* ---------------------------------------------------------------
+   12. Modales
+   --------------------------------------------------------------- */
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(4, 8, 11, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  animation: aparecer 160ms ease-out;
+}
+
+.modal-fondo[hidden] {
+  display: none;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  width: min(600px, 100%);
+  max-height: calc(100vh - 44px);
+  border-radius: var(--radio);
+  border: 1px solid var(--borde);
+  background: linear-gradient(165deg, rgba(34, 48, 59, 0.97), rgba(17, 26, 34, 0.98));
+  box-shadow: 0 34px 80px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.modal.ancho {
+  width: min(980px, 100%);
+}
+
+.modal-cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--borde-suave);
+  background: rgba(10, 16, 21, 0.35);
+}
+
+.modal-cabecera h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.modal-cuerpo {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-nota {
+  font-size: 0.8rem;
+  color: var(--secundario);
+}
+
+.modal-pie {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+  padding: 13px 20px;
+  border-top: 1px solid var(--borde-suave);
+  background: rgba(10, 16, 21, 0.35);
+}
+
+.modal-cuerpo .modal-pie {
+  margin: 4px -20px -20px;
+}
+
+.rejilla-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+
+.form-busqueda {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--borde-suave);
+  background: rgba(7, 13, 18, 0.35);
+}
+
+.form-busqueda .campo {
+  flex: 1;
+  min-width: 140px;
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formulario-oculto[hidden] {
+  display: none;
+}
+
+.vista-precio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(111, 211, 232, 0.3);
+  background: rgba(111, 211, 232, 0.07);
+}
+
+.vista-precio span {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--secundario);
+}
+
+.vista-precio output {
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  color: var(--cian);
+  text-shadow: 0 0 12px rgba(111, 211, 232, 0.35);
+}
+
+.confirmacion {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 108, 108, 0.42);
+  background: rgba(224, 108, 108, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.confirmacion[hidden] {
+  display: none;
+}
+
+.confirmacion-texto {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #F2C9C9;
+}
+
+.confirmacion .modal-pie {
+  margin: 0;
+  padding: 8px 0 0;
+  background: transparent;
+  border-top: 1px solid rgba(224, 108, 108, 0.25);
+}
+
+/* ---------------------------------------------------------------
+   13. Modal de mantenimientos
+   --------------------------------------------------------------- */
+.barra-mantenimientos {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--borde-suave);
+  background: rgba(7, 13, 18, 0.35);
+}
+
+.barra-mantenimientos > .campo {
+  min-width: 180px;
+}
+
+.form-filtros-mantenimientos {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.form-filtros-mantenimientos .campo {
+  min-width: 140px;
+}
+
+.barra-acciones-mantenimientos {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tabla-scroll-mantenimientos {
+  max-height: 260px;
+}
+
+.tabla-mantenimientos {
+  min-width: 720px;
+}
+
+.tabla-mantenimientos .acciones-fila {
+  display: flex;
+  gap: 6px;
+}
+
+.form-mantenimiento {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(111, 211, 232, 0.28);
+  background: rgba(7, 13, 18, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-mantenimiento[hidden] {
+  display: none;
+}
+
+.form-mantenimiento h3 {
+  font-size: 0.86rem;
+  letter-spacing: 0.04em;
+  color: var(--cian);
+}
+
+.form-mantenimiento .modal-pie {
+  margin: 0;
+  padding: 8px 0 0;
+  background: transparent;
+  border-top: 1px solid var(--borde-suave);
+}
+
+/* ---------------------------------------------------------------
+   14. Pie y avisos especiales
+   --------------------------------------------------------------- */
+.pie {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 22px 14px;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  color: rgba(159, 176, 191, 0.5);
+  position: relative;
+  z-index: 1;
+}
+
+.aviso-noscript {
+  margin: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 108, 108, 0.4);
+  background: rgba(224, 108, 108, 0.1);
+  color: #F0B4B4;
+  font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------
+   15. Animaciones
+   --------------------------------------------------------------- */
+@keyframes girar {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes oleaje {
+  from { transform: translateY(2px) rotate(-2deg); }
+  to { transform: translateY(-3px) rotate(3deg); }
+}
+
+@keyframes latido {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+@keyframes barrido {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes aparecer {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes entrar-toast {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------------------------------------------
+   16. Responsive
+   --------------------------------------------------------------- */
+/* Pantallas muy anchas: se aprovecha el espacio extra para respirar mejor. */
+@media (min-width: 1700px) {
+  .tablero {
+    grid-template-columns: 210px minmax(0, 1fr) 380px;
+  }
+
+  .compuerta {
+    max-width: 200px;
+  }
+
+  .tabla {
+    font-size: 0.84rem;
+  }
+
+  .tabla thead th {
+    padding: 10px 10px;
+  }
+
+  .tabla tbody td {
+    padding: 10px 10px;
+  }
+
+  .detalle-titulo {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 1359px) {
+  .tablero {
+    grid-template-columns: 130px minmax(0, 1fr) 300px;
+  }
+
+  .compuerta {
+    max-width: 118px;
+  }
+
+  /* Un poco mas compacta para que las once columnas entren en 1280 px. */
+  .tabla {
+    min-width: 720px;
+    font-size: 0.73rem;
+  }
+
+  .tabla thead th {
+    padding: 7px 4px;
+    font-size: 0.6rem;
+  }
+
+  .tabla tbody td {
+    padding: 6px 4px;
+  }
+}
+
+/* Debajo de 1200 px la pagina vuelve a desplazarse completa y el panel de
+   detalle pasa debajo del listado, para que la tabla conserve ancho. */
+@media (max-width: 1199px) {
+  html,
+  body {
+    height: auto;
+  }
+
+  body {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
+  .tablero {
+    grid-template-columns: 176px minmax(0, 1fr);
+    grid-template-rows: auto;
+    align-items: start;
+  }
+
+  .columna-detalle {
+    grid-column: 1 / -1;
+    display: block;
+  }
+
+  .columna-detalle .panel {
+    height: auto;
+    max-height: none;
+  }
+
+  #detalle-contenido {
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .tabla-scroll {
+    max-height: 460px;
+  }
+}
+
+@media (max-width: 1080px) {
+  .filtros {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .campo-acciones-filtro {
+    grid-column: 1 / -1;
+  }
+
+  .panel-control {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+
+  .pantalla-digital {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+
+  .conexion {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 860px) {
+  .tablero {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 14px;
+    gap: 14px;
+  }
+
+  .columna-compuerta {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 4px;
+  }
+
+  .compuerta {
+    width: 108px;
+    max-width: 108px;
+    flex: 0 0 auto;
+  }
+
+  .compuerta-datos {
+    display: none;
+  }
+
+  .compuerta-texto {
+    text-align: left;
+  }
+
+  .panel {
+    padding: 14px;
+  }
+
+  .rejilla-campos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acciones .boton {
+    flex: 1 1 44%;
+  }
+
+  .modal-fondo {
+    padding: 10px;
+  }
+
+  .modal {
+    max-height: calc(100vh - 20px);
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    font-size: 14px;
+  }
+
+  .panel-control {
+    padding: 12px 14px;
+  }
+
+  .marca-bloque {
+    min-width: 0;
+  }
+
+  .marca-textos h1 {
+    font-size: 1.1rem;
+  }
+
+  .conexion-url {
+    display: none;
+  }
+
+  .filtros {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acciones .boton {
+    flex: 1 1 100%;
+  }
+
+  .detalle-resumen {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modal-cabecera,
+  .modal-cuerpo,
+  .modal-pie {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .modal-cuerpo .modal-pie {
+    margin-left: -14px;
+    margin-right: -14px;
+  }
+
+  .toasts {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
+  }
+
+  .pie {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+}
+
+/* Respeta la preferencia de movimiento reducido: la compuerta deja de girar
+   y las animaciones decorativas se detienen, pero el estado se sigue viendo. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .compuerta-tambor {
+    animation: none !important;
+  }
+
+  .compuerta-agua {
+    animation: none !important;
+  }
+
+  .pantalla-barra {
+    width: 100% !important;
+    animation: none !important;
+    opacity: 0.6;
+  }
+}
