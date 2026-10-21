@@ -41,6 +41,12 @@
     }
     const notificador = Voltia.notificador;
     const cliente = Voltia.clienteGraphQL;
+    const selectorApi = document.getElementById('selector-api');
+    if (selectorApi) {
+      const modoGuardado = global.localStorage.getItem('voltia-api') === 'rest' ? 'rest' : 'graphql';
+      selectorApi.value = modoGuardado;
+      cliente.setModoApi(modoGuardado);
+    }
 
     // Composicion de dependencias: se crean una sola vez y se pasan a quien
     // las necesita. Ni la vista ni el controlador crean servicios por su cuenta.
@@ -50,6 +56,19 @@
       notificador,
       controladorLavadoras
     );
+    if (selectorApi) {
+      selectorApi.addEventListener('change', async () => {
+        cliente.setModoApi(selectorApi.value);
+        try {
+          await controladorLavadoras.recargar();
+          notificador.notificar(Voltia.EVENTOS.MENSAJE, {
+            tipo: 'exito', texto: 'Conexión cambiada a ' + selectorApi.value.toUpperCase() + '.'
+          });
+        } catch (error) {
+          // El controlador informa el error y conserva los datos visibles.
+        }
+      });
+    }
     const vista = new Voltia.Vista(notificador);
 
     vista.iniciar(controladorLavadoras, controladorMantenimientos);

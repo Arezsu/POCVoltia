@@ -1,9 +1,9 @@
 /* =====================================================================
    SERVICIO GRAPHQL (capa de red)
    =====================================================================
-   Unica capa que conoce la direccion del servidor y el lenguaje GraphQL.
+   Unica capa que conoce las direcciones del servidor y los protocolos GraphQL/REST.
    La vista NUNCA llama a este archivo: siempre pasa por el controlador.
-   Asi, si manana el servicio cambia de GraphQL a REST, solo se toca aqui.
+   El selector de la interfaz puede cambiar el protocolo sin tocar los casos de uso.
 
    Patron SINGLETON:
    La aplicacion necesita un solo cliente GraphQL: un solo lugar donde se
@@ -24,6 +24,7 @@
   const Voltia = global.Voltia = global.Voltia || {};
 
   const URL_SERVIDOR = 'http://localhost:8081/graphql';
+  const URL_REST = 'http://localhost:8081/api';
 
   // ---------------------------------------------------------------------
   //  Campos que se piden al servidor
@@ -151,6 +152,7 @@
 
     let peticionesEnCurso = 0;
     let ultimaConexion = null;
+    let modoApi = 'graphql';
 
     /** Avisa a la vista si hay red en curso (la compuerta acelera). */
     function avisarTrabajo() {
@@ -193,7 +195,8 @@
       }
       const mensaje = error && error.message ? error.message : '';
       if (error instanceof TypeError || mensaje === 'Failed to fetch' || mensaje === 'NetworkError when attempting to fetch resource.') {
-        return new Error('No se pudo conectar con el servidor GraphQL (' + URL_SERVIDOR + '). Verifique que este encendido.');
+        const url = modoApi === 'rest' ? URL_REST : URL_SERVIDOR;
+        return new Error('No se pudo conectar con el servidor ' + modoApi.toUpperCase() + ' (' + url + '). Verifique que este encendido.');
       }
       return error;
     }
@@ -253,11 +256,71 @@
       }
     }
 
+    /** Ejecuta una llamada REST y entrega el JSON directamente al controlador. */
+    async function ejecutarRest(ruta, opciones) {
+      peticionesEnCurso += 1;
+      avisarTrabajo();
+      try {
+        const respuesta = await fetch(URL_REST + ruta, Object.assign({
+          headers: { 'Accept': 'application/json' }
+        }, opciones || {}));
+        if (respuesta.status === 404) {
+          avisarConexion(true);
+          return null;
+        }
+        if (!respuesta.ok) {
+          let mensaje = 'El servidor REST respondió con estado HTTP ' + respuesta.status + '.';
+          try {
+            const cuerpoError = await respuesta.json();
+            mensaje = cuerpoError.mensaje || mensaje;
+          } catch (ignorado) { /* La respuesta de error no siempre contiene JSON. */ }
+          throw new Error(mensaje);
+        }
+        const cuerpo = respuesta.status === 204 ? true : await respuesta.json();
+        avisarConexion(true);
+        return cuerpo;
+      } catch (error) {
+        const errorNormalizado = normalizarError(error);
+        if (errorNormalizado instanceof TypeError || /No se pudo conectar/.test(errorNormalizado.message)) {
+          avisarConexion(false);
+        }
+        registro.error('Peticion REST fallida', errorNormalizado.message);
+        throw errorNormalizado;
+      } finally {
+        peticionesEnCurso -= 1;
+        avisarTrabajo();
+      }
+    }
+
+    function queryString(variables) {
+      const parametros = new URLSearchParams();
+      Object.keys(variables || {}).forEach((llave) => {
+        const valor = variables[llave];
+        if (valor !== null && valor !== undefined && valor !== '') parametros.set(llave, String(valor));
+      });
+      const texto = parametros.toString();
+      return texto ? '?' + texto : '';
+    }
+
+    function json(opciones, body) {
+      return Object.assign({}, opciones || {}, {
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+    }
+
     // -------------------------------------------------------------------
     //  API publica del cliente
     // -------------------------------------------------------------------
     return {
       url: URL_SERVIDOR,
+
+      setModoApi: function (modo) {
+        modoApi = modo === 'rest' ? 'rest' : 'graphql';
+        try { global.localStorage.setItem('voltia-api', modoApi); } catch (ignorado) { /* Almacenamiento opcional. */ }
+      },
+
+      modoApi: function () { return modoApi; },
 
       estaTrabajando: function () {
         return peticionesEnCurso > 0;
@@ -269,18 +332,21 @@
 
       /** Lista las lavadoras con los filtros que aplica el servidor. */
       listarLavadoras: async function (filtros) {
+        if (modoApi === 'rest') return await ejecutarRest('/lavadoras' + queryString(filtros || {})) || [];
         const datos = await ejecutar(DOCUMENTOS.LAVADORAS_POR_FILTRO, filtros || {});
         return datos.lavadorasPorFiltro || [];
       },
 
       /** Busca UNA lavadora por codigo y/o marca. Devuelve null si no existe. */
       buscarLavadoraPorCriterios: async function (criterios) {
+        if (modoApi === 'rest') return await ejecutarRest('/lavadoras/buscar' + queryString(criterios || {}));
         const datos = await ejecutar(DOCUMENTOS.LAVADORA_POR_CRITERIOS, criterios || {});
         return datos.lavadoraPorCriterios || null;
       },
 
       /** Numero de version de los datos: cambia cuando alguien modifica algo. */
       obtenerVersionDatos: async function () {
+        if (modoApi === 'rest') return await ejecutarRest('/version');
         const datos = await ejecutar(DOCUMENTOS.VERSION_DATOS, {});
         return datos.versionDatos;
       },
@@ -288,11 +354,18 @@
       /** Mantenimientos de una lavadora, con filtros opcionales. */
       consultarMantenimientos: async function (codigoLavadora, filtros) {
         const variables = Object.assign({ codigoLavadora: codigoLavadora }, filtros || {});
+        if (modoApi === 'rest') {
+          const { codigoLavadora: codigo, ...parametros } = variables;
+          return await ejecutarRest('/lavadoras/' + Number(codigo) + '/mantenimientos' + queryString(parametros)) || [];
+        }
         const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTOS_POR_FILTRO, variables);
         return datos.mantenimientosPorFiltro || [];
       },
 
       consultarMantenimientoPorId: async function (codigoLavadora, id) {
+        if (modoApi === 'rest') {
+          return await ejecutarRest('/lavadoras/' + Number(codigoLavadora) + '/mantenimientos/' + Number(id));
+        }
         const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTO_POR_ID, {
           codigoLavadora: Number(codigoLavadora), id: Number(id)
         });
@@ -300,21 +373,25 @@
       },
 
       agregarLavadora: async function (input) {
+        if (modoApi === 'rest') return ejecutarRest('/lavadoras', json({ method: 'POST' }, input));
         const datos = await ejecutar(DOCUMENTOS.AGREGAR_LAVADORA, { input: input });
         return datos.addLavadora;
       },
 
       actualizarLavadora: async function (codigo, input) {
+        if (modoApi === 'rest') return ejecutarRest('/lavadoras/' + Number(codigo), json({ method: 'PUT' }, input));
         const datos = await ejecutar(DOCUMENTOS.ACTUALIZAR_LAVADORA, { codigo: codigo, input: input });
         return datos.actualizarLavadora;
       },
 
       eliminarLavadora: async function (codigo) {
+        if (modoApi === 'rest') return (await ejecutarRest('/lavadoras/' + Number(codigo), { method: 'DELETE' })) !== null;
         const datos = await ejecutar(DOCUMENTOS.ELIMINAR_LAVADORA, { codigo: codigo });
         return datos.eliminarLavadora === true;
       },
 
       agregarMantenimiento: async function (codigoLavadora, input) {
+        if (modoApi === 'rest') return ejecutarRest('/lavadoras/' + Number(codigoLavadora) + '/mantenimientos', json({ method: 'POST' }, input));
         const datos = await ejecutar(DOCUMENTOS.AGREGAR_MANTENIMIENTO, {
           codigoLavadora: codigoLavadora,
           input: input
@@ -323,6 +400,7 @@
       },
 
       actualizarMantenimiento: async function (codigoLavadora, id, input) {
+        if (modoApi === 'rest') return ejecutarRest('/lavadoras/' + Number(codigoLavadora) + '/mantenimientos/' + Number(id), json({ method: 'PUT' }, input));
         const datos = await ejecutar(DOCUMENTOS.ACTUALIZAR_MANTENIMIENTO, {
           codigoLavadora: codigoLavadora,
           id: id,
@@ -332,6 +410,7 @@
       },
 
       eliminarMantenimiento: async function (codigoLavadora, id) {
+        if (modoApi === 'rest') return (await ejecutarRest('/lavadoras/' + Number(codigoLavadora) + '/mantenimientos/' + Number(id), { method: 'DELETE' })) !== null;
         const datos = await ejecutar(DOCUMENTOS.ELIMINAR_MANTENIMIENTO, {
           codigoLavadora: codigoLavadora,
           id: id

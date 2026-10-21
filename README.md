@@ -212,6 +212,28 @@ Detalles importantes del contrato:
 - Los errores de negocio (codigo repetido, fecha invalida, lavadora inexistente) llegan
   como errores GraphQL con un mensaje en espanol listo para mostrar al usuario.
 
+### Cliente web: elegir GraphQL o REST
+
+El selector **API** del encabezado permite cambiar el protocolo del cliente web; GraphQL
+sigue siendo la opcion inicial. La preferencia queda guardada en el navegador. La API REST
+vive en `http://localhost:8081/api` y reutiliza los mismos servicios y validaciones Java,
+por lo que los dos protocolos comparten los datos mientras el servidor siga ejecutandose.
+
+| Metodo | Ruta REST | Funcion |
+| :--- | :--- | :--- |
+| GET | `/lavadoras?marca=&tecnologiaInverter=&conMantenimientos=` | Lista aplicando filtros opcionales en el servidor |
+| GET | `/lavadoras/buscar?codigo=&marca=` | Busca una lavadora por codigo y/o marca |
+| GET | `/lavadoras/{codigo}` | Consulta una lavadora |
+| POST / PUT / DELETE | `/lavadoras` o `/lavadoras/{codigo}` | Agrega, actualiza o elimina lavadoras |
+| GET | `/lavadoras/{codigo}/mantenimientos?tecnico=&completado=` | Lista y filtra el detalle |
+| GET / POST | `/lavadoras/{codigo}/mantenimientos/{id}` o `/lavadoras/{codigo}/mantenimientos` | Consulta por id o agrega un mantenimiento |
+| PUT / DELETE | `/lavadoras/{codigo}/mantenimientos/{id}` | Actualiza o elimina un mantenimiento |
+| GET | `/version` | Devuelve la version compartida de los datos |
+
+En el listado web se pueden combinar **marca**, **inverter** (con o sin) y **mantenimientos**
+(con o sin). Por ejemplo, elegir “Solo con inverter” y “Con mantenimientos” devuelve unicamente
+las lavadoras que cumplen ambos filtros.
+
 ---
 
 ## 5. Patrones de diseno exigidos

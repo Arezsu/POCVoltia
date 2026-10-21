@@ -1,6 +1,7 @@
 package com.example.ServidorLavadora.model;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * Objeto DETALLE del proyecto (lado 0..* de la Figura 1: Maestro - Detalle).
@@ -72,6 +73,7 @@ public class Mantenimiento {
         this.costo = costo;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     public LocalDateTime getFecha() {
         return fecha;
     }

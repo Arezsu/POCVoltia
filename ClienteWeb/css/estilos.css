@@ -315,6 +315,23 @@ body[data-estado="ERROR"] .pantalla-valor {
   border-left: 1px solid var(--borde-suave);
 }
 
+.selector-api-etiqueta {
+  color: var(--secundario);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.selector-api {
+  min-height: 2.35rem;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.55rem;
+  background: var(--chasis);
+  color: var(--texto);
+  font: inherit;
+}
+
 /* ---------------------------------------------------------------
    4. Tablero: compuerta, centro y detalle
    --------------------------------------------------------------- */

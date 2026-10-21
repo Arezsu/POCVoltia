@@ -1,6 +1,7 @@
 package com.example.ServidorLavadora.model;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 /**
  * SUPERCLASE (clase padre) de los electrodomesticos de Voltia.
@@ -49,6 +50,7 @@ public abstract class Electrodomestico {
         this.precioBase = precioBase;
     }
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     public LocalDateTime getFechaFabricacion() {
         return fechaFabricacion;
     }
