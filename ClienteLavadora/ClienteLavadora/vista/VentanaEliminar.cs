@@ -26,11 +26,10 @@ namespace ClienteLavadora.vista
         private readonly ControladorLavadoras controlador = new ControladorLavadoras(new ServicioLavadoras());
 
         private readonly CampoTexto txtCodigo = new CampoTexto();
-        private readonly CampoTexto txtMarca = new CampoTexto();
 
         private readonly TextBlock tituloFicha = new TextBlock();
         private readonly TextBlock advertencia = new TextBlock();
-        private readonly FichaLavadora ficha = new FichaLavadora();
+        private readonly CamposLavadora ficha = new CamposLavadora();
         private readonly ListaMantenimientos lista = new ListaMantenimientos();
         private readonly BotonVoltia btnEliminar;
 
@@ -38,6 +37,8 @@ namespace ClienteLavadora.vista
 
         public VentanaEliminar() : base("ELIMINAR LAVADORA", 880, 780, false, 0)
         {
+            ficha.PermitirEdicion(false);
+            ficha.BloquearCodigo();
             btnEliminar = BotonVoltia.Peligro("Eliminar definitivamente");
             btnEliminar.Width = 200;
             btnEliminar.Habilitado = false;
@@ -75,28 +76,22 @@ namespace ClienteLavadora.vista
             Grid rejilla = new Grid();
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             txtCodigo.Fuente = Tema.Numeros;
             txtCodigo.TeclaPresionada += AlPresionarTecla;
-            txtMarca.TeclaPresionada += AlPresionarTecla;
 
             StackPanel celdaCodigo = Ui.Celda("Buscar por codigo", txtCodigo);
             Grid.SetColumn(celdaCodigo, 0);
             rejilla.Children.Add(celdaCodigo);
 
-            StackPanel celdaMarca = Ui.Celda("y/o por marca (contiene el texto)", txtMarca);
-            Grid.SetColumn(celdaMarca, 2);
-            rejilla.Children.Add(celdaMarca);
 
             BotonVoltia btnBuscar = BotonVoltia.Principal("Buscar");
             btnBuscar.Width = 110;
             btnBuscar.Height = 32;
             btnBuscar.VerticalAlignment = VerticalAlignment.Bottom;
             btnBuscar.Click += async (s, e) => await BuscarAsync();
-            Grid.SetColumn(btnBuscar, 4);
+            Grid.SetColumn(btnBuscar, 2);
             rejilla.Children.Add(btnBuscar);
 
             Border panel = Ui.Cristal(rejilla, new Thickness(12, 10, 12, 10));
@@ -120,7 +115,7 @@ namespace ClienteLavadora.vista
             advertencia.Margin = new Thickness(0, 0, 0, 8);
             advertencia.TextWrapping = TextWrapping.Wrap;
 
-            ficha.MostrarVacio("Escriba un codigo o una marca y presione Buscar.");
+            ficha.Limpiar();
 
             ScrollViewer desplazable = Ui.Desplazable(ficha);
             desplazable.MaxHeight = 260;
@@ -176,13 +171,18 @@ namespace ClienteLavadora.vista
             try
             {
                 int? codigo = LeerCodigoOpcional();
-                string marca = txtMarca.Texto.Trim();
-                if (marca.Length == 0)
+                if (codigo == null)
                 {
-                    marca = null;
+                    throw new ArgumentException("Escriba el codigo de la lavadora para buscar.");
                 }
 
-                LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, marca));
+                LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, null));
+                if (lavadora == null)
+                {
+                    Limpiar();
+                    Aviso("Lavadora no encontrada", "No existe una lavadora con el codigo " + codigo + ".");
+                    return;
+                }
                 Mostrar(lavadora);
                 Sonidos.Click();
             }
@@ -220,7 +220,7 @@ namespace ClienteLavadora.vista
             btnEliminar.Habilitado = false;
             tituloFicha.Text = "PRIMERO BUSQUE LA LAVADORA";
             advertencia.Text = "Al eliminar una lavadora tambien se eliminan TODOS sus mantenimientos.";
-            ficha.MostrarVacio("Escriba un codigo o una marca y presione Buscar.");
+            ficha.Limpiar();
             lista.Mostrar(null, "Sin mantenimientos para mostrar.");
         }
 

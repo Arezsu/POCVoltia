@@ -24,7 +24,7 @@ namespace ClienteLavadora.vista.controles
     {
         private readonly CampoTexto txtCodigo = new CampoTexto();
         private readonly ComboBox cmbMarca;
-        private readonly CampoTexto txtFecha = new CampoTexto();
+        private readonly CampoFecha txtFecha = new CampoFecha();
         private readonly CampoTexto txtPrecio = new CampoTexto();
         private readonly CampoTexto txtCapacidad = new CampoTexto();
         private readonly CampoTexto txtRpm = new CampoTexto();
@@ -38,6 +38,11 @@ namespace ClienteLavadora.vista.controles
 
         public CamposLavadora()
         {
+            txtCodigo.SinNegativos = true;
+            txtPrecio.SinNegativos = true;
+            txtCapacidad.SinNegativos = true;
+            txtRpm.SinNegativos = true;
+            txtMinutos.SinNegativos = true;
             cmbMarca = Ui.Combo();
             cmbMarca.IsEditable = true; // El usuario puede escribir una marca nueva
             string[] marcas = { "LG", "Samsung", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Siemens" };
@@ -48,18 +53,15 @@ namespace ClienteLavadora.vista.controles
 
             // Los numeros y la fecha se ven en Consolas para que queden alineados.
             txtCodigo.Fuente = Tema.Numeros;
-            txtFecha.Fuente = Tema.Numeros;
             txtPrecio.Fuente = Tema.Numeros;
             txtCapacidad.Fuente = Tema.Numeros;
             txtRpm.Fuente = Tema.Numeros;
             txtMinutos.Fuente = Tema.Numeros;
 
-            txtFecha.Ayuda = "Formato yyyy-MM-ddTHH:mm:ss";
 
             // ---------- Filas del formulario ----------
             filas[0] = Ui.Fila(Ui.Celda("Codigo de la lavadora", txtCodigo), Ui.Celda("Marca", cmbMarca));
-            filas[1] = Ui.Fila(Ui.Celda("Fecha de fabricacion", ConPista(txtFecha,
-                "Formato yyyy-MM-ddTHH:mm:ss, por ejemplo 2024-03-10T09:00:00")), null);
+            filas[1] = Ui.Fila(Ui.Celda("Fecha de fabricacion", txtFecha), null);
             filas[2] = Ui.Fila(Ui.Celda("Precio base (pesos)", txtPrecio), Ui.Celda("Capacidad de carga (kg)", txtCapacidad));
             filas[3] = Ui.Fila(Ui.Celda("Velocidad de centrifugado (RPM)", txtRpm), Ui.Celda("Tiempo de lavado (minutos)", txtMinutos));
             filas[4] = Ui.Fila(Ui.Celda(null, chkInverter), null);
@@ -71,7 +73,7 @@ namespace ClienteLavadora.vista.controles
 
             // Avisar cada cambio: la ventana Agregar lo usa para la vista previa.
             txtCodigo.TextoCambiado += AlCambiarTexto;
-            txtFecha.TextoCambiado += AlCambiarTexto;
+            txtFecha.SelectedDateChanged += (s, e) => AvisarCambio();
             txtPrecio.TextoCambiado += AlCambiarTexto;
             txtCapacidad.TextoCambiado += AlCambiarTexto;
             txtRpm.TextoCambiado += AlCambiarTexto;
@@ -172,7 +174,7 @@ namespace ClienteLavadora.vista.controles
                 "El codigo debe ser un numero entero mayor que cero.");
             input.Marca = Formato.LeerTexto(cmbMarca.Text, "Escriba la marca de la lavadora.");
             input.FechaFabricacion = Formato.LeerFechaServidor(txtFecha.Texto,
-                "La fecha debe tener el formato yyyy-MM-ddTHH:mm:ss (por ejemplo 2024-03-10T09:00:00).");
+                "Seleccione una fecha valida en el calendario.");
             input.PrecioBase = Formato.LeerDecimal(txtPrecio.Texto,
                 "El precio base debe ser un numero mayor que cero (por ejemplo 1450000).");
             input.CapacidadCargaKilos = Formato.LeerDecimal(txtCapacidad.Texto,

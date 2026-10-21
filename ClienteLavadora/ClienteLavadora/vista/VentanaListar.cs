@@ -401,8 +401,10 @@ namespace ClienteLavadora.vista
             {
                 return;
             }
-            VentanaMantenimientos ventana = new VentanaMantenimientos(seleccionada.Codigo);
-            ventana.Owner = this;
+            VentanaMantenimientos ventana = new VentanaListarMantenimientos(seleccionada.Codigo);
+            // Es una ventana de caso de uso independiente; no debe cerrarse al cerrar
+            // la ventana de listado ni cerrar otras ventanas abiertas.
+            ventana.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             ventana.Show();
         }
 

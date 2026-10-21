@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -26,8 +27,9 @@ namespace ClienteLavadora.vista
         public VentanaMarco(string titulo, double ancho, double alto, bool mostrarOjo, double ladoOjo)
         {
             Title = titulo;
-            Width = ancho;
-            Height = alto;
+            Rect areaTrabajo = SystemParameters.WorkArea;
+            Width = Math.Min(ancho, Math.Max(360, areaTrabajo.Width - 24));
+            Height = Math.Min(alto, Math.Max(320, areaTrabajo.Height - 24));
             WindowStyle = WindowStyle.None;
             AllowsTransparency = true;
             Background = Brushes.Transparent;

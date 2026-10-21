@@ -42,6 +42,8 @@ namespace ClienteLavadora.vista.controles
 
             caja.GotKeyboardFocus += AlTomarFoco;
             caja.LostKeyboardFocus += AlPerderFoco;
+            caja.PreviewTextInput += AlEscribirTexto;
+            DataObject.AddPastingHandler(caja, AlPegarTexto);
         }
 
         // ================= Propiedades =================
@@ -70,6 +72,9 @@ namespace ClienteLavadora.vista.controles
         {
             set { caja.FontFamily = value; }
         }
+
+        /// <summary>Impide introducir signo menos por teclado o pegado en campos numericos.</summary>
+        public bool SinNegativos { get; set; }
 
         /// <summary>Texto de ayuda que aparece al dejar el mouse encima.</summary>
         public string Ayuda
@@ -111,6 +116,27 @@ namespace ClienteLavadora.vista.controles
         private void AlPerderFoco(object remitente, KeyboardFocusChangedEventArgs argumentos)
         {
             BorderBrush = Tema.Pincel("#2A3A47");
+        }
+
+        private void AlEscribirTexto(object remitente, TextCompositionEventArgs argumentos)
+        {
+            if (SinNegativos && argumentos.Text.IndexOfAny(new[] { '-', '\u2212' }) >= 0)
+            {
+                argumentos.Handled = true;
+            }
+        }
+
+        private void AlPegarTexto(object remitente, DataObjectPastingEventArgs argumentos)
+        {
+            if (!SinNegativos)
+            {
+                return;
+            }
+            string texto = argumentos.DataObject.GetData(typeof(string)) as string;
+            if (!string.IsNullOrEmpty(texto) && texto.IndexOfAny(new[] { '-', '\u2212' }) >= 0)
+            {
+                argumentos.CancelCommand();
+            }
         }
     }
 }

@@ -59,6 +59,8 @@
       this.lavadoraMantenimientos = null;
       this.mantenimientoEnEdicion = null;
       this.mantenimientoAEliminar = null;
+      this.modoMantenimientos = 'listar';
+      this.versionMantenimientos = 0;
     }
 
     // =================================================================
@@ -97,10 +99,22 @@
         botonLimpiarFiltros: porId('boton-limpiar-filtros'),
         resumenFiltros: porId('resumen-filtros'),
         botonAgregar: porId('boton-agregar'),
+        botonListar: porId('boton-listar'),
         botonConsultar: porId('boton-consultar'),
         botonActualizar: porId('boton-actualizar'),
         botonEliminar: porId('boton-eliminar'),
         botonMantenimientos: porId('boton-mantenimientos'),
+        botonListarMantenimientos: porId('boton-listar-mantenimientos'),
+        botonAgregarMantenimientoMenu: porId('boton-agregar-mantenimiento-menu'),
+        botonConsultarMantenimiento: porId('boton-consultar-mantenimiento'),
+        botonActualizarMantenimiento: porId('boton-actualizar-mantenimiento'),
+        botonEliminarMantenimiento: porId('boton-eliminar-mantenimiento'),
+        botonAcerca: porId('boton-acerca'),
+        contenidoMantenimientos: porId('contenido-mantenimientos'),
+        tablaMantenimientos: document.querySelector('#modal-mantenimientos [data-parte="tabla"]'),
+        filtrosMantenimientos: document.querySelector('#modal-mantenimientos [data-parte="filtros"]'),
+        accionesListadoMantenimientos: document.querySelector('#modal-mantenimientos [data-parte="acciones-listado"]'),
+        encabezadoAccionesMantenimiento: document.querySelector('#modal-mantenimientos th[data-col="acciones"]'),
 
         // Tabla
         contadorLavadoras: porId('contador-lavadoras'),
@@ -121,7 +135,6 @@
         // Modal consultar
         formConsultar: porId('form-consultar'),
         coCodigo: porId('co-codigo'),
-        coMarca: porId('co-marca'),
         errorConsultar: porId('error-consultar'),
         errorCoCodigo: porId('error-co-codigo'),
         resultadoConsulta: porId('resultado-consulta'),
@@ -133,6 +146,7 @@
         errorBuscarActualizar: porId('error-buscar-actualizar'),
         resultadoActualizar: porId('resultado-actualizar'),
         formActualizar: porId('form-actualizar'),
+        acCodigoFijo: porId('ac-codigo-fijo'),
         acPrecioFinal: porId('ac-precio-final'),
         errorActualizar: porId('error-actualizar'),
         botonGuardarActualizar: porId('boton-guardar-actualizar'),
@@ -149,6 +163,7 @@
         botonConfirmarEliminar: porId('boton-confirmar-eliminar'),
 
         // Modal mantenimientos
+        modalMantenimientos: porId('modal-mantenimientos'),
         matLavadora: porId('mat-lavadora'),
         formFiltrosMantenimientos: porId('form-filtros-mantenimientos'),
         matFiltroTecnico: porId('mat-filtro-tecnico'),
@@ -218,10 +233,24 @@
 
       // Acciones sobre la lavadora
       this.escuchar(this.refs.botonAgregar, 'click', () => this.abrirAgregar());
+      this.escuchar(this.refs.botonListar, 'click', () => {
+        document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('tabla-lavadoras').focus();
+      });
       this.escuchar(this.refs.botonConsultar, 'click', () => this.abrirConsultar());
       this.escuchar(this.refs.botonActualizar, 'click', () => this.abrirActualizar());
       this.escuchar(this.refs.botonEliminar, 'click', () => this.abrirEliminar());
       this.escuchar(this.refs.botonMantenimientos, 'click', () => this.abrirMantenimientos(null));
+      this.escuchar(this.refs.botonListarMantenimientos, 'click', () => this.abrirMantenimientos(null, 'listar'));
+      this.escuchar(this.refs.botonAgregarMantenimientoMenu, 'click', () => this.abrirMantenimientos(null, 'agregar'));
+      this.escuchar(this.refs.botonConsultarMantenimiento, 'click', () => this.abrirMantenimientos(null, 'consultar'));
+      this.escuchar(this.refs.botonActualizarMantenimiento, 'click', () => this.abrirMantenimientos(null, 'actualizar'));
+      this.escuchar(this.refs.botonEliminarMantenimiento, 'click', () => this.abrirMantenimientos(null, 'eliminar'));
+      this.escuchar(this.refs.botonAcerca, 'click', () => this.abrirModal('modal-acerca'));
+
+      document.addEventListener('click', (evento) => {
+        if (evento.target.closest('.boton-caso')) this.reproducirSonido('click');
+      });
 
       // Tabla: seleccion con clic y con teclado
       this.escuchar(this.refs.cuerpoTabla, 'click', (evento) => this.alHacerClicTabla(evento));
@@ -268,7 +297,13 @@
       this.escuchar(this.refs.matLavadora, 'change', () => {
         this.cerrarFormularioMantenimiento();
         this.cancelarEliminarMantenimiento();
-        this.cargarMantenimientos();
+        if (this.modoMantenimientos === 'agregar') {
+          const codigo = Number(this.refs.matLavadora.value);
+          this.lavadoraMantenimientos = codigo ? { codigo: codigo, mantenimientos: [] } : null;
+          if (codigo) this.abrirFormularioMantenimiento(null, 'agregar');
+        } else {
+          this.cargarMantenimientos();
+        }
       });
       this.escuchar(this.refs.formFiltrosMantenimientos, 'submit', (evento) => {
         evento.preventDefault();
@@ -307,6 +342,18 @@
         creado.textContent = String(texto);
       }
       return creado;
+    }
+
+    reproducirSonido(tipo) {
+      const archivo = tipo === 'lavadora' ? 'lavadora.wav' : 'click.wav';
+      try {
+        const audio = new Audio('assets/' + archivo);
+        audio.volume = 0.72;
+        const reproduccion = audio.play();
+        if (reproduccion && typeof reproduccion.catch === 'function') reproduccion.catch(() => {});
+      } catch (error) {
+        // El sonido es decorativo; si el navegador lo bloquea la operación sigue.
+      }
     }
 
     valorBooleano(texto) {
@@ -440,7 +487,7 @@
       const seccionDetalle = this.elemento('div', 'detalle-seccion');
       const cabeceraDetalle = this.elemento('div', 'detalle-seccion-cabecera');
       cabeceraDetalle.appendChild(this.elemento('h3', null, 'Mantenimientos'));
-      const botonGestionar = this.elemento('button', 'boton primario chico', 'Gestionar');
+      const botonGestionar = this.elemento('button', 'boton primario chico boton-caso', 'Gestionar');
       botonGestionar.type = 'button';
       botonGestionar.dataset.accion = 'gestionar';
       botonGestionar.dataset.codigo = String(lavadora.codigo);
@@ -540,20 +587,15 @@
         const celdaAcciones = document.createElement('td');
         const grupo = this.elemento('div', 'acciones-fila');
 
-        const editar = this.elemento('button', 'boton secundario chico', 'Editar');
-        editar.type = 'button';
-        editar.dataset.accion = 'editar';
-        editar.dataset.id = String(mantenimiento.id);
-        editar.setAttribute('aria-label', 'Editar el mantenimiento ' + mantenimiento.id);
-
-        const eliminar = this.elemento('button', 'boton peligro chico', 'Eliminar');
-        eliminar.type = 'button';
-        eliminar.dataset.accion = 'eliminar';
-        eliminar.dataset.id = String(mantenimiento.id);
-        eliminar.setAttribute('aria-label', 'Eliminar el mantenimiento ' + mantenimiento.id);
-
-        grupo.appendChild(editar);
-        grupo.appendChild(eliminar);
+        const accion = this.modoMantenimientos;
+        const etiqueta = accion === 'consultar' ? 'Consultar' : (accion === 'actualizar' ? 'Actualizar' : 'Eliminar');
+        const clase = accion === 'eliminar' ? 'boton peligro chico boton-caso' : 'boton secundario chico boton-caso';
+        const botonAccion = this.elemento('button', clase, etiqueta);
+        botonAccion.type = 'button';
+        botonAccion.dataset.accion = accion === 'consultar' ? 'consultar' : (accion === 'actualizar' ? 'editar' : 'eliminar');
+        botonAccion.dataset.id = String(mantenimiento.id);
+        botonAccion.setAttribute('aria-label', etiqueta + ' el mantenimiento ' + mantenimiento.id);
+        grupo.appendChild(botonAccion);
         celdaAcciones.appendChild(grupo);
         fila.appendChild(celdaAcciones);
       }
@@ -572,6 +614,34 @@
       cabecera.appendChild(bloqueTitulo);
       cabecera.appendChild(this.elemento('span', 'chip', 'Inverter: ' + lavadora.inverterTexto));
       contenedor.appendChild(cabecera);
+
+      if (configuracion.camposLectura) {
+        const campos = this.elemento('div', 'rejilla-campos ficha-solo-lectura');
+        const agregarCampo = (etiqueta, valor, tipo) => {
+          const campo = this.elemento('div', 'campo');
+          const id = 'ficha-' + etiqueta.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+          const label = this.elemento('label', null, etiqueta);
+          label.htmlFor = id;
+          const input = document.createElement('input');
+          input.id = id;
+          input.type = tipo || 'text';
+          input.value = String(valor === null || valor === undefined ? '' : valor);
+          input.readOnly = true;
+          input.disabled = true;
+          input.setAttribute('aria-readonly', 'true');
+          campo.appendChild(label);
+          campo.appendChild(input);
+          campos.appendChild(campo);
+        };
+        agregarCampo('Codigo de la lavadora', lavadora.codigo, 'number');
+        agregarCampo('Marca', lavadora.marca);
+        agregarCampo('Fecha de fabricacion', this.fechaCalendario(lavadora.fechaFabricacion), 'datetime-local');
+        agregarCampo('Precio base', lavadora.precioBase, 'number');
+        agregarCampo('Capacidad de carga (kg)', lavadora.capacidadCargaKilos, 'number');
+        agregarCampo('Velocidad de centrifugado (RPM)', lavadora.velocidadCentrifugadoRPM, 'number');
+        agregarCampo('Minutos de lavado', lavadora.minutosLavado, 'number');
+        contenedor.appendChild(campos);
+      }
 
       const lista = this.elemento('dl', 'ficha-datos');
       const filas = [
@@ -756,6 +826,7 @@
         return;
       }
       fondo.hidden = true;
+      if (id === 'modal-mantenimientos') this.versionMantenimientos += 1;
       if (!this.modalSuperior()) {
         document.body.classList.remove('con-modal');
       }
@@ -879,12 +950,23 @@
         codigo: Number(leer('codigo')),
         marca: leer('marca'),
         precioBase: Number(leer('precio')),
-        fechaFabricacion: leer('fecha'),
+        fechaFabricacion: this.fechaServidor(leer('fecha')),
         capacidadCargaKilos: Number(leer('capacidad')),
         velocidadCentrifugadoRPM: Number(leer('rpm')),
         tecnologiaInverter: Boolean(inverter && inverter.checked),
         minutosLavado: Number(leer('minutos'))
       };
+    }
+
+    fechaServidor(valor) {
+      const fecha = String(valor || '').trim();
+      if (!fecha) return '';
+      return fecha.length === 16 ? fecha + ':00' : fecha;
+    }
+
+    fechaCalendario(valor) {
+      const fecha = String(valor || '').trim();
+      return fecha.length >= 16 ? fecha.slice(0, 16) : fecha;
     }
 
     escribirFormularioLavadora(prefijo, lavadora) {
@@ -896,7 +978,7 @@
       };
       escribir('marca', lavadora.marca);
       escribir('precio', lavadora.precioBase);
-      escribir('fecha', lavadora.fechaFabricacion);
+      escribir('fecha', this.fechaCalendario(lavadora.fechaFabricacion));
       escribir('capacidad', lavadora.capacidadCargaKilos);
       escribir('rpm', lavadora.velocidadCentrifugadoRPM);
       escribir('minutos', lavadora.minutosLavado);
@@ -932,7 +1014,7 @@
     abrirAgregar() {
       this.refs.formAgregar.reset();
       this.limpiarErrores(this.refs.formAgregar);
-      this.refs.agFecha.value = Voltia.formato.fechaActualTexto();
+      this.refs.agFecha.value = this.fechaCalendario(Voltia.formato.fechaActualTexto());
       this.actualizarVistaPrecio('ag');
       this.abrirModal('modal-agregar');
       document.getElementById('ag-codigo').focus();
@@ -950,6 +1032,7 @@
       this.bloquearBoton(this.refs.botonGuardarLavadora, true, 'Guardando...');
       try {
         await this.controladorLavadoras.agregar(datos);
+        this.reproducirSonido('lavadora');
         this.cerrarModal('modal-agregar');
       } catch (error) {
         this.refs.errorAgregar.textContent = error.message;
@@ -964,11 +1047,10 @@
     abrirConsultar() {
       this.limpiarErrores(this.refs.formConsultar);
       this.refs.coCodigo.value = '';
-      this.refs.coMarca.value = '';
       this.refs.errorConsultar.textContent = '';
       this.refs.resultadoConsulta.textContent = '';
       this.refs.resultadoConsulta.appendChild(this.elemento('p', 'vacio',
-        'Escriba el codigo, la marca o ambos criterios y pulse Buscar.'));
+        'Escriba el codigo de la lavadora y pulse Buscar.'));
       this.abrirModal('modal-consultar');
       this.refs.coCodigo.focus();
     }
@@ -978,43 +1060,27 @@
       this.limpiarErrores(this.refs.formConsultar);
       this.refs.errorConsultar.textContent = '';
 
-      const criterios = {
-        codigoTexto: this.refs.coCodigo.value.trim(),
-        marca: this.refs.coMarca.value.trim()
-      };
-      const errores = Voltia.Validaciones.validarCriterios(criterios);
-      if (Voltia.Validaciones.hayErrores(errores)) {
-        if (errores.codigo) {
-          this.refs.errorCoCodigo.textContent = errores.codigo;
-          this.refs.coCodigo.classList.add('invalido');
-          this.refs.coCodigo.setAttribute('aria-invalid', 'true');
-        }
-        if (errores.general) {
-          this.refs.errorConsultar.textContent = errores.general;
-        }
+      const codigoTexto = this.refs.coCodigo.value.trim();
+      const codigo = Number(codigoTexto);
+      if (!codigoTexto || !Number.isInteger(codigo) || codigo <= 0) {
+        this.refs.errorCoCodigo.textContent = 'Escriba un codigo entero mayor que cero.';
+        this.refs.coCodigo.classList.add('invalido');
+        this.refs.coCodigo.setAttribute('aria-invalid', 'true');
         this.refs.coCodigo.focus();
         return;
-      }
-
-      const variables = {};
-      if (criterios.codigoTexto) {
-        variables.codigo = Number(criterios.codigoTexto);
-      }
-      if (criterios.marca) {
-        variables.marca = criterios.marca;
       }
 
       const boton = this.refs.formConsultar.querySelector('button[type="submit"]');
       this.bloquearBoton(boton, true, 'Buscando...');
       try {
-        const lavadora = await this.controladorLavadoras.consultar(variables);
+        const lavadora = await this.controladorLavadoras.consultar({ codigo: codigo });
         this.refs.resultadoConsulta.textContent = '';
         if (!lavadora) {
           this.refs.resultadoConsulta.appendChild(this.elemento('p', 'vacio',
-            'No se encontro una lavadora con esos criterios.'));
+            'No se encontro una lavadora con ese codigo.'));
           return;
         }
-        this.mostrarFichaLavadora(this.refs.resultadoConsulta, lavadora, { mantenimientos: true });
+        this.mostrarFichaLavadora(this.refs.resultadoConsulta, lavadora, { mantenimientos: true, camposLectura: true });
       } catch (error) {
         this.refs.errorConsultar.textContent = error.message;
       } finally {
@@ -1030,6 +1096,7 @@
       this.limpiarErrores(this.refs.formBuscarActualizar);
       this.limpiarErrores(this.refs.formActualizar);
       this.refs.acCodigo.value = '';
+      this.refs.acCodigoFijo.value = '';
       this.refs.errorBuscarActualizar.textContent = '';
       this.refs.errorActualizar.textContent = '';
       this.refs.resultadoActualizar.textContent = '';
@@ -1066,6 +1133,7 @@
           return;
         }
         this.lavadoraActualizar = lavadora;
+        this.refs.acCodigoFijo.value = String(lavadora.codigo);
         this.mostrarFichaLavadora(this.refs.resultadoActualizar, lavadora, { mantenimientos: false });
         this.escribirFormularioLavadora('ac', lavadora);
         this.actualizarVistaPrecio('ac');
@@ -1119,6 +1187,7 @@
       this.bloquearBoton(this.refs.botonGuardarActualizar, true, 'Guardando...');
       try {
         await this.controladorLavadoras.actualizar(this.lavadoraActualizar.codigo, cambios);
+        this.reproducirSonido('click');
         this.cerrarModal('modal-actualizar');
       } catch (error) {
         this.refs.errorActualizar.textContent = error.message;
@@ -1176,7 +1245,7 @@
         }
 
         this.lavadoraEliminar = lavadora;
-        this.mostrarFichaLavadora(this.refs.resultadoEliminar, lavadora, { mantenimientos: true });
+        this.mostrarFichaLavadora(this.refs.resultadoEliminar, lavadora, { mantenimientos: true, camposLectura: true });
         this.refs.textoConfirmacionEliminar.textContent =
           'Va a eliminar la lavadora ' + lavadora.codigo + ' (' + lavadora.marca + ') y sus ' +
           lavadora.cantidadMantenimientos + ' mantenimientos. Esta accion no se puede deshacer. ' +
@@ -1208,6 +1277,7 @@
       this.bloquearBoton(this.refs.botonConfirmarEliminar, true, 'Eliminando...');
       try {
         await this.controladorLavadoras.eliminar(codigo);
+        this.reproducirSonido('click');
         this.lavadoraEliminar = null;
         this.cerrarModal('modal-eliminar');
       } catch (error) {
@@ -1220,7 +1290,23 @@
     // =================================================================
     //  Mantenimientos (detalle de la lavadora)
     // =================================================================
-    abrirMantenimientos(codigoLavadora) {
+    abrirMantenimientos(codigoLavadora, casoUso) {
+      this.versionMantenimientos += 1;
+      this.modoMantenimientos = casoUso || 'listar';
+      this.refs.contenidoMantenimientos.dataset.caso = this.modoMantenimientos;
+      const titulos = {
+        listar: 'Listar mantenimientos',
+        agregar: 'Agregar mantenimiento',
+        consultar: 'Consultar mantenimiento',
+        actualizar: 'Actualizar mantenimiento',
+        eliminar: 'Eliminar mantenimiento'
+      };
+      document.getElementById('titulo-mantenimientos').textContent = titulos[this.modoMantenimientos];
+      const esAlta = this.modoMantenimientos === 'agregar';
+      this.refs.filtrosMantenimientos.hidden = esAlta;
+      this.refs.tablaMantenimientos.hidden = esAlta;
+      this.refs.accionesListadoMantenimientos.hidden = true;
+      this.refs.encabezadoAccionesMantenimiento.hidden = this.modoMantenimientos === 'listar';
       this.llenarSelectorLavadoras(codigoLavadora);
       this.refs.matFiltroTecnico.value = '';
       this.refs.matFiltroCompletado.value = '';
@@ -1236,10 +1322,17 @@
 
       if (codigoLavadora) {
         this.refs.matLavadora.value = String(codigoLavadora);
-        this.cargarMantenimientos();
-      } else if (this.refs.matLavadora.value) {
-        this.cargarMantenimientos();
+      }
+      if (this.refs.matLavadora.value) {
+        const codigo = Number(this.refs.matLavadora.value);
+        if (esAlta) {
+          this.lavadoraMantenimientos = { codigo: codigo, mantenimientos: [] };
+          this.abrirFormularioMantenimiento(null, 'agregar');
+        } else {
+          this.cargarMantenimientos();
+        }
       } else {
+        this.lavadoraMantenimientos = null;
         this.refs.mantenimientosVacio.hidden = false;
         this.refs.mantenimientosVacio.textContent = 'No hay lavadoras registradas. Agregue una primero.';
       }
@@ -1275,6 +1368,7 @@
     }
 
     async cargarMantenimientos() {
+      const version = ++this.versionMantenimientos;
       const codigo = Number(this.refs.matLavadora.value);
       if (!codigo) {
         this.refs.errorMantenimientos.textContent = 'Elija una lavadora para ver sus mantenimientos.';
@@ -1290,9 +1384,11 @@
 
       try {
         const lista = await this.controladorMantenimientos.cargarMantenimientos(codigo, filtros);
+        if (version !== this.versionMantenimientos || this.refs.modalMantenimientos.hidden) return;
         this.lavadoraMantenimientos = { codigo: codigo, mantenimientos: lista };
         this.renderMantenimientos();
       } catch (error) {
+        if (version !== this.versionMantenimientos || this.refs.modalMantenimientos.hidden) return;
         this.lavadoraMantenimientos = null;
         this.refs.cuerpoMantenimientos.textContent = '';
         this.refs.mantenimientosVacio.hidden = true;
@@ -1309,8 +1405,9 @@
       const cuerpo = this.refs.cuerpoMantenimientos;
       cuerpo.textContent = '';
 
+      const conAcciones = this.modoMantenimientos !== 'listar';
       lista.forEach((mantenimiento) => {
-        cuerpo.appendChild(this.crearFilaMantenimiento(mantenimiento, true));
+        cuerpo.appendChild(this.crearFilaMantenimiento(mantenimiento, conAcciones));
       });
       this.refs.mantenimientosVacio.hidden = lista.length > 0;
       this.refs.mantenimientosVacio.textContent =
@@ -1335,14 +1432,16 @@
         return;
       }
       const id = Number(boton.dataset.id);
-      if (boton.dataset.accion === 'editar') {
-        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id));
+      if (boton.dataset.accion === 'consultar') {
+        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id), 'consultar');
+      } else if (boton.dataset.accion === 'editar') {
+        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id), 'actualizar');
       } else if (boton.dataset.accion === 'eliminar') {
         this.pedirEliminarMantenimiento(id);
       }
     }
 
-    abrirFormularioMantenimiento(mantenimiento) {
+    abrirFormularioMantenimiento(mantenimiento, casoUso) {
       if (!this.lavadoraMantenimientos) {
         this.refs.errorMantenimientos.textContent = 'Elija una lavadora antes de agregar mantenimientos.';
         return;
@@ -1352,24 +1451,31 @@
       this.limpiarErrores(this.refs.formMantenimiento);
       this.refs.errorMantenimiento.textContent = '';
       this.mantenimientoEnEdicion = mantenimiento || null;
+      const modo = casoUso || this.modoMantenimientos;
+      const soloLectura = modo === 'consultar';
+      [this.refs.matDescripcion, this.refs.matTecnico, this.refs.matCosto, this.refs.matFecha]
+        .forEach((campo) => { campo.readOnly = soloLectura; });
+      this.refs.matCompletado.disabled = soloLectura;
+      this.refs.botonGuardarMantenimiento.hidden = soloLectura;
+      this.refs.botonCancelarMantenimiento.textContent = soloLectura ? 'Cerrar detalle' : 'Cancelar';
 
       if (mantenimiento) {
-        this.refs.tituloFormMantenimiento.textContent = 'Actualizar mantenimiento ' + mantenimiento.id;
+        this.refs.tituloFormMantenimiento.textContent = (soloLectura ? 'Consulta del mantenimiento ' : 'Actualizar mantenimiento ') + mantenimiento.id;
         this.fijarTextoBoton(this.refs.botonGuardarMantenimiento, 'Guardar cambios');
         this.refs.matDescripcion.value = mantenimiento.descripcion;
         this.refs.matTecnico.value = mantenimiento.tecnico;
         this.refs.matCosto.value = mantenimiento.costo;
-        this.refs.matFecha.value = mantenimiento.fecha;
+        this.refs.matFecha.value = this.fechaCalendario(mantenimiento.fecha);
         this.refs.matCompletado.checked = mantenimiento.completado;
       } else {
         this.refs.tituloFormMantenimiento.textContent = 'Agregar mantenimiento';
         this.fijarTextoBoton(this.refs.botonGuardarMantenimiento, 'Guardar mantenimiento');
         this.refs.formMantenimiento.reset();
-        this.refs.matFecha.value = Voltia.formato.fechaActualTexto();
+        this.refs.matFecha.value = this.fechaCalendario(Voltia.formato.fechaActualTexto());
       }
 
       this.refs.formMantenimiento.hidden = false;
-      this.refs.matDescripcion.focus();
+      if (!soloLectura) this.refs.matDescripcion.focus();
     }
 
     cerrarFormularioMantenimiento() {
@@ -1377,6 +1483,11 @@
       if (this.refs.formMantenimiento) {
         this.refs.formMantenimiento.hidden = true;
         this.refs.formMantenimiento.reset();
+        [this.refs.matDescripcion, this.refs.matTecnico, this.refs.matCosto, this.refs.matFecha]
+          .forEach((campo) => { campo.readOnly = false; });
+        this.refs.matCompletado.disabled = false;
+        this.refs.botonGuardarMantenimiento.hidden = false;
+        this.refs.botonCancelarMantenimiento.textContent = 'Cancelar';
       }
       if (this.refs.errorMantenimiento) {
         this.refs.errorMantenimiento.textContent = '';
@@ -1389,7 +1500,7 @@
         descripcion: this.refs.matDescripcion.value.trim(),
         tecnico: this.refs.matTecnico.value.trim(),
         costo: Number(this.refs.matCosto.value),
-        fecha: this.refs.matFecha.value.trim(),
+        fecha: this.fechaServidor(this.refs.matFecha.value),
         completado: this.refs.matCompletado.checked
       };
     }
@@ -1416,12 +1527,18 @@
       try {
         if (enEdicion) {
           await this.controladorMantenimientos.actualizar(codigo, enEdicion.id, datos);
+          this.reproducirSonido('click');
         } else {
           await this.controladorMantenimientos.agregar(codigo, datos);
+          this.reproducirSonido('lavadora');
         }
         this.cerrarFormularioMantenimiento();
         await this.cargarMantenimientos();
         this.llenarSelectorLavadoras(codigo);
+        if (this.modoMantenimientos === 'agregar') {
+          this.lavadoraMantenimientos = this.lavadoraMantenimientos || { codigo: codigo, mantenimientos: [] };
+          this.abrirFormularioMantenimiento(null, 'agregar');
+        }
       } catch (error) {
         this.refs.errorMantenimiento.textContent = error.message;
       } finally {
@@ -1437,9 +1554,11 @@
       this.cerrarFormularioMantenimiento();
       this.mantenimientoAEliminar = mantenimiento;
       this.refs.textoConfirmacionMantenimiento.textContent =
-        'Se eliminara el mantenimiento ' + mantenimiento.id + ' ("' + mantenimiento.descripcion +
-        '") de la lavadora ' + this.lavadoraMantenimientos.codigo +
-        '. Esta accion no se puede deshacer.';
+        'Mantenimiento ' + mantenimiento.id + ' · ' + mantenimiento.descripcion +
+        ' · Tecnico: ' + mantenimiento.tecnico + ' · Costo: ' + mantenimiento.costoTexto +
+        ' · Fecha: ' + mantenimiento.fechaTexto + ' · Estado: ' + mantenimiento.estadoTexto +
+        ' · Lavadora: ' + this.lavadoraMantenimientos.codigo + '. Esta accion no se puede deshacer.';
+      this.abrirFormularioMantenimiento(mantenimiento, 'consultar');
       this.refs.confirmacionMantenimiento.hidden = false;
       this.refs.botonConfirmarEliminarMantenimiento.focus();
     }
@@ -1463,7 +1582,9 @@
       this.bloquearBoton(this.refs.botonConfirmarEliminarMantenimiento, true, 'Eliminando...');
       try {
         await this.controladorMantenimientos.eliminar(codigo, id);
+        this.reproducirSonido('click');
         this.cancelarEliminarMantenimiento();
+        this.cerrarFormularioMantenimiento();
         await this.cargarMantenimientos();
         this.llenarSelectorLavadoras(codigo);
       } catch (error) {

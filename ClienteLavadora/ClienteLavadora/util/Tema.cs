@@ -18,16 +18,40 @@ namespace ClienteLavadora.util
     /// </summary>
     public static class Tema
     {
+        public static bool EsClaro { get; private set; }
+
+        public static void Alternar()
+        {
+            EsClaro = !EsClaro;
+            Cambiar(Fondo, EsClaro ? "#EDF3F6" : HexFondo);
+            Cambiar(FondoAlto, EsClaro ? "#DCE7EC" : HexFondoAlto);
+            Cambiar(Chasis, EsClaro ? "#FFFFFF" : HexChasis);
+            Cambiar(Acero, EsClaro ? "#DCE7EC" : HexAcero);
+            Cambiar(AceroClaro, EsClaro ? "#B7C8D0" : HexAceroClaro);
+            Cambiar(Cian, EsClaro ? "#087C96" : HexCian);
+            Cambiar(Ambar, EsClaro ? "#9A5B00" : HexAmbar);
+            Cambiar(Texto, EsClaro ? "#172832" : HexTexto);
+            Cambiar(TextoSecundario, EsClaro ? "#526873" : HexTextoSecundario);
+            Cambiar(Cristal, EsClaro ? "#D9FFFFFF" : HexCristal);
+            Cambiar(CristalBorde, EsClaro ? "#55314958" : HexCristalBorde);
+            Cambiar(Linea, EsClaro ? "#30314958" : HexLinea);
+            Cambiar(PanelOscuro, EsClaro ? "#E4EDF1" : HexPanelOscuro);
+        }
+
+        private static void Cambiar(SolidColorBrush pincel, string color)
+        {
+            pincel.Color = ColorDe(color);
+        }
         // ====================================================================
         //  Colores de la casa (texto hexadecimal, igual que en CSS)
         //  Los ocho primero digitos son el alfa: FF = opaco, 33 = casi transparente.
         // ====================================================================
 
-        public const string HexFondo = "#0B1016";          // fondo general
-        public const string HexFondoAlto = "#111A22";      // fondo un poco mas claro
-        public const string HexChasis = "#1A242D";         // chasis de la lavadora
-        public const string HexAcero = "#22303B";          // acero de paneles y encabezados
-        public const string HexAceroClaro = "#2E4050";     // bordes y separadores de acero
+        public const string HexFondo = "#14212A";          // fondo general
+        public const string HexFondoAlto = "#1B2B36";      // fondo un poco mas claro
+        public const string HexChasis = "#243743";         // chasis de la lavadora
+        public const string HexAcero = "#304957";          // acero de paneles y encabezados
+        public const string HexAceroClaro = "#8AA6B5";     // bordes y separadores de acero
         public const string HexCian = "#6FD3E8";           // acento principal (pantallas)
         public const string HexAmbar = "#E8B15A";          // acento secundario (alertas suaves)
         public const string HexTexto = "#E6EDF3";          // texto principal
@@ -135,19 +159,25 @@ namespace ClienteLavadora.util
         /// <summary>Fondo de la ventana: azul noche muy oscuro.</summary>
         public static LinearGradientBrush FondoVentana()
         {
-            return DegradadoDiagonal(HexFondoAlto, HexFondo);
+            return EsClaro
+                ? DegradadoDiagonal("#F4F8FA", "#DCE8ED")
+                : DegradadoDiagonal(HexFondoAlto, HexFondo);
         }
 
         /// <summary>Chasis de la lavadora: metal oscuro con un brillo arriba.</summary>
         public static LinearGradientBrush ChasisMetal()
         {
-            return Degradado("#1E2A33", HexChasis, "#141D25");
+            return EsClaro
+                ? Degradado("#FFFFFF", "#E8F0F3", "#D9E5EA")
+                : Degradado("#2B414E", HexChasis, "#1B2B36");
         }
 
         /// <summary>Consola superior: un poco mas clara que el chasis para separarse.</summary>
         public static LinearGradientBrush Consola()
         {
-            return Degradado("#22303B", "#16212A");
+            return EsClaro
+                ? Degradado("#FFFFFF", "#E2EDF1")
+                : Degradado("#304957", "#20333F");
         }
 
         /// <summary>Aro metalico plateado del ojo de buey.</summary>

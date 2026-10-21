@@ -14,8 +14,8 @@ namespace ClienteLavadora.vista
     /// <summary>
     /// CASO DE USO CONSULTAR (ventana independiente).
     ///
-    /// Busca por UNO o por DOS criterios (codigo y/o marca) usando la consulta
-    /// "lavadoraPorCriterios" del servidor y muestra TODOS los campos del resultado,
+    /// Busca por codigo usando la consulta
+    /// del servidor y muestra TODOS los campos del resultado,
     /// incluida la lista de mantenimientos.
     ///
     /// Todo se ve en modo lectura: esta ventana no modifica nada.
@@ -25,14 +25,15 @@ namespace ClienteLavadora.vista
         private readonly ControladorLavadoras controlador = new ControladorLavadoras(new ServicioLavadoras());
 
         private readonly CampoTexto txtCodigo = new CampoTexto();
-        private readonly CampoTexto txtMarca = new CampoTexto();
 
         private readonly TextBlock tituloResultado = new TextBlock();
-        private readonly FichaLavadora ficha = new FichaLavadora();
+        private readonly CamposLavadora ficha = new CamposLavadora();
         private readonly ListaMantenimientos lista = new ListaMantenimientos();
 
         public VentanaConsultar() : base("CONSULTAR LAVADORA", 860, 760, false, 0)
         {
+            ficha.PermitirEdicion(false);
+            ficha.BloquearCodigo();
             Grid raiz = new Grid();
             raiz.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             raiz.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
@@ -62,21 +63,15 @@ namespace ClienteLavadora.vista
             Grid rejilla = new Grid();
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             txtCodigo.Fuente = Tema.Numeros;
             txtCodigo.TeclaPresionada += AlPresionarTecla;
-            txtMarca.TeclaPresionada += AlPresionarTecla;
 
-            StackPanel celdaCodigo = Ui.Celda("Codigo (opcional)", txtCodigo);
+            StackPanel celdaCodigo = Ui.Celda("Buscar por codigo", txtCodigo);
             Grid.SetColumn(celdaCodigo, 0);
             rejilla.Children.Add(celdaCodigo);
 
-            StackPanel celdaMarca = Ui.Celda("Marca (opcional, contiene el texto)", txtMarca);
-            Grid.SetColumn(celdaMarca, 2);
-            rejilla.Children.Add(celdaMarca);
 
             StackPanel botones = new StackPanel();
             botones.Orientation = Orientation.Horizontal;
@@ -95,7 +90,7 @@ namespace ClienteLavadora.vista
             btnLimpiar.Click += (s, e) => Limpiar();
             botones.Children.Add(btnLimpiar);
 
-            Grid.SetColumn(botones, 4);
+            Grid.SetColumn(botones, 2);
             rejilla.Children.Add(botones);
 
             Border panel = Ui.Cristal(rejilla, new Thickness(12, 10, 12, 10));
@@ -112,7 +107,7 @@ namespace ClienteLavadora.vista
             tituloResultado.Foreground = Tema.Cian;
             tituloResultado.Margin = new Thickness(0, 0, 0, 8);
 
-            ficha.MostrarVacio("Escriba un codigo o una marca y presione Buscar.");
+            ficha.Limpiar();
 
             TextBlock rotulo = Ui.Rotulo("MANTENIMIENTOS DE LA LAVADORA");
             rotulo.Margin = new Thickness(0, 6, 0, 6);
@@ -144,18 +139,19 @@ namespace ClienteLavadora.vista
             try
             {
                 int? codigo = LeerCodigo();
-                string marca = txtMarca.Texto.Trim();
-                if (marca.Length == 0)
+                if (codigo == null)
                 {
-                    marca = null;
+                    throw new ArgumentException("Escriba el codigo de la lavadora para buscar.");
                 }
 
-                if (codigo == null && marca == null)
+                LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, null));
+                if (lavadora == null)
                 {
-                    throw new ArgumentException("Escriba el codigo o la marca para poder buscar.");
+                    tituloResultado.Text = "SIN RESULTADO";
+                    ficha.Limpiar();
+                    lista.Mostrar(null, "Sin mantenimientos para mostrar.");
+                    return;
                 }
-
-                LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, marca));
 
                 tituloResultado.Text = "RESULTADO  " + lavadora.Codigo + "  -  " + lavadora.Marca;
                 ficha.Mostrar(lavadora);
@@ -165,8 +161,12 @@ namespace ClienteLavadora.vista
             catch (Exception ex)
             {
                 tituloResultado.Text = "SIN RESULTADO";
-                ficha.MostrarVacio(ex.Message);
+                ficha.Limpiar();
                 lista.Mostrar(null, "Sin mantenimientos para mostrar.");
+                if (IsLoaded && IsVisible)
+                {
+                    Aviso("No se pudo consultar", ex.Message);
+                }
             }
         }
 
@@ -183,9 +183,8 @@ namespace ClienteLavadora.vista
         private void Limpiar()
         {
             txtCodigo.Texto = "";
-            txtMarca.Texto = "";
             tituloResultado.Text = "RESULTADO";
-            ficha.MostrarVacio("Escriba un codigo o una marca y presione Buscar.");
+            ficha.Limpiar();
             lista.Mostrar(null, "Sin mantenimientos para mostrar.");
             txtCodigo.Enfocar();
         }

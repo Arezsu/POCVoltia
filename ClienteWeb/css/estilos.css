@@ -14,10 +14,11 @@
    1. Variables de la casa
    --------------------------------------------------------------- */
 :root {
-  --fondo-1: #0B1016;
-  --fondo-2: #111A22;
-  --chasis: #1A242D;
-  --acero: #22303B;
+  color-scheme: dark;
+  --fondo-1: #14212A;
+  --fondo-2: #1B2B36;
+  --chasis: #243743;
+  --acero: #304957;
   --cristal: rgba(255, 255, 255, 0.06);
   --cristal-fuerte: rgba(255, 255, 255, 0.09);
   --borde: rgba(255, 255, 255, 0.14);
@@ -37,6 +38,53 @@
   --transicion: 160ms ease;
 }
 
+/* Tema claro: conserva los colores de marca y sube el contraste de las superficies. */
+body[data-tema="claro"] {
+  color-scheme: light;
+  --fondo-1: #EDF3F6;
+  --fondo-2: #DCE7EC;
+  --chasis: #FFFFFF;
+  --acero: #DCE7EC;
+  --cristal: rgba(255, 255, 255, 0.82);
+  --cristal-fuerte: rgba(255, 255, 255, 0.96);
+  --borde: rgba(33, 57, 72, 0.24);
+  --borde-suave: rgba(33, 57, 72, 0.14);
+  --cian: #087C96;
+  --cian-oscuro: rgba(8, 124, 150, 0.12);
+  --ambar: #9A5B00;
+  --texto: #172832;
+  --secundario: #526873;
+  --sombra-panel: 0 18px 40px rgba(32, 57, 70, 0.14);
+}
+
+body[data-tema="claro"] .panel,
+body[data-tema="claro"] .modal,
+body[data-tema="claro"] .toast {
+  background: rgba(255, 255, 255, 0.96);
+}
+
+body[data-tema="claro"] .tabla-scroll,
+body[data-tema="claro"] .form-busqueda,
+body[data-tema="claro"] .barra-mantenimientos,
+body[data-tema="claro"] .form-mantenimiento,
+body[data-tema="claro"] .mantenimiento-item {
+  background: rgba(236, 243, 246, 0.9);
+}
+
+body[data-tema="claro"] .tabla thead th { color: #172832; border-bottom-color: var(--borde); }
+body[data-tema="claro"] .tabla tbody tr:hover { background: #E5EEF2; }
+body[data-tema="claro"] .modal-cabecera,
+body[data-tema="claro"] .modal-pie { background: #EDF3F6; }
+body[data-tema="claro"] .panel-control {
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(231,240,244,.96));
+  box-shadow: 0 10px 24px rgba(32,57,70,.12);
+}
+body[data-tema="claro"] .pantalla-digital {
+  background: repeating-linear-gradient(0deg, rgba(15,42,53,.08) 0 1px, transparent 1px 3px),
+    radial-gradient(circle at 50% 0%, #DDF4F7, #C8E4E9);
+  box-shadow: inset 0 0 14px rgba(22,70,83,.16);
+}
+
 /* ---------------------------------------------------------------
    2. Base
    --------------------------------------------------------------- */
@@ -45,6 +93,8 @@
 *::after {
   box-sizing: border-box;
 }
+
+[hidden] { display: none !important; }
 
 html,
 body {
@@ -135,7 +185,7 @@ table {
   align-items: center;
   gap: 22px;
   padding: 14px 22px;
-  background: linear-gradient(180deg, rgba(26, 36, 45, 0.94), rgba(16, 24, 31, 0.88));
+  background: linear-gradient(180deg, rgba(36, 55, 67, 0.97), rgba(20, 33, 42, 0.94));
   border-bottom: 1px solid var(--borde-suave);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -578,6 +628,19 @@ body[data-estado="LAVANDO"] .compuerta-agua {
   transition: border-color var(--transicion), box-shadow var(--transicion), background var(--transicion);
 }
 
+.ficha-solo-lectura input:disabled {
+  opacity: 1;
+  color: var(--texto);
+  cursor: default;
+  background: rgba(7, 13, 18, 0.48);
+}
+
+body[data-tema="claro"] .ficha-solo-lectura input:disabled {
+  color: #172832;
+  background: #E8F0F3;
+  border-color: rgba(33, 57, 72, 0.24);
+}
+
 .campo input::placeholder {
   color: rgba(159, 176, 191, 0.45);
 }
@@ -676,6 +739,47 @@ body[data-estado="LAVANDO"] .compuerta-agua {
   border-top: 1px solid var(--borde-suave);
 }
 
+.grupos-casos {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--borde-suave);
+  align-items: end;
+}
+
+.grupo-casos { min-width: 0; }
+.grupo-casos h3 {
+  margin: 0 0 6px;
+  color: var(--cian);
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+.grupo-casos .acciones {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  gap: 6px;
+}
+.grupo-casos .boton { flex: 1 1 auto; padding: 8px 10px; }
+.grupo-ayuda { min-width: 100px; }
+.grupo-ayuda .boton { width: 100%; }
+
+.modal-acerca { width: min(560px, 100%); }
+.acerca-contenido { align-items: center; text-align: center; padding: 28px; }
+.acerca-contenido h3 {
+  color: var(--cian);
+  font-family: var(--mono);
+  font-size: .75rem;
+  letter-spacing: .14em;
+  margin-bottom: 10px;
+}
+.acerca-contenido p { margin: 5px 0; }
+.acerca-contenido strong { color: var(--cian); font-family: var(--mono); margin-top: 12px; }
+
 /* ---------------------------------------------------------------
    8. Botones
    --------------------------------------------------------------- */
@@ -712,9 +816,10 @@ body[data-estado="LAVANDO"] .compuerta-agua {
 }
 
 .boton.primario {
-  background: linear-gradient(180deg, rgba(111, 211, 232, 0.22), rgba(46, 127, 146, 0.20));
-  border-color: rgba(111, 211, 232, 0.55);
-  color: #C8F1FA;
+  background: linear-gradient(180deg, #78D2E3, #59B8CC);
+  border-color: #8DE0EF;
+  color: #10232B;
+  font-weight: 650;
 }
 
 .boton.primario:hover {
@@ -722,13 +827,15 @@ body[data-estado="LAVANDO"] .compuerta-agua {
 }
 
 .boton.secundario {
-  background: rgba(34, 48, 59, 0.75);
-  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(48, 73, 87, 0.72);
+  border-color: rgba(138, 166, 181, 0.45);
   color: var(--texto);
+  font-weight: 600;
 }
 
 .boton.secundario:hover {
-  background: rgba(45, 62, 75, 0.9);
+  background: rgba(68, 98, 115, 0.9);
+  border-color: var(--cian);
 }
 
 .boton.acero {
@@ -1657,6 +1764,10 @@ body[data-estado="LAVANDO"] .compuerta-agua {
   .conexion {
     margin-left: auto;
   }
+
+  .grupos-casos { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .grupo-ayuda { grid-column: 1 / -1; }
+  .grupo-ayuda .boton { width: auto; min-width: 150px; }
 }
 
 @media (max-width: 860px) {
@@ -1690,6 +1801,11 @@ body[data-estado="LAVANDO"] .compuerta-agua {
   .panel {
     padding: 14px;
   }
+
+  .grupos-casos { grid-template-columns: minmax(0, 1fr); }
+  .grupo-ayuda { grid-column: auto; }
+  .grupo-casos .acciones { flex-wrap: wrap; }
+  .grupo-casos .boton { flex: 1 1 28%; }
 
   .rejilla-campos {
     grid-template-columns: minmax(0, 1fr);

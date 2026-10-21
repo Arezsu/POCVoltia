@@ -1,6 +1,7 @@
 # Voltia - Sistema Distribuido de Lavadoras (Maestro - Detalle)
 
 Segundo Proyecto 2026B - Diseno de Soluciones - Universidad de Ibague.
+Version de la aplicacion: **v4.5**.
 
 Aplicacion distribuida cliente-servidor sobre servicios web GraphQL: un servidor central
 en Java (Spring Boot) administra los datos en memoria y dos clientes independientes los
@@ -29,11 +30,15 @@ lavadora es un objeto principal que puede tener cero, uno o muchos mantenimiento
 asociados. El sistema permite:
 
 - Registrar lavadoras con sus siete datos tecnicos.
-- Consultar una lavadora por codigo, por marca o por los dos criterios a la vez.
+- Consultar una lavadora individual por su codigo desde los clientes.
 - Listar y filtrar lavadoras en el servidor (por marca, por tecnologia inverter y por
   tenencia de mantenimientos).
 - Actualizar y eliminar lavadoras con busqueda previa obligatoria.
 - Registrar, actualizar y eliminar los mantenimientos de cada lavadora.
+
+La consulta individual de un mantenimiento requiere el codigo de su lavadora y el id
+del mantenimiento. El servidor tambien expone busquedas combinadas para lavadoras; el
+flujo de usuario de ambos clientes prioriza el codigo, como se acordo para esta entrega.
 
 ---
 
@@ -363,9 +368,18 @@ POCVoltiaV4/
 │   ├── js/                            modelo, servicios, controlador, vista y observador
 │   └── servidor.js                    Servidor estatico local (Node, sin dependencias)
 ├── pruebas_graphiql_voltia.txt        Consultas y mutaciones listas para GraphiQL
-├── DOCUMENTACION.md                   Explicacion tecnica y guia de sustentacion
 └── README.md
 ```
+
+La documentacion interna del equipo se conserva localmente y no se publica en este
+repositorio.
+
+## Consulta individual (requisito 5 de la guia)
+
+El requisito 5 solicita consultar un objeto individual por criterios de busqueda
+acordados con el docente. La lavadora se consulta por codigo y el mantenimiento por el
+par codigo de lavadora + id. El PDF no especifica cuales criterios se acordaron para
+este caso; esa parte debe validarse con el docente.
 
 ---
 

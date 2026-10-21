@@ -115,7 +115,10 @@ namespace ClienteLavadora.vista
 
         private static void Abrir(DialogoVoltia dialogo, Window dueno)
         {
-            if (dueno != null)
+            // Una peticion asincrona puede terminar despues de cerrar su ventana.
+            // En ese caso WPF lanza InvalidOperationException al asignar un Owner cerrado.
+            // El dialogo sigue siendo util centrado en pantalla y evita el error global.
+            if (dueno != null && dueno.IsLoaded && dueno.IsVisible)
             {
                 dialogo.Owner = dueno;
             }

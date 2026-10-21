@@ -52,6 +52,7 @@
       <span class="conexion-texto" id="texto-conexion" role="status">Sin conexion</span>
       <span class="conexion-url">localhost:8081</span>
     </div>
+    <button type="button" class="boton secundario boton-tema" id="boton-tema" aria-pressed="false">Modo claro</button>
   </header>
 
   <!-- ================================================================
@@ -86,7 +87,7 @@
       <!-- Filtros y acciones -->
       <section class="panel panel-filtros" aria-labelledby="titulo-filtros">
         <div class="panel-cabecera">
-          <h2 id="titulo-filtros">Lavadoras registradas</h2>
+        <h2 id="titulo-filtros">Lavadoras</h2>
           <p class="panel-nota" id="resumen-filtros">Sin filtros aplicados</p>
         </div>
 
@@ -117,17 +118,36 @@
           </div>
         </form>
 
-        <div class="acciones" role="group" aria-label="Acciones sobre lavadoras">
-          <button type="button" class="boton primario" id="boton-agregar">Agregar lavadora</button>
-          <button type="button" class="boton secundario" id="boton-consultar">Consultar</button>
-          <button type="button" class="boton secundario" id="boton-actualizar">Actualizar</button>
-          <button type="button" class="boton peligro" id="boton-eliminar">Eliminar</button>
-          <button type="button" class="boton acero" id="boton-mantenimientos">Mantenimientos</button>
+        <div class="grupos-casos">
+          <section class="grupo-casos" aria-labelledby="casos-lavadoras">
+            <h3 id="casos-lavadoras">LAVADORAS</h3>
+            <div class="acciones" role="group" aria-label="Casos de uso de lavadoras">
+              <button type="button" class="boton secundario boton-caso" id="boton-listar">Listar</button>
+              <button type="button" class="boton primario boton-caso" id="boton-agregar">Agregar</button>
+              <button type="button" class="boton secundario boton-caso" id="boton-consultar">Consultar</button>
+              <button type="button" class="boton secundario boton-caso" id="boton-actualizar">Actualizar</button>
+              <button type="button" class="boton peligro boton-caso" id="boton-eliminar">Eliminar</button>
+            </div>
+          </section>
+          <section class="grupo-casos" aria-labelledby="casos-mantenimientos">
+            <h3 id="casos-mantenimientos">MANTENIMIENTOS</h3>
+            <div class="acciones" role="group" aria-label="Casos de uso de mantenimientos">
+              <button type="button" class="boton secundario boton-caso" id="boton-listar-mantenimientos">Listar</button>
+              <button type="button" class="boton primario boton-caso" id="boton-agregar-mantenimiento-menu">Agregar</button>
+              <button type="button" class="boton secundario boton-caso" id="boton-consultar-mantenimiento">Consultar</button>
+              <button type="button" class="boton secundario boton-caso" id="boton-actualizar-mantenimiento">Actualizar</button>
+              <button type="button" class="boton peligro boton-caso" id="boton-eliminar-mantenimiento">Eliminar</button>
+            </div>
+          </section>
+          <section class="grupo-casos grupo-ayuda" aria-labelledby="casos-ayuda">
+            <h3 id="casos-ayuda">AYUDA</h3>
+            <button type="button" class="boton secundario boton-caso" id="boton-acerca">Acerca de</button>
+          </section>
         </div>
       </section>
 
       <!-- Tabla de lavadoras -->
-      <section class="panel panel-tabla" aria-labelledby="titulo-tabla">
+      <section class="panel panel-tabla" id="panel-tabla" aria-labelledby="titulo-tabla">
         <div class="panel-cabecera panel-cabecera-tabla">
           <h2 id="titulo-tabla">Listado</h2>
           <span class="contador" id="contador-lavadoras">0 lavadoras</span>
@@ -137,7 +157,7 @@
           Si la ventana es angosta, desplace la tabla hacia la derecha para ver todas las columnas.
         </p>
         <div class="tabla-scroll" id="tabla-scroll">
-          <table class="tabla" id="tabla-lavadoras" aria-describedby="tabla-ayuda">
+          <table class="tabla" id="tabla-lavadoras" aria-describedby="tabla-ayuda" tabindex="-1">
             <caption class="visualmente-oculto">Lavadoras registradas con sus datos tecnicos y costos</caption>
             <thead>
               <tr>
@@ -178,10 +198,7 @@
 
   </main>
 
-  <footer class="pie">
-    <span>Voltia - Segundo Proyecto 2026B</span>
-    <span>Cliente web en JavaScript puro</span>
-  </footer>
+  <footer class="pie"><span>VOLTIA · Panel de control</span></footer>
 
   <!-- Avisos tipo toast -->
   <div class="toasts" id="toasts" role="status" aria-live="polite" aria-atomic="false"></div>
@@ -221,7 +238,7 @@
           </div>
           <div class="campo">
             <label for="ag-fecha">Fecha de fabricacion</label>
-            <input type="text" id="ag-fecha" name="fechaFabricacion" placeholder="2025-06-18T10:45:00" autocomplete="off" required>
+            <input type="datetime-local" id="ag-fecha" name="fechaFabricacion" step="60" required>
             <span class="campo-error" id="error-ag-fecha"></span>
           </div>
           <div class="campo">
@@ -263,7 +280,7 @@
   </div>
 
   <!-- ================================================================
-       MODAL: consultar por uno o dos criterios
+       MODAL: consultar por codigo
        ================================================================ -->
   <div class="modal-fondo" id="modal-consultar" hidden>
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-consultar">
@@ -278,16 +295,11 @@
             <input type="number" id="co-codigo" name="codigo" inputmode="numeric" min="1" step="1" placeholder="101">
             <span class="campo-error" id="error-co-codigo"></span>
           </div>
-          <div class="campo">
-            <label for="co-marca">Marca contiene</label>
-            <input type="search" id="co-marca" name="marca" placeholder="LG" autocomplete="off">
-            <span class="campo-error" id="error-co-marca"></span>
-          </div>
           <button type="submit" class="boton primario" id="boton-buscar-consulta">Buscar</button>
         </form>
         <p class="error-formulario" id="error-consultar" role="alert"></p>
         <div class="resultado" id="resultado-consulta">
-          <p class="vacio">Escriba el codigo, la marca o ambos criterios y pulse Buscar.</p>
+          <p class="vacio">Escriba el codigo de la lavadora y pulse Buscar.</p>
         </div>
       </div>
       <footer class="modal-pie">
@@ -319,6 +331,10 @@
         </div>
 
         <form id="form-actualizar" class="formulario-oculto" novalidate hidden>
+          <div class="campo">
+            <label for="ac-codigo-fijo">Codigo de la lavadora</label>
+            <input type="number" id="ac-codigo-fijo" readonly aria-readonly="true">
+          </div>
           <div class="rejilla-campos">
             <div class="campo">
               <label for="ac-marca">Marca</label>
@@ -332,7 +348,7 @@
             </div>
             <div class="campo">
               <label for="ac-fecha">Fecha de fabricacion</label>
-              <input type="text" id="ac-fecha" name="fechaFabricacion" placeholder="2025-06-18T10:45:00" autocomplete="off">
+              <input type="datetime-local" id="ac-fecha" name="fechaFabricacion" step="60">
               <span class="campo-error" id="error-ac-fecha"></span>
             </div>
             <div class="campo">
@@ -418,7 +434,7 @@
        MODAL: gestion de mantenimientos (detalle)
        ================================================================ -->
   <div class="modal-fondo" id="modal-mantenimientos" hidden>
-    <div class="modal ancho" role="dialog" aria-modal="true" aria-labelledby="titulo-mantenimientos">
+    <div class="modal ancho" id="contenido-mantenimientos" role="dialog" aria-modal="true" aria-labelledby="titulo-mantenimientos" data-caso="listar">
       <header class="modal-cabecera">
         <h2 id="titulo-mantenimientos">Mantenimientos</h2>
         <button type="button" class="boton-cerrar" data-cerrar="modal-mantenimientos" aria-label="Cerrar la ventana">Cerrar</button>
@@ -429,7 +445,7 @@
             <label for="mat-lavadora">Lavadora</label>
             <select id="mat-lavadora"></select>
           </div>
-          <form id="form-filtros-mantenimientos" class="form-filtros-mantenimientos" novalidate>
+          <form id="form-filtros-mantenimientos" class="form-filtros-mantenimientos" data-parte="filtros" novalidate>
             <div class="campo">
               <label for="mat-filtro-tecnico">Tecnico contiene</label>
               <input type="search" id="mat-filtro-tecnico" placeholder="Nombre" autocomplete="off">
@@ -447,14 +463,14 @@
           </form>
         </div>
 
-        <div class="barra-acciones-mantenimientos">
+        <div class="barra-acciones-mantenimientos" data-parte="acciones-listado">
           <span class="contador" id="contador-mantenimientos">Sin datos</span>
-          <button type="button" class="boton primario" id="boton-agregar-mantenimiento">Agregar mantenimiento</button>
+          <button type="button" class="boton primario" id="boton-agregar-mantenimiento">Nuevo mantenimiento</button>
         </div>
 
         <p class="error-formulario" id="error-mantenimientos" role="alert"></p>
 
-        <div class="tabla-scroll tabla-scroll-mantenimientos">
+        <div class="tabla-scroll tabla-scroll-mantenimientos" data-parte="tabla">
           <table class="tabla tabla-mantenimientos">
             <caption class="visualmente-oculto">Mantenimientos de la lavadora elegida</caption>
             <thead>
@@ -465,7 +481,7 @@
                 <th scope="col">Costo</th>
                 <th scope="col">Fecha</th>
                 <th scope="col">Estado</th>
-                <th scope="col">Acciones</th>
+                <th scope="col" data-col="acciones">Acciones</th>
               </tr>
             </thead>
             <tbody id="cuerpo-mantenimientos"></tbody>
@@ -496,7 +512,7 @@
             </div>
             <div class="campo">
               <label for="mat-fecha">Fecha</label>
-              <input type="text" id="mat-fecha" placeholder="2025-06-18T10:45:00" autocomplete="off">
+              <input type="datetime-local" id="mat-fecha" step="60">
               <span class="campo-error" id="error-mat-fecha"></span>
             </div>
             <div class="campo campo-casilla">
@@ -526,6 +542,23 @@
         <button type="button" class="boton secundario" data-cerrar="modal-mantenimientos">Cerrar</button>
       </footer>
     </div>
+  </div>
+
+  <!-- Ventana enfocada de ayuda -->
+  <div class="modal-fondo" id="modal-acerca" hidden>
+    <section class="modal modal-acerca" role="dialog" aria-modal="true" aria-labelledby="titulo-acerca">
+      <header class="modal-cabecera">
+        <h2 id="titulo-acerca">Acerca de Voltia</h2>
+        <button type="button" class="boton-cerrar" data-cerrar="modal-acerca" aria-label="Cerrar la ventana">Cerrar</button>
+      </header>
+      <div class="modal-cuerpo acerca-contenido">
+        <h3>INTEGRANTES</h3>
+        <p>Juan Andres Bermeo Alvarez</p>
+        <p>Alejandro Sanchez Quimbayo</p>
+        <p>David Arredondo</p>
+        <strong>Versión v4.5</strong>
+      </div>
+    </section>
   </div>
 
   <!-- Scripts clasicos, en el orden que exige la arquitectura MVC -->

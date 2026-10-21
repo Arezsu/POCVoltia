@@ -22,6 +22,23 @@
   const INTERVALO_VIGILANCIA = 4000;
 
   function arrancar() {
+    const botonTema = document.getElementById('boton-tema');
+    const temaGuardado = global.localStorage.getItem('voltia-tema');
+    document.body.dataset.tema = temaGuardado === 'claro' ? 'claro' : 'oscuro';
+    if (botonTema) {
+      const actualizarBotonTema = () => {
+        const claro = document.body.dataset.tema === 'claro';
+        botonTema.textContent = claro ? 'Modo oscuro' : 'Modo claro';
+        botonTema.setAttribute('aria-pressed', String(claro));
+      };
+      actualizarBotonTema();
+      botonTema.addEventListener('click', () => {
+        const claro = document.body.dataset.tema !== 'claro';
+        document.body.dataset.tema = claro ? 'claro' : 'oscuro';
+        global.localStorage.setItem('voltia-tema', claro ? 'claro' : 'oscuro');
+        actualizarBotonTema();
+      });
+    }
     const notificador = Voltia.notificador;
     const cliente = Voltia.clienteGraphQL;
 

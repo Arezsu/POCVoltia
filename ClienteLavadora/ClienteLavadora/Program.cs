@@ -21,7 +21,9 @@ namespace ClienteLavadora
         public static void Main()
         {
             Application aplicacion = new Application();
-            aplicacion.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            // Las ventanas de cada caso de uso son independientes. El proceso termina
+            // cuando el usuario cierra la ultima ventana, no al cerrar el tablero.
+            aplicacion.ShutdownMode = ShutdownMode.OnLastWindowClose;
 
             // Red de seguridad: si algo falla en la interfaz, se muestra un mensaje en
             // lugar de cerrar el programa de golpe.

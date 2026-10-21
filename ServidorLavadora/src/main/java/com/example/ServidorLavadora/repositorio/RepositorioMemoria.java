@@ -2,9 +2,8 @@ package com.example.ServidorLavadora.repositorio;
 
 import com.example.ServidorLavadora.model.Lavadora;
 import com.example.ServidorLavadora.model.Mantenimiento;
-
-import java.time.LocalDateTime;
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,8 +38,57 @@ public class RepositorioMemoria implements AlmacenDatos {
     // Version de los datos. AtomicInteger permite aumentarla sin candado.
     private final AtomicInteger version = new AtomicInteger(1);
 
-    private RepositorioMemoria() {
-        cargarDatosDeEjemplo();
+    private RepositorioMemoria() { }
+
+    /** Carga dos maestros y dos detalles de demostracion solo si el almacen esta vacio. */
+    public void cargarDatosPruebaSiVacio() {
+        synchronized (candado) {
+            if (!lavadoras.isEmpty()) {
+                return;
+            }
+
+            Lavadora lg = Lavadora.builder()
+                    .codigo(901)
+                    .marca("LG")
+                    .precioBase(1450000)
+                    .fechaFabricacion(LocalDateTime.of(2024, 3, 10, 9, 0))
+                    .capacidadCargaKilos(18)
+                    .velocidadCentrifugadoRPM(1400)
+                    .tecnologiaInverter(true)
+                    .minutosLavado(45)
+                    .build();
+            lg.agregarMantenimiento(Mantenimiento.builder()
+                    .id(1)
+                    .descripcion("Revision de bomba de agua")
+                    .tecnico("Carlos Perez")
+                    .costo(185000)
+                    .fecha(LocalDateTime.of(2025, 6, 12, 10, 30))
+                    .completado(false)
+                    .build());
+
+            Lavadora samsung = Lavadora.builder()
+                    .codigo(902)
+                    .marca("Samsung")
+                    .precioBase(1100000)
+                    .fechaFabricacion(LocalDateTime.of(2023, 11, 5, 14, 0))
+                    .capacidadCargaKilos(12)
+                    .velocidadCentrifugadoRPM(1200)
+                    .tecnologiaInverter(false)
+                    .minutosLavado(60)
+                    .build();
+            samsung.agregarMantenimiento(Mantenimiento.builder()
+                    .id(1)
+                    .descripcion("Limpieza de filtro y mangueras")
+                    .tecnico("Laura Gomez")
+                    .costo(95000)
+                    .fecha(LocalDateTime.of(2025, 8, 20, 15, 0))
+                    .completado(true)
+                    .build());
+
+            lavadoras.add(lg);
+            lavadoras.add(samsung);
+        }
+        notificar("Se cargaron dos lavadoras y dos mantenimientos de prueba");
     }
 
     /** Unica puerta de entrada a la instancia (Singleton). */
@@ -79,68 +127,4 @@ public class RepositorioMemoria implements AlmacenDatos {
         }
     }
 
-    // ==================================================================
-    //  Datos de ejemplo que ya existen cuando arranca el servidor
-    // ==================================================================
-
-    private void cargarDatosDeEjemplo() {
-        // Lavadora 101: tres mantenimientos (detalle con varios hijos).
-        Lavadora lg = crearLavadora(101, "LG", 1450000, LocalDateTime.of(2024, 3, 10, 9, 0),
-                18.0, 1400, true, 45);
-        agregarMantenimiento(lg, 1, "Cambio de bomba de agua", "Carlos Perez",
-                185000, LocalDateTime.of(2024, 6, 12, 10, 30), true);
-        agregarMantenimiento(lg, 2, "Revision de rodamientos", "Laura Gomez",
-                95000, LocalDateTime.of(2025, 2, 3, 15, 0), true);
-        agregarMantenimiento(lg, 3, "Limpieza de filtro", "Carlos Perez",
-                45000, LocalDateTime.of(2025, 7, 20, 9, 15), false);
-
-        // Lavadora 102: un solo mantenimiento.
-        Lavadora samsung = crearLavadora(102, "Samsung", 1290000, LocalDateTime.of(2023, 11, 22, 14, 30),
-                16.0, 1200, false, 30);
-        agregarMantenimiento(samsung, 1, "Calibracion de tambor", "Andres Ruiz",
-                120000, LocalDateTime.of(2024, 1, 15, 11, 0), true);
-
-        // Lavadora 103: CERO mantenimientos. Esto demuestra el lado 0..* de la relacion.
-        crearLavadora(103, "Whirlpool", 980000, LocalDateTime.of(2025, 1, 5, 8, 15),
-                14.0, 1000, false, 60);
-
-        // Lavadora 104: dos mantenimientos, uno todavia pendiente.
-        Lavadora lgNueva = crearLavadora(104, "LG", 1650000, LocalDateTime.of(2025, 6, 18, 10, 45),
-                20.0, 1600, true, 90);
-        agregarMantenimiento(lgNueva, 1, "Instalacion y nivelacion", "Diana Torres",
-                80000, LocalDateTime.of(2025, 6, 20, 8, 0), true);
-        agregarMantenimiento(lgNueva, 2, "Revision de mangueras", "Diana Torres",
-                60000, LocalDateTime.of(2025, 7, 1, 16, 45), false);
-    }
-
-    /** Crea una lavadora con el patron Builder y la guarda en la lista. */
-    private Lavadora crearLavadora(int codigo, String marca, double precio, LocalDateTime fecha,
-                                   double kilos, int rpm, boolean inverter, int minutos) {
-        Lavadora lavadora = Lavadora.builder()
-                .codigo(codigo)
-                .marca(marca)
-                .precioBase(precio)
-                .fechaFabricacion(fecha)
-                .capacidadCargaKilos(kilos)
-                .velocidadCentrifugadoRPM(rpm)
-                .tecnologiaInverter(inverter)
-                .minutosLavado(minutos)
-                .build();
-        lavadoras.add(lavadora);
-        return lavadora;
-    }
-
-    /** Crea un mantenimiento con el patron Builder y lo agrega a su lavadora. */
-    private void agregarMantenimiento(Lavadora lavadora, int id, String descripcion, String tecnico,
-                                      double costo, LocalDateTime fecha, boolean completado) {
-        Mantenimiento mantenimiento = Mantenimiento.builder()
-                .id(id)
-                .descripcion(descripcion)
-                .tecnico(tecnico)
-                .costo(costo)
-                .fecha(fecha)
-                .completado(completado)
-                .build();
-        lavadora.agregarMantenimiento(mantenimiento);
-    }
 }

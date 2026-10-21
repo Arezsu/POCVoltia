@@ -21,21 +21,19 @@ namespace ClienteLavadora.vista.controles
         private readonly CampoTexto txtDescripcion = new CampoTexto();
         private readonly CampoTexto txtTecnico = new CampoTexto();
         private readonly CampoTexto txtCosto = new CampoTexto();
-        private readonly CampoTexto txtFecha = new CampoTexto();
+        private readonly CampoFecha txtFecha = new CampoFecha();
         private readonly CheckBox chkCompletado = Ui.Check("Mantenimiento completado");
 
         private readonly Grid[] filas = new Grid[4];
 
         public CamposMantenimiento()
         {
+            txtCosto.SinNegativos = true;
             txtCosto.Fuente = Tema.Numeros;
-            txtFecha.Fuente = Tema.Numeros;
-            txtFecha.Ayuda = "Formato yyyy-MM-ddTHH:mm:ss";
 
             filas[0] = Ui.Fila(Ui.Celda("Descripcion del trabajo", txtDescripcion), null);
             filas[1] = Ui.Fila(Ui.Celda("Tecnico", txtTecnico), Ui.Celda("Costo (pesos)", txtCosto));
-            filas[2] = Ui.Fila(Ui.Celda("Fecha", ConPista(txtFecha,
-                "Formato yyyy-MM-ddTHH:mm:ss, por ejemplo 2024-06-12T10:30:00")), null);
+            filas[2] = Ui.Fila(Ui.Celda("Fecha", txtFecha), null);
             filas[3] = Ui.Fila(Ui.Celda(null, chkCompletado), null);
 
             foreach (Grid fila in filas)
@@ -101,7 +99,7 @@ namespace ClienteLavadora.vista.controles
             input.Costo = Formato.LeerDecimalCeroPermitido(txtCosto.Texto,
                 "El costo debe ser un numero mayor o igual a cero (por ejemplo 185000).");
             input.Fecha = Formato.LeerFechaServidor(txtFecha.Texto,
-                "La fecha debe tener el formato yyyy-MM-ddTHH:mm:ss (por ejemplo 2024-06-12T10:30:00).");
+                "Seleccione una fecha valida en el calendario.");
             input.Completado = chkCompletado.IsChecked == true;
             return input;
         }

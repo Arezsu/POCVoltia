@@ -39,8 +39,8 @@ app.get('/api/estado', (req, res) => {
 });
 
 // Redireccion por defecto a la pagina principal
-app.get('*', (req, res) => {
-  res.sendFile(path.join(RAIZ, 'index.html'));
+app.get('/*splat', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Iniciar servidor

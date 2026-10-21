@@ -13,58 +13,24 @@ namespace ClienteLavadora.vista
     /// </summary>
     public class VentanaAcercaDe : VentanaMarco
     {
-        public VentanaAcercaDe() : base("ACERCA DE VOLTIA", 680, 640, false, 0)
+        public VentanaAcercaDe() : base("ACERCA DE VOLTIA", 600, 430, false, 0)
         {
             StackPanel contenido = new StackPanel();
-
-            // ---------- Encabezado ----------
-            TextBlock nombre = new TextBlock();
-            nombre.Text = "VOLTIA";
-            nombre.FontFamily = Tema.Numeros;
-            nombre.FontSize = 26;
-            nombre.FontWeight = FontWeights.Bold;
-            nombre.Foreground = Tema.Cian;
-            contenido.Children.Add(nombre);
-
-            TextBlock descripcion = Ui.Texto("Sistema de gestion de lavadoras industriales", 12, Tema.TextoSecundario);
-            descripcion.Margin = new Thickness(0, 2, 0, 0);
-            contenido.Children.Add(descripcion);
-
-            contenido.Children.Add(Ui.Separador());
-
-            // ---------- Curso ----------
-            contenido.Children.Add(Ui.Rotulo("CURSO"));
-            contenido.Children.Add(Fila("Asignatura", "Diseno de Soluciones"));
-            contenido.Children.Add(Fila("Proyecto", "Segundo Proyecto 2026B"));
-            contenido.Children.Add(Fila("Programa", "Ingenieria de Sistemas"));
-
-            contenido.Children.Add(Ui.Separador());
-
-            // ---------- Integrantes ----------
+            contenido.VerticalAlignment = VerticalAlignment.Center;
             contenido.Children.Add(Ui.Rotulo("INTEGRANTES"));
-            contenido.Children.Add(Fila("Juan Andres Bermeo Alvarez", "2220241053"));
-            contenido.Children.Add(Fila("Alejandro Sanchez Quimbayo", "2220241077"));
-            contenido.Children.Add(Fila("David Arredondo", "2220241062"));
-
+            contenido.Children.Add(NombreIntegrante("Juan Andres Bermeo Alvarez"));
+            contenido.Children.Add(NombreIntegrante("Alejandro Sanchez Quimbayo"));
+            contenido.Children.Add(NombreIntegrante("David Arredondo"));
             contenido.Children.Add(Ui.Separador());
-
-            // ---------- Tecnologias ----------
-            contenido.Children.Add(Ui.Rotulo("TECNOLOGIAS"));
-            contenido.Children.Add(Fila("Cliente", "C# WPF sin XAML (.NET Framework 4.8)"));
-            contenido.Children.Add(Fila("Servidor", "Java Spring Boot con GraphQL"));
-            contenido.Children.Add(Fila("Datos", "En memoria dentro del servidor"));
-
-            contenido.Children.Add(Ui.Separador());
-
-            // ---------- Patrones ----------
-            contenido.Children.Add(Ui.Rotulo("PATRONES Y PRINCIPIOS"));
-            contenido.Children.Add(Fila("Arquitectura", "MVC por paquetes (modelo, servicios, controlador, vista)"));
-            contenido.Children.Add(Fila("Patrones", "Singleton, Builder, Observer y segregacion de interfaces"));
-            contenido.Children.Add(Fila("Concurrencia", "async/await con Task.Run y Dispatcher.Invoke"));
-            contenido.Children.Add(Fila("Relacion", "Lavadora (1) *-- (0..*) Mantenimiento"));
+            TextBlock version = Ui.Texto("Versión v4.5", 16, Tema.Cian);
+            version.FontFamily = Tema.Numeros;
+            version.FontWeight = FontWeights.Bold;
+            version.HorizontalAlignment = HorizontalAlignment.Center;
+            version.Margin = new Thickness(0, 8, 0, 0);
+            contenido.Children.Add(version);
 
             ScrollViewer desplazable = Ui.Desplazable(contenido);
-            desplazable.MaxHeight = 440;
+            desplazable.MaxHeight = 260;
 
             BotonVoltia btnCerrar = BotonVoltia.Principal("Cerrar");
             btnCerrar.Width = 130;
@@ -84,29 +50,12 @@ namespace ClienteLavadora.vista
             Loaded += (s, e) => Anime.Escalonado(new UIElement[] { raiz }, 60, 240);
         }
 
-        /// <summary>Una fila "dato - valor" del panel.</summary>
-        private static FrameworkElement Fila(string etiqueta, string valor)
+        private static FrameworkElement NombreIntegrante(string nombre)
         {
-            Grid rejilla = new Grid();
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(215) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-
-            TextBlock izquierda = Ui.Texto(etiqueta, 11.5, Tema.TextoSecundario);
-            izquierda.VerticalAlignment = VerticalAlignment.Center;
-            rejilla.Children.Add(izquierda);
-
-            TextBlock derecha = Ui.Texto(valor, 12, Tema.Texto);
-            derecha.VerticalAlignment = VerticalAlignment.Center;
-            Grid.SetColumn(derecha, 1);
-            rejilla.Children.Add(derecha);
-
-            Border fondo = new Border();
-            fondo.Padding = new Thickness(8, 4, 8, 4);
-            fondo.Margin = new Thickness(0, 0, 0, 2);
-            fondo.CornerRadius = new CornerRadius(6);
-            fondo.Background = Tema.Pincel("#08FFFFFF");
-            fondo.Child = rejilla;
-            return fondo;
+            TextBlock texto = Ui.Texto(nombre, 15, Tema.Texto);
+            texto.HorizontalAlignment = HorizontalAlignment.Center;
+            texto.Margin = new Thickness(0, 7, 0, 7);
+            return texto;
         }
     }
 }

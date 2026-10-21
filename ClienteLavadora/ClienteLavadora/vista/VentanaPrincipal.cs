@@ -114,11 +114,6 @@ namespace ClienteLavadora.vista
             descripcion.Margin = new Thickness(1, 1, 0, 0);
             textos.Children.Add(descripcion);
 
-            TextBlock tecnologia = Ui.Texto("Cliente de escritorio C# (sin XAML)  -  Servidor Java GraphQL", 10.5,
-                Tema.TextoSecundario);
-            tecnologia.Margin = new Thickness(1, 4, 0, 0);
-            textos.Children.Add(tecnologia);
-
             Grid.SetColumn(textos, 1);
             cabecera.Children.Add(textos);
 
@@ -196,15 +191,25 @@ namespace ClienteLavadora.vista
             filaLavadoras.Children.Add(Atajo("Eliminar", false, AbrirEliminar));
             panel.Children.Add(filaLavadoras);
 
-            TextBlock rotuloMantenimientos = Ui.Rotulo("MANTENIMIENTOS Y AYUDA");
+            TextBlock rotuloMantenimientos = Ui.Rotulo("MANTENIMIENTOS");
             rotuloMantenimientos.Margin = new Thickness(0, 12, 0, 6);
             panel.Children.Add(rotuloMantenimientos);
 
             UniformGrid filaMantenimientos = new UniformGrid();
-            filaMantenimientos.Columns = 2;
-            filaMantenimientos.Children.Add(Atajo("Mantenimientos", true, AbrirMantenimientos));
-            filaMantenimientos.Children.Add(Atajo("Acerca de", false, AbrirAcercaDe));
+            filaMantenimientos.Columns = 5;
+            filaMantenimientos.Children.Add(Atajo("Listar", true, AbrirListarMantenimientos));
+            filaMantenimientos.Children.Add(Atajo("Agregar", false, AbrirAgregarMantenimiento));
+            filaMantenimientos.Children.Add(Atajo("Consultar", false, AbrirConsultarMantenimiento));
+            filaMantenimientos.Children.Add(Atajo("Actualizar", false, AbrirActualizarMantenimiento));
+            filaMantenimientos.Children.Add(Atajo("Eliminar", false, AbrirEliminarMantenimiento));
             panel.Children.Add(filaMantenimientos);
+
+            TextBlock rotuloAyuda = Ui.Rotulo("AYUDA");
+            rotuloAyuda.Margin = new Thickness(0, 10, 0, 4);
+            panel.Children.Add(rotuloAyuda);
+            UniformGrid filaAyuda = new UniformGrid { Columns = 1 };
+            filaAyuda.Children.Add(Atajo("Acerca de", false, AbrirAcercaDe));
+            panel.Children.Add(filaAyuda);
 
             return panel;
         }
@@ -231,25 +236,23 @@ namespace ClienteLavadora.vista
             pie.Margin = new Thickness(0, 14, 0, 0);
             pie.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             pie.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            pie.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-            StackPanel textos = new StackPanel();
-            textos.VerticalAlignment = VerticalAlignment.Center;
-
-            TextBlock curso = Ui.Texto("Segundo Proyecto 2026B  -  Diseno de Soluciones  -  Ingenieria de Sistemas",
-                10.5, Tema.TextoSecundario);
-            textos.Children.Add(curso);
-
-            TextBlock relacion = Ui.Texto("Relacion maestro-detalle: Lavadora (1) *-- (0..*) Mantenimiento",
-                10, Tema.TextoSecundario);
-            relacion.Margin = new Thickness(0, 2, 0, 0);
-            textos.Children.Add(relacion);
-
-            pie.Children.Add(textos);
+            BotonVoltia btnTema = BotonVoltia.Secundario("Modo claro");
+            btnTema.Width = 130;
+            btnTema.Margin = new Thickness(0, 0, 8, 0);
+            btnTema.Click += (s, e) =>
+            {
+                Tema.Alternar();
+                btnTema.Texto = Tema.EsClaro ? "Modo oscuro" : "Modo claro";
+            };
+            Grid.SetColumn(btnTema, 1);
+            pie.Children.Add(btnTema);
 
             BotonVoltia btnSalir = BotonVoltia.Secundario("Cerrar");
             btnSalir.Width = 120;
             btnSalir.Click += (s, e) => Cerrar();
-            Grid.SetColumn(btnSalir, 1);
+            Grid.SetColumn(btnSalir, 2);
             pie.Children.Add(btnSalir);
 
             return pie;
@@ -352,10 +355,11 @@ namespace ClienteLavadora.vista
             Abrir(new VentanaEliminar());
         }
 
-        private void AbrirMantenimientos()
-        {
-            Abrir(new VentanaMantenimientos(0));
-        }
+        private void AbrirListarMantenimientos() { Abrir(new VentanaListarMantenimientos()); }
+        private void AbrirAgregarMantenimiento() { Abrir(new VentanaAgregarMantenimiento()); }
+        private void AbrirConsultarMantenimiento() { Abrir(new VentanaConsultarMantenimiento()); }
+        private void AbrirActualizarMantenimiento() { Abrir(new VentanaActualizarMantenimiento()); }
+        private void AbrirEliminarMantenimiento() { Abrir(new VentanaEliminarMantenimiento()); }
 
         private void AbrirAcercaDe()
         {
@@ -363,13 +367,12 @@ namespace ClienteLavadora.vista
         }
 
         /// <summary>
-        /// Abre una ventana hija con dueno: se cierra junto con la principal y siempre
-        /// aparece encima de ella. Se usa Show (no ShowDialog) para poder tener varias
-        /// abiertas a la vez y seguir viendo el tambor girar.
+        /// Abre una ventana independiente para que cerrar una no cierre las demas.
+        /// Se usa Show (no ShowDialog) para poder tener varias abiertas a la vez.
         /// </summary>
         private void Abrir(Window ventana)
         {
-            ventana.Owner = this;
+            ventana.WindowStartupLocation = WindowStartupLocation.CenterScreen;
             ventana.Show();
         }
     }

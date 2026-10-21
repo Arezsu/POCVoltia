@@ -27,7 +27,6 @@ namespace ClienteLavadora.vista
         private readonly ControladorLavadoras controlador = new ControladorLavadoras(new ServicioLavadoras());
 
         private readonly CampoTexto txtCodigo = new CampoTexto();
-        private readonly CampoTexto txtMarca = new CampoTexto();
         private readonly CamposLavadora campos = new CamposLavadora();
 
         private readonly TextBlock tituloFormulario = new TextBlock();
@@ -83,28 +82,22 @@ namespace ClienteLavadora.vista
             Grid rejilla = new Grid();
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             txtCodigo.Fuente = Tema.Numeros;
             txtCodigo.TeclaPresionada += AlPresionarTecla;
-            txtMarca.TeclaPresionada += AlPresionarTecla;
 
             StackPanel celdaCodigo = Ui.Celda("Buscar por codigo", txtCodigo);
             Grid.SetColumn(celdaCodigo, 0);
             rejilla.Children.Add(celdaCodigo);
 
-            StackPanel celdaMarca = Ui.Celda("y/o por marca (contiene el texto)", txtMarca);
-            Grid.SetColumn(celdaMarca, 2);
-            rejilla.Children.Add(celdaMarca);
 
             BotonVoltia btnBuscar = BotonVoltia.Principal("Buscar");
             btnBuscar.Width = 110;
             btnBuscar.Height = 32;
             btnBuscar.VerticalAlignment = VerticalAlignment.Bottom;
             btnBuscar.Click += async (s, e) => await BuscarAsync();
-            Grid.SetColumn(btnBuscar, 4);
+            Grid.SetColumn(btnBuscar, 2);
             rejilla.Children.Add(btnBuscar);
 
             Border panel = Ui.Cristal(rejilla, new Thickness(12, 10, 12, 10));
@@ -170,13 +163,23 @@ namespace ClienteLavadora.vista
             try
             {
                 int? codigo = LeerCodigoOpcional();
-                string marca = txtMarca.Texto.Trim();
-                if (marca.Length == 0)
+                if (codigo == null)
                 {
-                    marca = null;
+                    throw new ArgumentException("Escriba el codigo de la lavadora para buscar.");
                 }
 
-                LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, marca));
+                LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, null));
+                if (lavadora == null)
+                {
+                    cargada = null;
+                    campos.Limpiar();
+                    campos.PermitirEdicion(false);
+                    campos.BloquearCodigo();
+                    btnGuardar.Habilitado = false;
+                    tituloFormulario.Text = "NO SE ENCONTRO LA LAVADORA";
+                    precioServidor.Text = "Verifique el codigo e intente de nuevo.";
+                    return;
+                }
                 Precargar(lavadora);
                 Sonidos.Click();
             }
@@ -276,6 +279,17 @@ namespace ClienteLavadora.vista
             {
                 int codigo = cargada.Codigo;
                 LavadoraData lavadora = await Task.Run(() => controlador.BuscarAsync(codigo, null));
+                if (lavadora == null)
+                {
+                    cargada = null;
+                    campos.Limpiar();
+                    campos.PermitirEdicion(false);
+                    campos.BloquearCodigo();
+                    btnGuardar.Habilitado = false;
+                    tituloFormulario.Text = "NO SE ENCONTRO LA LAVADORA";
+                    precioServidor.Text = "Verifique el codigo e intente de nuevo.";
+                    return;
+                }
                 Precargar(lavadora);
             }
             catch (Exception ex)
