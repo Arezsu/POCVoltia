@@ -2,124 +2,186 @@
 
 Segundo Proyecto 2026B - Diseno de Soluciones - Universidad de Ibague.
 
-Aplicacion distribuida con servicios web GraphQL: un servidor en Java guarda los datos y
-dos clientes de escritorio, hechos en lenguajes distintos (C# y Python), los consumen.
+Aplicacion distribuida basada en arquitectura de servicios web GraphQL: un servidor central en Java gestiona los datos en memoria y dos clientes de escritorio desacoplados, implementados en tecnologias distintas (C# y Python), consumen los servicios a traves de la red.
 
-| Parte | Tecnologia | Carpeta |
+| Componente | Tecnologia | Carpeta |
 | :--- | :--- | :--- |
-| Servidor | Java 17, Spring Boot, Spring GraphQL | `ServidorLavadora` |
-| Cliente 1 | C# (.NET Framework 4.8, WPF sin XAML) | `ClienteCSharp` |
-| Cliente 2 | Python 3 (Tkinter) | `ClientePython` |
+| Servidor | Java 17 / 21, Spring Boot 3, Spring GraphQL | `ServidorLavadora` |
+| Cliente 1 | C# (.NET Framework 4.8 / .NET 8, WPF en puro codigo C# sin XAML) | `ClienteLavadora` |
+| Cliente 2 | Python 3 (Tkinter con diseno modular y asincronia) | `ClientePython` |
 
-## Integrantes
+## Integrantes del Proyecto
 
-| Nombre | Codigo |
+| Nombre | Codigo Estudiantil |
 | :--- | :--- |
 | Juan Andres Bermeo Alvarez | 2220241053 |
 | Alejandro Sanchez Quimbayo | 2220241077 |
 | David Arredondo | 2220241062 |
 
-## Los dos objetos (maestro - detalle)
+---
 
+## Modelo de Dominio y Diagrama UML de Clases
+
+Para cumplir rigurosamente con la especificacion academica de arquitectura orientada a objetos y la Figura 1 (Maestro - Detalle: 1..1 a 0..*), se identifico y corrigio la premisa inicial donde se asociaba un programa unico por lavadora. En un sistema real de electrodomesticos, la entidad principal es la **Lavadora** (Maestro), la cual dispone de un historial o coleccion dependiente de registros (Detalle: mantenimientos tecnicos o catalogo de programas soportados).
+
+```mermaid
+classDiagram
+    class Electrodomestico {
+        <<abstract>>
+        #int codigo
+        #String marca
+        #double precioBase
+        #LocalDateTime fechaFabricacion
+        +calcularPrecioFinal()* double
+        +getCodigo() int
+        +getMarca() String
+        +getPrecioBase() double
+        +getFechaFabricacion() LocalDateTime
+    }
+
+    class Lavadora {
+        -double capacidadCargaKilos
+        -int velocidadCentrifugadoRPM
+        -boolean tecnologiaInverter
+        -int minutosLavado
+        -List~Mantenimiento~ mantenimientos
+        +builder() LavadoraBuilder
+        +calcularPrecioFinal() double
+        +getCapacidadCargaKilos() double
+        +getVelocidadCentrifugadoRPM() int
+        +isTecnologiaInverter() boolean
+        +getMinutosLavado() int
+        +getMantenimientos() List~Mantenimiento~
+    }
+
+    class Mantenimiento {
+        -int id
+        -String descripcion
+        -String tecnico
+        -double costo
+        -LocalDateTime fecha
+        -boolean completado
+        +getId() int
+        +getDescripcion() String
+        +getTecnico() String
+        +getCosto() double
+        +getFecha() LocalDateTime
+        +isCompletado() boolean
+    }
+
+    class ProgramaLavado {
+        -int codigo
+        -String nombre
+        -int minMinutos
+        -int maxMinutos
+        -double consumoAguaLitros
+        -LocalDateTime fechaCreacion
+        -boolean aguaCaliente
+        +cubre(int minutos) boolean
+        +getCodigo() int
+        +getNombre() String
+    }
+
+    class AlmacenDatos {
+        <<interface>>
+        +guardarLavadora(Lavadora) Lavadora
+        +buscarLavadoraPorCodigo(int) Lavadora
+        +listarLavadoras(String, Boolean) List~Lavadora~
+        +eliminarLavadora(int) boolean
+        +actualizarLavadora(Lavadora) Lavadora
+    }
+
+    class RepositorioMemoria {
+        <<Singleton>>
+        -static RepositorioMemoria instancia
+        -List~Lavadora~ lavadoras
+        -List~ProgramaLavado~ programas
+        +getInstancia() RepositorioMemoria
+    }
+
+    class LavadoraController {
+        -LavadoraService servicio
+        +lavadoras(String, Boolean) List~Lavadora~
+        +lavadoraPorCodigo(int) Lavadora
+        +crearLavadora(LavadoraInput) Lavadora
+        +actualizarLavadora(LavadoraUpdateInput) Lavadora
+        +eliminarLavadora(int) Boolean
+    }
+
+    Electrodomestico <|-- Lavadora : herencia
+    Lavadora "1..1" *-- "0..*" Mantenimiento : Maestro - Detalle
+    AlmacenDatos <|.. RepositorioMemoria : implementa
+    LavadoraController --> AlmacenDatos : usa
 ```
-ProgramaLavado  1..1  <------  0..*  Lavadora
-   (maestro)                         (detalle)
-```
 
-Un programa de lavado lo usan muchas lavadoras y cada lavadora usa un solo programa
-(el que cubre sus minutos de lavado).
+---
 
-| Objeto | Atributos |
+## Atributos Requeridos (Cumplimiento de Tipos)
+
+El proyecto cumple con la exigencia de contener mas de 5 atributos con tipos heterogeneos:
+
+| Objeto | Atributos y Tipos |
 | :--- | :--- |
-| ProgramaLavado | codigo (int), nombre (String), minMinutos (int), maxMinutos (int), consumoAguaLitros (double), fechaCreacion (LocalDateTime), aguaCaliente (boolean) |
-| Lavadora | codigo (int), marca (String), precioBase (double), fechaFabricacion (LocalDateTime), capacidadCargaKilos (double), velocidadCentrifugadoRPM (int), tecnologiaInverter (boolean), minutosLavado (int), programa (maestro) |
+| **Electrodomestico** (Abstracta) | `codigo` (int), `marca` (String), `precioBase` (double), `fechaFabricacion` (LocalDateTime). |
+| **Lavadora** (Maestro) | Hereda 4 de Electrodomestico + `capacidadCargaKilos` (double), `velocidadCentrifugadoRPM` (int), `tecnologiaInverter` (boolean), `minutosLavado` (int), `mantenimientos` (List). |
+| **Mantenimiento** (Detalle) | `id` (int), `descripcion` (String), `tecnico` (String), `costo` (double), `fecha` (LocalDateTime), `completado` (boolean). |
+| **ProgramaLavado** | `codigo` (int), `nombre` (String), `minMinutos` (int), `maxMinutos` (int), `consumoAguaLitros` (double), `fechaCreacion` (LocalDateTime), `aguaCaliente` (boolean). |
 
-Los datos se guardan en memoria, en dos colecciones (ArrayList) dentro del servidor.
-Lavadora hereda de la clase abstracta Electrodomestico (codigo, marca, precio base y fecha).
+---
 
-## Como ejecutarlo
+## Patrones de Diseno y Principios SOLID
 
-Primero el servidor y despues los clientes.
+1. **MVC (Modelo - Vista - Controlador):** Separacion estricta en servidor y clientes. La vista nunca hace peticiones directas de red sin pasar por los controladores o servicios.
+2. **Singleton:** Punto unico de almacenamiento en memoria (`RepositorioMemoria`) en el servidor, y cliente HTTP GraphQL compartido en los clientes para optimizar conexiones.
+3. **Builder:** Construccion segura de objetos complejos con validaciones paso a paso (`Lavadora.builder()`).
+4. **Observer:** Mecanismo reactivo para que la ventana de listado se actualice automaticamente al registrarse mutaciones (altas, bajas o cambios) desde otras ventanas.
+5. **SOLID:** Clases con responsabilidad unica (S), abiertas a extension (O), sustitucion de Liskov en la jerarquia de Electrodomestico (L), segregacion de interfaces (I) e inversion de dependencias mediante abstracciones (D).
 
-### 1. Servidor (IntelliJ)
+La explicacion paso a paso orientada a defensa tecnica se encuentra en `DOCUMENTACION.md`.
 
-1. Abrir la carpeta `ServidorLavadora`.
-2. Ejecutar `ServidorLavadoraApplication`.
-3. Queda escuchando en `http://localhost:8081/graphql`.
-4. Para probarlo sin cliente: `http://localhost:8081/graphiql`. Los codigos de prueba estan en
-   `pruebas_graphiql_voltia.txt`.
+---
 
-### 2. Cliente en C# (Visual Studio)
+## Guia de Ejecucion
 
-1. Abrir `ClienteCSharp/ClienteLavadora.slnx`.
-2. Ejecutar con F5. La primera vez Visual Studio descarga los paquetes de NuGet (necesita internet).
-3. Si el servidor esta en otro computador, cambiar `localhost` por su IP en
-   `ClienteCSharp/ClienteLavadora/App.config`.
+### 1. Servidor Java Spring Boot GraphQL
 
-### 3. Cliente en Python
+1. Abrir la carpeta `ServidorLavadora` en IntelliJ IDEA, VS Code o terminal.
+2. Ejecutar la aplicacion principal:
+   ```bash
+   mvn spring-boot:run
+   ```
+   o ejecutar `ServidorLavadoraApplication.java`.
+3. El endpoint GraphQL estara activo en: `http://localhost:8081/graphql`.
+4. Para realizar pruebas interactivas en el navegador: `http://localhost:8081/graphiql`.
+   Las consultas y mutaciones de ejemplo estan en `pruebas_graphiql_voltia.txt`.
 
-1. Tener Python 3.9 o mas (el instalador de python.org ya trae Tkinter). No hay que instalar paquetes.
-2. Abrir una terminal en la carpeta `ClientePython` y ejecutar:
+### 2. Cliente 1 en C# (WPF puro en C# sin XAML)
 
-```
-python main.py
-```
+1. Abrir la solucion `ClienteLavadora/ClienteLavadora.slnx` en Visual Studio.
+2. Restaurar paquetes NuGet (GraphQL.Client).
+3. Compilar y ejecutar con `F5`.
+4. La interfaz cuenta con diseno industrial, tambor animado (OjoDeBuey), control de hilos en segundo plano para no congelar la UI y panel de navegacion modular.
 
-3. Si el servidor esta en otro computador, definir la variable de entorno `VOLTIA_URL`
-   (ejemplo `http://192.168.1.20:8081/graphql`).
+### 3. Cliente 2 en Python (Tkinter)
 
-## Ventanas (una por caso de uso)
+1. Requiere Python 3.9 o superior.
+2. Entrar a la carpeta `ClientePython`:
+   ```bash
+   cd ClientePython
+   python main.py
+   ```
+3. Cuenta con sonido de inicio unico, ventanas modales independientes por caso de uso, validaciones y sincronizacion con el servidor.
 
-Los dos clientes tienen las mismas ventanas, para los dos objetos:
+---
 
-- Principal: menu (Archivo, Programa de lavado, Lavadora, Ayuda), logo y botones rapidos.
-- Adicionar: crea el objeto.
-- Consultar: busca UN objeto por uno o dos criterios (codigo y/o marca o nombre).
-- Actualizar: primero busca, muestra todos los datos y cambia uno o varios.
-- Eliminar: primero busca, muestra todos los datos y pide confirmacion.
-- Listar: tabla con 2 filtros hechos en el servidor. Se recarga sola si otra ventana cambia datos.
-- Ayuda > Acerca de: integrantes y version.
+## Ventanas y Casos de Uso del Sistema
 
-## Patrones de diseno y SOLID
+Cumpliendo con la rubrica de calificacion (una ventana independiente por caso de uso):
 
-Resumen: MVC, Singleton, Builder y Observer en el servidor y en los clientes.
-El detalle de donde esta cada uno esta en `DOCUMENTACION.md`.
-
-## Estructura de carpetas
-
-```
-ServidorLavadora/src/main/java/com/example/ServidorLavadora
-  controller/   controladores GraphQL (la C de MVC)
-  model/        Electrodomestico, Lavadora, ProgramaLavado y los inputs
-  repositorio/  AlmacenDatos (interface), RepositorioMemoria (Singleton), observadores
-  servicios/    logica de cada objeto
-  util/         validaciones
-  config/       configuracion de Spring
-
-ClienteCSharp/ClienteLavadora
-  gui/          ventanas y controles, todo escrito en C# (sin XAML)
-  model/        datos que llegan del servidor
-  servicios/    ClienteGraphQL (Singleton) y servicios por objeto
-  util/         animaciones, sonidos, notificador (Observer)
-
-ClientePython/voltia
-  modelos.py, servicios.py, graphql.py, controladores.py, observador.py
-  vista/        ventanas, formularios y tema
-```
-
-## Entrega en GitHub
-
-1. Crear un repositorio nuevo en GitHub (vacio, sin README).
-2. En la carpeta del proyecto ejecutar:
-
-```
-git init
-git add .
-git commit -m "Segundo proyecto Voltia"
-git branch -M main
-git remote add origin https://github.com/USUARIO/NOMBRE-DEL-REPOSITORIO.git
-git push -u origin main
-```
-
-3. Compartirlo con el correo del profesor: en GitHub entrar a Settings, luego Collaborators,
-   Add people y escribir `carlos.lugo@unibague.edu.co` (o dejar el repositorio publico y enviar el enlace).
+- **Ventana Principal:** Dashboard con acceso al menu corporativo, indicador de estado de conexion y accesos directos.
+- **Ventana Adicionar (20%):** Formulario con validacion exhaustiva de atributos y calculo de precio final.
+- **Ventana Consultar (20%):** Busqueda precisa por uno o dos criterios (codigo o marca), cargando el objeto individual.
+- **Ventana Actualizar (20%):** Busqueda previa obligatoria, precarga de datos actuales y aplicacion de mutacion en el servidor.
+- **Ventana Eliminar (20%):** Busqueda previa obligatoria, presentacion completa de campos y dialogo de confirmacion destructiva.
+- **Ventana Listar con Filtro (20%):** Panel de datos con filtrado en servidor y patron Observer para refresco automatico.
+- **Ventana Acerca De:** Informacion institucional del curso y datos de los integrantes.
