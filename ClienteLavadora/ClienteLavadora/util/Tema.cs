@@ -36,6 +36,9 @@ namespace ClienteLavadora.util
             Cambiar(CristalBorde, EsClaro ? "#55314958" : HexCristalBorde);
             Cambiar(Linea, EsClaro ? "#30314958" : HexLinea);
             Cambiar(PanelOscuro, EsClaro ? "#E4EDF1" : HexPanelOscuro);
+            Cambiar(FondoFecha, EsClaro ? "#F8FBFC" : "#0B141D");
+            Cambiar(BordeFecha, EsClaro ? "#9BB2BD" : "#405565");
+            Cambiar(TextoFecha, EsClaro ? "#172832" : "#E7F0F5");
         }
 
         private static void Cambiar(SolidColorBrush pincel, string color)
@@ -86,6 +89,9 @@ namespace ClienteLavadora.util
         public static readonly SolidColorBrush CristalBorde = Pincel(HexCristalBorde);
         public static readonly SolidColorBrush Linea = Pincel(HexLinea);
         public static readonly SolidColorBrush PanelOscuro = Pincel(HexPanelOscuro);
+        public static readonly SolidColorBrush FondoFecha = Pincel("#0B141D");
+        public static readonly SolidColorBrush BordeFecha = Pincel("#405565");
+        public static readonly SolidColorBrush TextoFecha = Pincel("#E7F0F5");
 
         // ====================================================================
         //  Tipografias

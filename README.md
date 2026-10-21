@@ -3,6 +3,12 @@
 Segundo Proyecto 2026B - Diseno de Soluciones - Universidad de Ibague.
 Version de la aplicacion: **v4.5**.
 
+<p align="center">
+  <img src="assets/readme-tambor.gif" alt="Tambor industrial VOLTIA en movimiento, sistema activo v4.5" width="600">
+</p>
+
+<p align="center"><b>Dos clientes, un servidor GraphQL y un tambor que nunca se queda quieto.</b></p>
+
 Aplicacion distribuida cliente-servidor sobre servicios web GraphQL: un servidor central
 en Java (Spring Boot) administra los datos en memoria y dos clientes independientes los
 consumen por la red, cada uno con su propia tecnologia.
@@ -37,8 +43,9 @@ asociados. El sistema permite:
 - Registrar, actualizar y eliminar los mantenimientos de cada lavadora.
 
 La consulta individual de un mantenimiento requiere el codigo de su lavadora y el id
-del mantenimiento. El servidor tambien expone busquedas combinadas para lavadoras; el
-flujo de usuario de ambos clientes prioriza el codigo, como se acordo para esta entrega.
+del mantenimiento. El servidor tambien expone busquedas combinadas para lavadoras; la
+interfaz de usuario las busca por codigo. El PDF pide acordar los criterios con el
+docente, pero no especifica cuales se acordaron para este proyecto.
 
 ---
 
@@ -366,7 +373,7 @@ POCVoltiaV4/
 │   ├── index.html
 │   ├── css/estilos.css
 │   ├── js/                            modelo, servicios, controlador, vista y observador
-│   └── servidor.js                    Servidor estatico local (Node, sin dependencias)
+│   └── servidor.js                    Servidor estatico local con Express
 ├── pruebas_graphiql_voltia.txt        Consultas y mutaciones listas para GraphiQL
 └── README.md
 ```

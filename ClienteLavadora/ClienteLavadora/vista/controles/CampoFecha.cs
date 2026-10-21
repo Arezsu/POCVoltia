@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Markup;
@@ -19,11 +20,12 @@ namespace ClienteLavadora.vista.controles
         {
             SelectedDateFormat = DatePickerFormat.Short;
             Language = XmlLanguage.GetLanguage("es-CO");
-            Background = Tema.Pincel("#0B141D");
-            Foreground = Tema.Pincel("#E7F0F5");
-            BorderBrush = Tema.Pincel("#405565");
+            Background = Tema.FondoFecha;
+            Foreground = Tema.TextoFecha;
+            BorderBrush = Tema.BordeFecha;
             BorderThickness = new System.Windows.Thickness(1);
             Padding = new System.Windows.Thickness(10, 7, 10, 7);
+            CalendarStyle = CrearEstiloCalendario();
             SelectedDate = DateTime.Today;
         }
 
@@ -38,12 +40,21 @@ namespace ClienteLavadora.vista.controles
             DatePickerTextBox campo = GetTemplateChild("PART_TextBox") as DatePickerTextBox;
             if (campo != null)
             {
-                campo.Background = Tema.Pincel("#0B141D");
-                campo.Foreground = Tema.Pincel("#E7F0F5");
-                campo.BorderBrush = Tema.Pincel("#405565");
+                campo.Background = Tema.FondoFecha;
+                campo.Foreground = Tema.TextoFecha;
+                campo.BorderBrush = Tema.BordeFecha;
                 campo.BorderThickness = new System.Windows.Thickness(0);
-                campo.CaretBrush = Tema.Pincel("#6FD3E8");
+                campo.CaretBrush = Tema.Cian;
             }
+        }
+
+        private static Style CrearEstiloCalendario()
+        {
+            Style estilo = new Style(typeof(System.Windows.Controls.Calendar));
+            estilo.Setters.Add(new System.Windows.Setter(Control.BackgroundProperty, Tema.Acero));
+            estilo.Setters.Add(new System.Windows.Setter(Control.ForegroundProperty, Tema.Texto));
+            estilo.Setters.Add(new System.Windows.Setter(Control.BorderBrushProperty, Tema.BordeFecha));
+            return estilo;
         }
 
         public string Texto
