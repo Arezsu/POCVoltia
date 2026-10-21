@@ -398,40 +398,28 @@ POCVoltiaV4/
 ### 2. Cliente C# de escritorio (desde Visual Studio)
 
 - **Desde Visual Studio:**
-  1. Abrir la solucion `POCVoltia.slnx` o `ClienteLavadora/ClienteLavadora.slnx`.
-  2. Seleccionar el proyecto `ClienteLavadora` como proyecto de inicio.
-  3. Presionar `F5` o el boton verde `Iniciar`.
-  4. La direccion del servidor se configura en `App.config` (clave `UrlServidor`).
+  1. Abrir la solucion `ClienteLavadora/ClienteLavadora.slnx`.
+  2. Presionar `F5` o el boton verde `Iniciar`.
+  3. La direccion del servidor se configura en `App.config` (clave `UrlServidor`).
 
 - **Desde terminal con dotnet:**
   ```bash
   dotnet run --project ClienteLavadora/ClienteLavadora/ClienteLavadora.csproj
   ```
 
-### 3. Cliente Web con Framework Express (desde Visual Studio o consola)
+### 3. Cliente Web con Framework Express (Node.js)
 
-El cliente web esta construido sobre el framework Express (Node.js) e incluye su proyecto `ClienteWeb.esproj` integrado en la solucion de Visual Studio.
+El cliente web esta construido sobre el framework Express (Node.js).
 
-- **Opcion A: Desde Visual Studio (F5 o Menu):**
-  1. Abrir `POCVoltia.slnx` en Visual Studio.
-  2. En el Explorador de Soluciones vera los dos proyectos: `ClienteLavadora` y `ClienteWeb`.
-  3. Para ejecutar el web: clic derecho sobre `ClienteWeb` -> `Establecer como proyecto de inicio` (Set as Startup Project) y presionar `F5` (Iniciar).
-  4. O bien: clic derecho sobre el archivo `package.json` en Visual Studio y seleccionar `Run npm start`.
-  5. O bien: abrir la terminal integrada de Visual Studio (menu `Ver` -> `Terminal`) y escribir:
-     ```bash
-     cd ClienteWeb
-     npm start
-     ```
-
-- **Opcion B: Desde cualquier terminal:**
+- **Desde terminal (o terminal integrada de Visual Studio en Ver -> Terminal):**
   ```bash
   cd ClienteWeb
   npm start
   ```
   Luego abrir en el navegador: `http://localhost:5501`.
 
-- **Opcion C: Abrir directo en el navegador:**
-  Tambien se puede hacer doble clic en `ClienteWeb/index.html`. El servidor Java tiene CORS habilitado y funcionara de forma directa.
+- **Opcion alternativa:**
+  Tambien se puede hacer doble clic en `ClienteWeb/index.html` para abrirlo directamente en el navegador. El servidor Java tiene CORS habilitado y funcionara de forma directa.
 
 ---
 
