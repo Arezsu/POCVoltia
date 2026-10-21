@@ -8,9 +8,9 @@ consumen por la red, cada uno con su propia tecnologia.
 
 | Componente | Tecnologia | Carpeta |
 | :--- | :--- | :--- |
-| Servidor | Java 17-21, Spring Boot 4, Spring GraphQL | `ServidorLavadora` |
+| Servidor | Java 17-21, Spring Boot, Spring GraphQL | `ServidorLavadora` |
 | Cliente 1 | C# con WPF en puro codigo C# (sin un solo archivo XAML) | `ClienteLavadora` |
-| Cliente 2 | Aplicacion web en JavaScript puro (HTML + CSS + JS, sin frameworks) | `ClienteWeb` |
+| Cliente 2 | Aplicacion web con framework Express (Node.js + JavaScript) | `ClienteWeb` |
 
 ## Integrantes del Proyecto
 
@@ -378,41 +378,60 @@ POCVoltiaV4/
 - Para el cliente C#: Visual Studio 2022 o el SDK de .NET (el proyecto apunta a
   .NET Framework 4.8).
 
-### 1. Servidor (primero)
+### 1. Servidor Java (desde IntelliJ o consola)
 
-```bash
-cd ServidorLavadora
-mvnw.cmd spring-boot:run        # Windows
-./mvnw spring-boot:run          # Linux o macOS
-```
+- **Desde IntelliJ IDEA:**
+  1. Abrir la carpeta `ServidorLavadora`.
+  2. Abrir el archivo `ServidorLavadoraApplication.java`.
+  3. Clic derecho y seleccionar `Run 'ServidorLavadoraApplication'`.
+- **Desde terminal:**
+  ```bash
+  cd ServidorLavadora
+  mvnw.cmd spring-boot:run        # Windows
+  ./mvnw spring-boot:run          # Linux o macOS
+  ```
 
-- Servicio GraphQL: `http://localhost:8081/graphql`
-- Pruebas interactivas: `http://localhost:8081/graphiql`
+- Servicio GraphQL activo en: `http://localhost:8081/graphql`
+- Pruebas interactivas en: `http://localhost:8081/graphiql`
 - Las consultas de ejemplo estan en `pruebas_graphiql_voltia.txt`.
 
-### 2. Cliente C# (WPF sin XAML)
+### 2. Cliente C# de escritorio (desde Visual Studio)
 
-```bash
-cd ClienteLavadora
-dotnet build ClienteLavadora/ClienteLavadora.csproj
-dotnet run --project ClienteLavadora/ClienteLavadora.csproj
-```
+- **Desde Visual Studio:**
+  1. Abrir la solucion `POCVoltia.slnx` o `ClienteLavadora/ClienteLavadora.slnx`.
+  2. Seleccionar el proyecto `ClienteLavadora` como proyecto de inicio.
+  3. Presionar `F5` o el boton verde `Iniciar`.
+  4. La direccion del servidor se configura en `App.config` (clave `UrlServidor`).
 
-Tambien se puede abrir `ClienteLavadora/ClienteLavadora.slnx` en Visual Studio y ejecutar
-con `F5`. La direccion del servidor se cambia en `App.config` (clave `UrlServidor`).
+- **Desde terminal con dotnet:**
+  ```bash
+  dotnet run --project ClienteLavadora/ClienteLavadora/ClienteLavadora.csproj
+  ```
 
-### 3. Cliente web (JavaScript)
+### 3. Cliente Web con Framework Express (desde Visual Studio o consola)
 
-Opcion recomendada, con el servidor estatico incluido:
+El cliente web esta construido sobre el framework Express (Node.js) e incluye su proyecto `ClienteWeb.esproj` integrado en la solucion de Visual Studio.
 
-```bash
-node ClienteWeb/servidor.js
-```
+- **Opcion A: Desde Visual Studio (F5 o Menu):**
+  1. Abrir `POCVoltia.slnx` en Visual Studio.
+  2. En el Explorador de Soluciones vera los dos proyectos: `ClienteLavadora` y `ClienteWeb`.
+  3. Para ejecutar el web: clic derecho sobre `ClienteWeb` -> `Establecer como proyecto de inicio` (Set as Startup Project) y presionar `F5` (Iniciar).
+  4. O bien: clic derecho sobre el archivo `package.json` en Visual Studio y seleccionar `Run npm start`.
+  5. O bien: abrir la terminal integrada de Visual Studio (menu `Ver` -> `Terminal`) y escribir:
+     ```bash
+     cd ClienteWeb
+     npm start
+     ```
 
-Luego abrir `http://localhost:5501`.
+- **Opcion B: Desde cualquier terminal:**
+  ```bash
+  cd ClienteWeb
+  npm start
+  ```
+  Luego abrir en el navegador: `http://localhost:5501`.
 
-Opcion alternativa: abrir `ClienteWeb/index.html` directamente en el navegador. El
-servidor Java ya tiene CORS habilitado para cualquier origen, por eso funciona igual.
+- **Opcion C: Abrir directo en el navegador:**
+  Tambien se puede hacer doble clic en `ClienteWeb/index.html`. El servidor Java tiene CORS habilitado y funcionara de forma directa.
 
 ---
 

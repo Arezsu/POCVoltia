@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ClienteLavadora/ClienteLavadora/ClienteLavadora.csproj" />
+  <Project Path="ClienteWeb/ClienteWeb.esproj" />
+</Solution>

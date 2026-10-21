@@ -21,7 +21,7 @@ Voltia es un sistema distribuido de tres piezas que se comunican por la red:
 1. **Servidor Java (Spring Boot + GraphQL):** guarda todos los datos en memoria y expone
    un servicio web con consultas y mutaciones.
 2. **Cliente C# (WPF sin XAML):** aplicacion de escritorio para Windows.
-3. **Cliente web (JavaScript puro):** aplicacion que corre en el navegador.
+3. **Cliente web (Framework Express en Node.js + JavaScript):** aplicacion web servida con Express y ejecutada en el navegador.
 
 Los tres hablan el mismo idioma: **GraphQL**. El cliente no pide "el recurso lavadoras/101"
 como en REST, sino que describe exactamente que datos necesita, y el servidor responde
