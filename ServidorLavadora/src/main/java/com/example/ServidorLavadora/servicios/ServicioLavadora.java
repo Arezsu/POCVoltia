@@ -184,7 +184,7 @@ public class ServicioLavadora {
                 lavadora.setMinutosLavado(input.minutosLavado());
             }
 
-            almacen.guardar(lavadora);
+            lavadora = almacen.guardar(lavadora);
             almacen.notificar("Lavadora " + codigo + " actualizada");
             return lavadora;
         }

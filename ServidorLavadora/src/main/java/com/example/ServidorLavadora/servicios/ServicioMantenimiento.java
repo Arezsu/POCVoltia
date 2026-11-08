@@ -146,9 +146,11 @@ public class ServicioMantenimiento {
                 mantenimiento.setCompletado(input.completado());
             }
 
-            almacen.guardar(lavadora);
+            Lavadora lavadoraGuardada = almacen.guardar(lavadora);
+            Mantenimiento mantenimientoGuardado = buscarEnLavadora(lavadoraGuardada, id);
+            enriquecer(mantenimientoGuardado, lavadoraGuardada);
             almacen.notificar("Mantenimiento " + id + " de la lavadora " + codigoLavadora + " actualizado");
-            return mantenimiento;
+            return mantenimientoGuardado;
         }
     }
 

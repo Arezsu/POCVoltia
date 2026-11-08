@@ -61,6 +61,7 @@
       this.mantenimientoAEliminar = null;
       this.modoMantenimientos = 'listar';
       this.versionMantenimientos = 0;
+      this.marcasDisponibles = [];
     }
 
     // =================================================================
@@ -91,6 +92,13 @@
         indicadorConexion: porId('indicador-conexion'),
         textoConexion: porId('texto-conexion'),
         compuertaEstado: porId('compuerta-estado'),
+        pestanasAplicacion: porId('pestanas-aplicacion'),
+        tabInicio: porId('tab-inicio'),
+        tabLavadoras: porId('tab-lavadoras'),
+        panelInicio: porId('panel-inicio'),
+        panelFiltros: porId('panel-filtros'),
+        panelTabla: porId('panel-tabla'),
+        panelDetalleLavadora: porId('panel-detalle-lavadora'),
 
         // Filtros y acciones
         formFiltros: porId('form-filtros'),
@@ -191,6 +199,14 @@
     suscribirEventos() {
       this.notificador.suscribir(EVENTOS.DATOS, (estado) => {
         this.estado = estado;
+        const filtros = estado.filtros || {};
+        if (!filtros.marca && filtros.tecnologiaInverter == null && filtros.conMantenimientos == null) {
+          this.marcasDisponibles = Array.from(new Set((estado.lavadoras || [])
+            .map((lavadora) => String(lavadora.marca || '').trim())
+            .filter(Boolean)))
+            .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+          this.renderizarOpcionesMarcas();
+        }
         this.renderTabla();
         this.renderDetalle(estado.seleccionada);
         this.renderVersion(estado.versionDatos);
@@ -220,6 +236,10 @@
       // Filtros
       this.escuchar(this.refs.formFiltros, 'submit', (evento) => this.aplicarFiltros(evento));
       this.escuchar(this.refs.botonLimpiarFiltros, 'click', () => this.limpiarFiltros());
+      this.escuchar(this.refs.pestanasAplicacion, 'click', (evento) => {
+        const boton = evento.target.closest('button[data-vista]');
+        if (boton) this.cambiarVista(boton.dataset.vista, true);
+      });
 
       this.escuchar(this.refs.botonMantenimientos, 'click', () => this.abrirMantenimientos(null));
       this.escuchar(document, 'click', (evento) => this.ejecutarAccionMenu(evento));
@@ -566,7 +586,7 @@
     describirFiltros(filtros) {
       const partes = [];
       if (filtros && filtros.marca) {
-        partes.push('marca contiene "' + filtros.marca + '"');
+        partes.push('marca "' + filtros.marca + '"');
       }
       if (filtros && filtros.tecnologiaInverter !== null && filtros.tecnologiaInverter !== undefined) {
         partes.push(filtros.tecnologiaInverter ? 'con inverter' : 'sin inverter');
@@ -858,8 +878,51 @@
     // =================================================================
     //  Filtros
     // =================================================================
+    cambiarVista(nombre, cargarLista) {
+      const vista = nombre === 'lavadoras' ? 'lavadoras' : 'inicio';
+      const mostrarLavadoras = vista === 'lavadoras';
+      document.body.dataset.vista = vista;
+      this.controladorLavadoras.listadoVisible = mostrarLavadoras;
+      this.refs.tabInicio.setAttribute('aria-selected', String(!mostrarLavadoras));
+      this.refs.tabInicio.tabIndex = mostrarLavadoras ? -1 : 0;
+      this.refs.tabLavadoras.setAttribute('aria-selected', String(mostrarLavadoras));
+      this.refs.tabLavadoras.tabIndex = mostrarLavadoras ? 0 : -1;
+      this.refs.panelInicio.hidden = mostrarLavadoras;
+      this.refs.panelFiltros.hidden = !mostrarLavadoras;
+      this.refs.panelTabla.hidden = !mostrarLavadoras;
+      this.refs.panelDetalleLavadora.hidden = !mostrarLavadoras;
+
+      if (mostrarLavadoras && cargarLista &&
+          (!this.controladorLavadoras.cargado || this.controladorLavadoras.cambiosPendientes)) {
+        this.controladorLavadoras.listarTodas().catch(() => {});
+      }
+    }
+
+    renderizarOpcionesMarcas() {
+      const selector = this.refs.filtroMarca;
+      if (!selector) return;
+      const seleccionada = selector.value;
+      const opciones = [new Option('Todas las marcas', '')];
+      this.marcasDisponibles.forEach((marca) => {
+        opciones.push(new Option(marca, marca));
+      });
+      selector.replaceChildren(...opciones);
+      selector.value = this.marcasDisponibles.includes(seleccionada) ? seleccionada : '';
+    }
+
+    registrarMarcaDisponible(marca) {
+      const nombre = String(marca || '').trim();
+      if (!nombre || this.marcasDisponibles.some((actual) => actual.toLocaleLowerCase() === nombre.toLocaleLowerCase())) {
+        return;
+      }
+      this.marcasDisponibles.push(nombre);
+      this.marcasDisponibles.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+      this.renderizarOpcionesMarcas();
+    }
+
     aplicarFiltros(evento) {
       if (evento) evento.preventDefault();
+      this.cambiarVista('lavadoras', false);
       const filtros = {
         marca: this.refs.filtroMarca.value.trim(),
         tecnologiaInverter: this.valorBooleano(this.refs.filtroInverter.value),
@@ -875,15 +938,18 @@
       if (!boton) return;
       switch (boton.dataset.action) {
         case 'filtrar':
+          this.cambiarVista('lavadoras', false);
           this.aplicarFiltros();
-          document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
-        case 'limpiar-filtros': this.limpiarFiltros(); break;
+        case 'limpiar-filtros':
+          this.cambiarVista('lavadoras', false);
+          this.limpiarFiltros();
+          break;
         case 'listar':
+          this.cambiarVista('lavadoras', false);
           this.refs.filtroMarca.value = '';
           this.refs.filtroInverter.value = '';
           this.controladorLavadoras.listarTodas().catch(() => {});
-          document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
         case 'agregar': this.abrirAgregar(); break;
         case 'consultar': this.abrirConsultar(); break;
@@ -900,6 +966,7 @@
     }
 
     limpiarFiltros() {
+      this.cambiarVista('lavadoras', false);
       this.refs.filtroMarca.value = '';
       this.refs.filtroInverter.value = '';
       this.controladorLavadoras.limpiarFiltros().catch(() => {});
@@ -1164,7 +1231,8 @@
 
       this.bloquearBoton(this.refs.botonGuardarLavadora, true, 'Guardando...');
       try {
-        await this.controladorLavadoras.agregar(datos);
+        const creada = await this.controladorLavadoras.agregar(datos);
+        if (creada) this.registrarMarcaDisponible(creada.marca);
         this.reproducirSonido('lavadora');
         this.cerrarModal('modal-agregar');
       } catch (error) {
@@ -1289,7 +1357,11 @@
       ];
       const cambios = {};
       campos.forEach((campo) => {
-        if (String(datos[campo]) !== String(original[campo])) {
+        const nuevo = String(datos[campo]);
+        const anterior = String(original[campo]);
+        const nuevoComparable = campo === 'fechaFabricacion' ? nuevo.slice(0, 16) : nuevo;
+        const anteriorComparable = campo === 'fechaFabricacion' ? anterior.slice(0, 16) : anterior;
+        if (nuevoComparable !== anteriorComparable) {
           cambios[campo] = datos[campo];
         }
       });
@@ -1319,7 +1391,8 @@
 
       this.bloquearBoton(this.refs.botonGuardarActualizar, true, 'Guardando...');
       try {
-        await this.controladorLavadoras.actualizar(this.lavadoraActualizar.codigo, cambios);
+        const actualizada = await this.controladorLavadoras.actualizar(this.lavadoraActualizar.codigo, cambios);
+        if (actualizada) this.registrarMarcaDisponible(actualizada.marca);
         this.reproducirSonido('click');
         this.cerrarModal('modal-actualizar');
       } catch (error) {

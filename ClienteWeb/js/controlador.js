@@ -35,6 +35,8 @@
       this.codigoSeleccionado = null;
       this.versionDatos = null;
       this.cargado = false;
+      this.listadoVisible = false;
+      this.cambiosPendientes = false;
     }
 
     // -------------------------------------------------------------------
@@ -91,6 +93,7 @@
         this.lavadoras = (resultados[0] || []).map((datos) => new Voltia.Lavadora(datos));
         this.versionDatos = resultados[1];
         this.cargado = true;
+        this.cambiosPendientes = false;
         this.ajustarSeleccion();
         this.notificador.notificar(EVENTOS.DATOS, this.estado());
       } catch (error) {
@@ -144,6 +147,22 @@
       await this.listarTodas();
     }
 
+    async refrescarTrasMutacion() {
+      if (!this.listadoVisible || !this.cargado) {
+        this.cambiosPendientes = true;
+        return;
+      }
+      try {
+        await this.recargar({ silencioso: true });
+      } catch (error) {
+        this.cambiosPendientes = true;
+        this.notificador.notificar(EVENTOS.MENSAJE, {
+          tipo: 'info',
+          texto: 'El cambio se guardó en el servidor, pero no se pudo actualizar la grilla. Vuelve a Listar lavadoras.'
+        });
+      }
+    }
+
     normalizarBooleano(valor) {
       if (valor === true || valor === 'true') {
         return true;
@@ -183,8 +202,9 @@
     async agregar(datos) {
       try {
         const creada = await this.cliente.agregarLavadora(this.entradaLavadora(datos));
+        if (!creada) throw new Error('GraphQL no confirmó que la lavadora se guardó.');
         this.codigoSeleccionado = creada ? creada.codigo : this.codigoSeleccionado;
-        await this.recargar({ silencioso: true });
+        await this.refrescarTrasMutacion();
         const texto = creada
           ? 'Lavadora ' + creada.codigo + ' (' + creada.marca + ') agregada correctamente.'
           : 'Lavadora agregada correctamente.';
@@ -216,8 +236,9 @@
     async actualizar(codigo, cambios) {
       try {
         const actualizada = await this.cliente.actualizarLavadora(Number(codigo), cambios);
+        if (!actualizada) throw new Error('GraphQL no confirmó que la lavadora se actualizó.');
         this.codigoSeleccionado = Number(codigo);
-        await this.recargar({ silencioso: true });
+        await this.refrescarTrasMutacion();
         const texto = actualizada
           ? 'Lavadora ' + actualizada.codigo + ' actualizada correctamente.'
           : 'Lavadora actualizada correctamente.';
@@ -235,11 +256,12 @@
     async eliminar(codigo) {
       try {
         const numero = Number(codigo);
-        await this.cliente.eliminarLavadora(numero);
+        const eliminada = await this.cliente.eliminarLavadora(numero);
+        if (!eliminada) throw new Error('GraphQL no confirmó que la lavadora se eliminó.');
         if (this.codigoSeleccionado === numero) {
           this.codigoSeleccionado = null;
         }
-        await this.recargar({ silencioso: true });
+        await this.refrescarTrasMutacion();
         this.notificador.notificar(EVENTOS.MENSAJE, {
           tipo: 'exito',
           texto: 'Lavadora ' + numero + ' eliminada con sus mantenimientos.'
@@ -262,10 +284,9 @@
     async verificarVersion() {
       try {
         const version = await this.cliente.obtenerVersionDatos();
-        if (!this.cargado || this.versionDatos === null) {
+        if (this.versionDatos === null) {
           // Consultar la version no debe disparar una carga masiva de la grilla.
-          // La lista se mantiene vacia hasta que el usuario la solicite o una
-          // mutacion de esta sesion la actualice explicitamente.
+          // La lista se mantiene vacia hasta que el usuario la solicite.
           this.versionDatos = version;
           return false;
         }
@@ -273,6 +294,13 @@
           return false;
         }
         this.versionDatos = version;
+        if (!this.cargado) {
+          return false;
+        }
+        if (!this.listadoVisible) {
+          this.cambiosPendientes = true;
+          return false;
+        }
         await this.recargar({ silencioso: true });
         this.notificador.notificar(EVENTOS.MENSAJE, {
           tipo: 'info',
@@ -332,6 +360,7 @@
           Number(codigoLavadora),
           this.entradaMantenimiento(datos)
         );
+        if (!creado) throw new Error('GraphQL no confirmó que el mantenimiento se guardó.');
         await this.refrescarMaestro();
         const texto = creado
           ? 'Mantenimiento ' + creado.id + ' agregado a la lavadora ' + codigoLavadora + '.'
@@ -351,6 +380,7 @@
           Number(id),
           this.entradaMantenimiento(datos)
         );
+        if (!actualizado) throw new Error('GraphQL no confirmó que el mantenimiento se actualizó.');
         await this.refrescarMaestro();
         const texto = actualizado
           ? 'Mantenimiento ' + actualizado.id + ' actualizado correctamente.'
@@ -365,7 +395,8 @@
 
     async eliminar(codigoLavadora, id) {
       try {
-        await this.cliente.eliminarMantenimiento(Number(codigoLavadora), Number(id));
+        const eliminado = await this.cliente.eliminarMantenimiento(Number(codigoLavadora), Number(id));
+        if (!eliminado) throw new Error('GraphQL no confirmó que el mantenimiento se eliminó.');
         await this.refrescarMaestro();
         this.notificador.notificar(EVENTOS.MENSAJE, {
           tipo: 'exito',
@@ -394,11 +425,7 @@
      * nuevos (cantidad de mantenimientos, pendientes y costo).
      */
     async refrescarMaestro() {
-      try {
-        await this.controladorLavadoras.recargar({ silencioso: true });
-      } catch (error) {
-        // El controlador del maestro ya avisa; aqui solo se evita cortar el flujo.
-      }
+      await this.controladorLavadoras.refrescarTrasMutacion();
     }
 
     avisarError(error) {

@@ -474,7 +474,19 @@ este caso; esa parte debe validarse con el docente.
 - Servicio GraphQL activo en: `http://localhost:8081/graphql`
 - MongoDB crea las colecciones `lavadoras` y `mantenimientos` al guardar el primer registro.
   El servidor genera el `_id` BSON de tipo `ObjectId`; GraphQL lo expone como hexadecimal.
-- Pruebas interactivas en: `http://localhost:8081/graphiql`
+- Consola interactiva GraphiQL: abre `http://localhost:8081/graphiql` en el navegador cuando
+  el servidor esté iniciado. Escribe una consulta en el editor y pulsa el botón de ejecutar.
+- `http://localhost:8081/graphql` es el endpoint que consumen los clientes; para explorar las
+  consultas manualmente, usa GraphiQL. Por ejemplo:
+  ```graphql
+  query {
+    lavadoras {
+      codigo
+      marca
+      mongoId
+    }
+  }
+  ```
 - Las consultas de ejemplo estan en `pruebas_graphiql_voltia.txt`.
 
 ### 2. Cliente C# de escritorio (desde Visual Studio)
@@ -496,9 +508,11 @@ El cliente web esta construido sobre el framework Express (Node.js).
 - **Desde terminal (o terminal integrada de Visual Studio en Ver -> Terminal):**
   ```bash
   cd ClienteWeb
+  npm install                     # solo la primera vez
   npm start
   ```
-  Luego abrir en el navegador: `http://localhost:5501`.
+  Luego abrir en el navegador: `http://localhost:5501`. Deja activo el servidor Java en el
+  puerto 8081; si ya está iniciado desde IntelliJ, no inicies otra instancia en la terminal.
 
 - **Opcion alternativa:**
   Tambien se puede hacer doble clic en `ClienteWeb/index.html` para abrirlo directamente en el navegador. El servidor Java tiene CORS habilitado y funcionara de forma directa.
