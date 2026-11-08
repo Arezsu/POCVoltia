@@ -24,7 +24,7 @@
   function arrancar() {
     const botonTema = document.getElementById('boton-tema');
     const temaGuardado = global.localStorage.getItem('voltia-tema');
-    document.body.dataset.tema = temaGuardado === 'claro' ? 'claro' : 'oscuro';
+    document.body.dataset.tema = temaGuardado === 'oscuro' ? 'oscuro' : 'claro';
     if (botonTema) {
       const actualizarBotonTema = () => {
         const claro = document.body.dataset.tema === 'claro';
@@ -41,12 +41,7 @@
     }
     const notificador = Voltia.notificador;
     const cliente = Voltia.clienteGraphQL;
-    const selectorApi = document.getElementById('selector-api');
-    if (selectorApi) {
-      const modoGuardado = global.localStorage.getItem('voltia-api') === 'rest' ? 'rest' : 'graphql';
-      selectorApi.value = modoGuardado;
-      cliente.setModoApi(modoGuardado);
-    }
+    cliente.setModoApi('graphql');
 
     // Composicion de dependencias: se crean una sola vez y se pasan a quien
     // las necesita. Ni la vista ni el controlador crean servicios por su cuenta.
@@ -56,19 +51,6 @@
       notificador,
       controladorLavadoras
     );
-    if (selectorApi) {
-      selectorApi.addEventListener('change', async () => {
-        cliente.setModoApi(selectorApi.value);
-        try {
-          await controladorLavadoras.recargar();
-          notificador.notificar(Voltia.EVENTOS.MENSAJE, {
-            tipo: 'exito', texto: 'Conexión cambiada a ' + selectorApi.value.toUpperCase() + '.'
-          });
-        } catch (error) {
-          // El controlador informa el error y conserva los datos visibles.
-        }
-      });
-    }
     const vista = new Voltia.Vista(notificador);
 
     vista.iniciar(controladorLavadoras, controladorMantenimientos);
@@ -105,13 +87,10 @@
       }
     });
 
-    // Primera carga. El vigilante arranca siempre, asi se recupera solo si el
-    // servidor estaba apagado al abrir la pagina.
-    controladorLavadoras.iniciar().then(() => {
-      programarVigilante();
-    }).catch(() => {
-      programarVigilante();
-    });
+    // La lista abre en blanco y solo se carga cuando el usuario ejecuta la
+    // accion explicita de consultar o cuando se produce un cambio del sistema.
+    programarVigilante();
+    controladorLavadoras.cargado = false;
 
     // Referencia util para revisar el estado desde la consola del navegador.
     global.VoltiaApp = {

@@ -18,11 +18,21 @@ namespace ClienteLavadora.util
     /// </summary>
     public static class Tema
     {
-        public static bool EsClaro { get; private set; }
+        public static bool EsClaro { get; private set; } = true;
+
+        static Tema()
+        {
+            AplicarColores();
+        }
 
         public static void Alternar()
         {
             EsClaro = !EsClaro;
+            AplicarColores();
+        }
+
+        private static void AplicarColores()
+        {
             Cambiar(Fondo, EsClaro ? "#EDF3F6" : HexFondo);
             Cambiar(FondoAlto, EsClaro ? "#DCE7EC" : HexFondoAlto);
             Cambiar(Chasis, EsClaro ? "#FFFFFF" : HexChasis);

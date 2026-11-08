@@ -38,7 +38,7 @@ namespace ClienteLavadora.vista.controles
             this.acento = Tema.ColorDe(acentoHex);
             this.relleno = relleno;
 
-            CornerRadius = new CornerRadius(10);
+            CornerRadius = new CornerRadius(3);
             BorderThickness = new Thickness(1);
             Height = 36;
             MinWidth = 92;

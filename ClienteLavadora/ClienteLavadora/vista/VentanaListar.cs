@@ -47,6 +47,7 @@ namespace ClienteLavadora.vista
 
         private LavadoraData seleccionada;
         private bool cargando;
+        private bool filtrosAplicados;
 
         public VentanaListar() : base("LISTAR LAVADORAS", 1220, 810, true, 96)
         {
@@ -71,10 +72,12 @@ namespace ClienteLavadora.vista
             NotificadorDatos.DatosCambiaron += AlCambiarDatos;
             Closed += AlCerrar;
 
-            Loaded += async (s, e) =>
+            Loaded += (s, e) =>
             {
                 Anime.Escalonado(new UIElement[] { filtros, cuerpo, pie }, 80, 300);
-                await CargarAsync();
+                grilla.ItemsSource = new List<LavadoraData>();
+                contador.Text = "0 lavadora(s)";
+                aviso.Text = "Lista vacia. Use Filtrar o Recargar para consultar datos.";
             };
         }
 
@@ -125,10 +128,7 @@ namespace ClienteLavadora.vista
             btnLimpiar.Height = 32;
             btnLimpiar.Click += async (s, e) =>
             {
-                txtMarca.Texto = "";
-                cmbInverter.SelectedIndex = 0;
-                cmbMantenimientos.SelectedIndex = 0;
-                await CargarAsync();
+                await CargarTodasAsync();
             };
             botones.Children.Add(btnLimpiar);
 
@@ -261,7 +261,7 @@ namespace ClienteLavadora.vista
             btnRecargar.Width = 110;
             btnRecargar.Height = 34;
             btnRecargar.Margin = new Thickness(0, 0, 8, 0);
-            btnRecargar.Click += async (s, e) => await CargarAsync();
+            btnRecargar.Click += async (s, e) => await CargarTodasAsync();
             derecha.Children.Add(btnRecargar);
 
             BotonVoltia btnCerrar = BotonVoltia.Secundario("Cerrar");
@@ -282,6 +282,26 @@ namespace ClienteLavadora.vista
         /// <summary>Pide al servidor la lista con los filtros escogidos.</summary>
         private async Task CargarAsync()
         {
+            filtrosAplicados = true;
+            await CargarListaAsync(true);
+        }
+
+        private async Task CargarTodasAsync()
+        {
+            filtrosAplicados = false;
+            txtMarca.Texto = "";
+            cmbInverter.SelectedIndex = 0;
+            cmbMantenimientos.SelectedIndex = 0;
+            await CargarListaAsync(false);
+        }
+
+        private async Task CargarActualAsync()
+        {
+            await CargarListaAsync(filtrosAplicados);
+        }
+
+        private async Task CargarListaAsync(bool conFiltros)
+        {
             if (cargando)
             {
                 return; // Evita dos peticiones iguales al mismo tiempo
@@ -294,17 +314,19 @@ namespace ClienteLavadora.vista
 
             try
             {
-                string marca = txtMarca.Texto.Trim();
-                if (marca.Length == 0)
+                string marca = conFiltros ? txtMarca.Texto.Trim() : null;
+                if (marca != null && marca.Length == 0)
                 {
                     marca = null;
                 }
-                bool? inverter = Opcion(cmbInverter.SelectedIndex);
-                bool? conMantenimientos = Opcion(cmbMantenimientos.SelectedIndex);
+                bool? inverter = conFiltros ? Opcion(cmbInverter.SelectedIndex) : null;
+                bool? conMantenimientos = conFiltros ? Opcion(cmbMantenimientos.SelectedIndex) : null;
 
                 // Task.Run: la red corre fuera del hilo de la interfaz.
                 List<LavadoraData> lista = await Task.Run(
-                    () => controlador.ListarAsync(marca, inverter, conMantenimientos));
+                    () => conFiltros
+                        ? controlador.ListarAsync(marca, inverter, conMantenimientos)
+                        : controlador.ListarTodasAsync());
 
                 grilla.ItemsSource = lista;
                 Anime.Contar(contador, lista.Count, "{0} lavadora(s)");
@@ -422,7 +444,7 @@ namespace ClienteLavadora.vista
         private async void RecargarPorAviso()
         {
             aviso.Text = "Cambio detectado: recargando...";
-            await CargarAsync();
+            await CargarActualAsync();
         }
 
         private void AlCerrar(object remitente, EventArgs argumentos)

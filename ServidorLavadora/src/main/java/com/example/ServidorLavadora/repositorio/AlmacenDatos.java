@@ -3,6 +3,7 @@ package com.example.ServidorLavadora.repositorio;
 import com.example.ServidorLavadora.model.Lavadora;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Abstraccion del lugar donde se guardan los datos (principio de inversion de
@@ -24,6 +25,21 @@ public interface AlmacenDatos {
      * lista de mantenimientos (el detalle). Usar siempre dentro del candado.
      */
     List<Lavadora> lavadoras();
+
+    /** Devuelve el listado aplicando los criterios en el almacen de datos. */
+    List<Lavadora> listarPorFiltro(String marca, Boolean tecnologiaInverter, Boolean conMantenimientos);
+
+    /** Busca un maestro por su clave sin cargar toda la coleccion. */
+    Optional<Lavadora> buscarPorCodigo(int codigo);
+
+    /** Busca una lavadora aplicando los criterios recibidos por el usuario. */
+    Optional<Lavadora> buscarPorCriterios(Integer codigo, String marca);
+
+    /** Persiste una lavadora nueva o actualizada en el almacen activo. */
+    Lavadora guardar(Lavadora lavadora);
+
+    /** Elimina una lavadora por su codigo y sus detalles asociados. */
+    boolean eliminar(int codigo);
 
     /** Avisa a los observadores que algo cambio (patron Observer). */
     void notificar(String evento);

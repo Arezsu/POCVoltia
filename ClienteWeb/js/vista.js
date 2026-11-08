@@ -99,18 +99,8 @@
         filtroMantenimientos: porId('filtro-mantenimientos'),
         botonLimpiarFiltros: porId('boton-limpiar-filtros'),
         resumenFiltros: porId('resumen-filtros'),
-        botonAgregar: porId('boton-agregar'),
-        botonListar: porId('boton-listar'),
-        botonConsultar: porId('boton-consultar'),
-        botonActualizar: porId('boton-actualizar'),
-        botonEliminar: porId('boton-eliminar'),
         botonMantenimientos: porId('boton-mantenimientos'),
-        botonListarMantenimientos: porId('boton-listar-mantenimientos'),
-        botonAgregarMantenimientoMenu: porId('boton-agregar-mantenimiento-menu'),
-        botonConsultarMantenimiento: porId('boton-consultar-mantenimiento'),
-        botonActualizarMantenimiento: porId('boton-actualizar-mantenimiento'),
-        botonEliminarMantenimiento: porId('boton-eliminar-mantenimiento'),
-        botonAcerca: porId('boton-acerca'),
+        botonTema: porId('boton-tema'),
         contenidoMantenimientos: porId('contenido-mantenimientos'),
         tablaMantenimientos: document.querySelector('#modal-mantenimientos [data-parte="tabla"]'),
         filtrosMantenimientos: document.querySelector('#modal-mantenimientos [data-parte="filtros"]'),
@@ -232,22 +222,8 @@
       this.escuchar(this.refs.formFiltros, 'submit', (evento) => this.aplicarFiltros(evento));
       this.escuchar(this.refs.botonLimpiarFiltros, 'click', () => this.limpiarFiltros());
 
-      // Acciones sobre la lavadora
-      this.escuchar(this.refs.botonAgregar, 'click', () => this.abrirAgregar());
-      this.escuchar(this.refs.botonListar, 'click', () => {
-        document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        document.getElementById('tabla-lavadoras').focus();
-      });
-      this.escuchar(this.refs.botonConsultar, 'click', () => this.abrirConsultar());
-      this.escuchar(this.refs.botonActualizar, 'click', () => this.abrirActualizar());
-      this.escuchar(this.refs.botonEliminar, 'click', () => this.abrirEliminar());
       this.escuchar(this.refs.botonMantenimientos, 'click', () => this.abrirMantenimientos(null));
-      this.escuchar(this.refs.botonListarMantenimientos, 'click', () => this.abrirMantenimientos(null, 'listar'));
-      this.escuchar(this.refs.botonAgregarMantenimientoMenu, 'click', () => this.abrirCasoMantenimiento('agregar'));
-      this.escuchar(this.refs.botonConsultarMantenimiento, 'click', () => this.abrirCasoMantenimiento('consultar'));
-      this.escuchar(this.refs.botonActualizarMantenimiento, 'click', () => this.abrirCasoMantenimiento('actualizar'));
-      this.escuchar(this.refs.botonEliminarMantenimiento, 'click', () => this.abrirCasoMantenimiento('eliminar'));
-      this.escuchar(this.refs.botonAcerca, 'click', () => this.abrirModal('modal-acerca'));
+      this.escuchar(document, 'click', (evento) => this.ejecutarAccionMenu(evento));
 
       this.escuchar(document, 'submit', (evento) => {
         const formulario = evento.target.closest('[data-form-mantenimiento-caso]');
@@ -256,10 +232,6 @@
       this.escuchar(document, 'click', (evento) => {
         const boton = evento.target.closest('[data-accion-mantenimiento-caso]');
         if (boton) this.ejecutarAccionMantenimientoCaso(boton);
-      });
-
-      document.addEventListener('click', (evento) => {
-        if (evento.target.closest('.boton-caso')) this.reproducirSonido('click');
       });
 
       // Tabla: seleccion con clic y con teclado
@@ -354,7 +326,7 @@
         const alta = caso === 'agregar';
         const formulario = alta ? `
           <form data-form-mantenimiento-caso="${caso}" novalidate>
-            <div class="campo"><label>Lavadora</label><select name="codigoLavadora" required></select></div>
+            <div class="campo"><label>Código de lavadora</label><input name="codigoLavadora" type="number" min="1" step="1" required></div>
             ${campos(caso, false)}
             <p class="error-formulario" data-error-mantenimiento-caso role="alert"></p>
             <div class="modal-pie"><button type="button" class="boton secundario" data-cerrar="${id}">Cancelar</button><button class="boton primario" type="submit">${textoBoton}</button></div>
@@ -737,6 +709,8 @@
       const fila = document.createElement('tr');
       fila.dataset.id = String(mantenimiento.id);
       fila.appendChild(this.elemento('td', 'num', mantenimiento.id));
+      fila.appendChild(this.elemento('td', 'num', mantenimiento.codigoLavadora));
+      fila.appendChild(this.elemento('td', null, mantenimiento.marcaLavadora));
       fila.appendChild(this.elemento('td', null, mantenimiento.descripcion));
       fila.appendChild(this.elemento('td', null, mantenimiento.tecnico));
       fila.appendChild(this.elemento('td', 'num', mantenimiento.costoTexto));
@@ -918,7 +892,7 @@
     //  Filtros
     // =================================================================
     aplicarFiltros(evento) {
-      evento.preventDefault();
+      if (evento) evento.preventDefault();
       const filtros = {
         marca: this.refs.filtroMarca.value.trim(),
         tecnologiaInverter: this.valorBooleano(this.refs.filtroInverter.value),
@@ -927,6 +901,31 @@
       // El controlador ya avisa el error por el notificador; aqui solo se
       // evita que quede una promesa sin manejar.
       this.controladorLavadoras.aplicarFiltros(filtros).catch(() => {});
+    }
+
+    ejecutarAccionMenu(evento) {
+      const boton = evento.target.closest('button[data-action]');
+      if (!boton) return;
+      switch (boton.dataset.action) {
+        case 'listar':
+          this.refs.filtroMarca.value = '';
+          this.refs.filtroInverter.value = '';
+          this.refs.filtroMantenimientos.value = '';
+          this.controladorLavadoras.listarTodas().catch(() => {});
+          document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'agregar': this.abrirAgregar(); break;
+        case 'consultar': this.abrirConsultar(); break;
+        case 'actualizar': this.abrirActualizar(); break;
+        case 'eliminar': this.abrirEliminar(); break;
+        case 'listar-mantenimientos': this.abrirMantenimientos(null, 'listar'); break;
+        case 'agregar-mantenimiento': this.abrirCasoMantenimiento('agregar'); break;
+        case 'consultar-mantenimiento': this.abrirCasoMantenimiento('consultar'); break;
+        case 'actualizar-mantenimiento': this.abrirCasoMantenimiento('actualizar'); break;
+        case 'eliminar-mantenimiento': this.abrirCasoMantenimiento('eliminar'); break;
+        case 'acerca': this.abrirModal('modal-acerca'); break;
+        case 'tema': this.refs.botonTema.click(); break;
+      }
     }
 
     limpiarFiltros() {
@@ -1498,36 +1497,13 @@
       } else {
         this.lavadoraMantenimientos = null;
         this.refs.mantenimientosVacio.hidden = false;
-        this.refs.mantenimientosVacio.textContent = 'No hay lavadoras registradas. Agregue una primero.';
+        this.refs.mantenimientosVacio.textContent = 'Ingrese el código de una lavadora para consultar sus mantenimientos.';
       }
     }
 
     llenarSelectorLavadoras(codigoPreferido) {
-      const select = this.refs.matLavadora;
-      const anterior = (codigoPreferido !== null && codigoPreferido !== undefined)
-        ? String(codigoPreferido)
-        : select.value;
-      select.textContent = '';
-
-      const lista = this.estado.lavadoras || [];
-      if (lista.length === 0) {
-        const opcion = document.createElement('option');
-        opcion.value = '';
-        opcion.textContent = 'No hay lavadoras registradas';
-        select.appendChild(opcion);
-        select.disabled = true;
-        return;
-      }
-
-      select.disabled = false;
-      lista.forEach((lavadora) => {
-        const opcion = document.createElement('option');
-        opcion.value = String(lavadora.codigo);
-        opcion.textContent = lavadora.titulo + ' (' + lavadora.cantidadMantenimientos + ' mantenimientos)';
-        select.appendChild(opcion);
-      });
-      if (anterior && lista.some((lavadora) => String(lavadora.codigo) === anterior)) {
-        select.value = anterior;
+      if (codigoPreferido !== null && codigoPreferido !== undefined && codigoPreferido !== '') {
+        this.refs.matLavadora.value = String(codigoPreferido);
       }
     }
 

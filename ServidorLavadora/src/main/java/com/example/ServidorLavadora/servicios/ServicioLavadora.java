@@ -48,9 +48,7 @@ public class ServicioLavadora {
     /** Busca una lavadora por su codigo. Devuelve Optional porque puede no existir. */
     public Optional<Lavadora> buscarPorCodigo(int codigo) {
         synchronized (almacen.candado()) {
-            return almacen.lavadoras().stream()
-                    .filter(lavadora -> lavadora.getCodigo() == codigo)
-                    .findFirst();
+            return almacen.buscarPorCodigo(codigo);
         }
     }
 
@@ -69,12 +67,8 @@ public class ServicioLavadora {
         if (codigo == null && (marca == null || marca.isBlank())) {
             throw new IllegalArgumentException("Escriba al menos un criterio de busqueda (codigo o marca)");
         }
-        String texto = (marca == null) ? "" : marca.trim().toLowerCase();
         synchronized (almacen.candado()) {
-            return almacen.lavadoras().stream()
-                    .filter(lavadora -> codigo == null || lavadora.getCodigo() == codigo)
-                    .filter(lavadora -> texto.isEmpty() || lavadora.getMarca().toLowerCase().contains(texto))
-                    .findFirst();
+            return almacen.buscarPorCriterios(codigo, marca);
         }
     }
 
@@ -86,14 +80,9 @@ public class ServicioLavadora {
      *                       false = solo las que no tienen ninguno, null = todas
      */
     public List<Lavadora> listarPorFiltro(String marca, Boolean tecnologiaInverter, Boolean conMantenimientos) {
-        String texto = (marca == null) ? "" : marca.trim().toLowerCase();
-        return listar().stream()
-                .filter(lavadora -> texto.isEmpty() || lavadora.getMarca().toLowerCase().contains(texto))
-                .filter(lavadora -> tecnologiaInverter == null
-                        || lavadora.isTecnologiaInverter() == tecnologiaInverter)
-                .filter(lavadora -> conMantenimientos == null
-                        || (lavadora.getCantidadMantenimientos() > 0) == conMantenimientos)
-                .toList();
+        synchronized (almacen.candado()) {
+            return almacen.listarPorFiltro(marca, tecnologiaInverter, conMantenimientos);
+        }
     }
 
     /** Numero de version de los datos (lo usan los clientes para refrescar la grilla). */
@@ -134,7 +123,7 @@ public class ServicioLavadora {
                     .minutosLavado(input.minutosLavado())
                     .build();
 
-            almacen.lavadoras().add(lavadora);
+            lavadora = almacen.guardar(lavadora);
             almacen.notificar("Lavadora " + lavadora.getCodigo() + " (" + lavadora.getMarca() + ") agregada");
             return lavadora;
         }
@@ -195,6 +184,7 @@ public class ServicioLavadora {
                 lavadora.setMinutosLavado(input.minutosLavado());
             }
 
+            almacen.guardar(lavadora);
             almacen.notificar("Lavadora " + codigo + " actualizada");
             return lavadora;
         }
@@ -212,7 +202,7 @@ public class ServicioLavadora {
     public boolean eliminar(int codigo) {
         synchronized (almacen.candado()) {
             Lavadora lavadora = exigirPorCodigo(codigo);
-            boolean eliminada = almacen.lavadoras().remove(lavadora);
+            boolean eliminada = almacen.eliminar(codigo);
             almacen.notificar("Lavadora " + codigo + " eliminada");
             return eliminada;
         }

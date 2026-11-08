@@ -38,6 +38,11 @@ namespace ClienteLavadora.controlador
         //  Consultas
         // ====================================================================
 
+        public async Task<List<MantenimientoData>> ListarTodasAsync(int codigoLavadora)
+        {
+            return await servicio.ListarTodasAsync(codigoLavadora);
+        }
+
         /// <summary>Lista los mantenimientos de una lavadora con los filtros del servidor.</summary>
         public async Task<List<MantenimientoData>> ListarAsync(int codigoLavadora, string tecnico, bool? completado)
         {

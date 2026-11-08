@@ -1,40 +1,35 @@
 /* =====================================================================
    ESTILOS DEL CLIENTE WEB VOLTIA
    =====================================================================
-   Metafora visual: lavadora industrial moderna con panel de cristal.
-   - Fondo oscuro con gradiente y textura de lineas muy tenues.
-   - Paneles de "glassmorphism" tenue (fondo translucido + blur + borde).
-   - Compuerta circular siempre visible, con tambor, agua y ropa girando.
-   - Paleta de la casa: cian, ambar, acero y grafito (sin colores chillones).
-   Todo el diseno se controla con variables CSS para cambiar la casa entera
-   desde un solo lugar.
+   Interfaz de gestion con menu clasico, filtros compactos y grillas.
+   La simulacion del tambor se conserva como indicador secundario.
    ===================================================================== */
 
 /* ---------------------------------------------------------------
    1. Variables de la casa
    --------------------------------------------------------------- */
 :root {
-  color-scheme: dark;
-  --fondo-1: #14212A;
-  --fondo-2: #1B2B36;
-  --chasis: #243743;
-  --acero: #304957;
-  --cristal: rgba(255, 255, 255, 0.06);
-  --cristal-fuerte: rgba(255, 255, 255, 0.09);
-  --borde: rgba(255, 255, 255, 0.14);
-  --borde-suave: rgba(255, 255, 255, 0.08);
-  --cian: #6FD3E8;
-  --cian-oscuro: rgba(111, 211, 232, 0.16);
-  --ambar: #E8B15A;
-  --texto: #E6EDF3;
-  --secundario: #9FB0BF;
-  --error: #E06C6C;
-  --exito: #7ED09A;
+  color-scheme: light;
+  --fondo-1: #EDF3F6;
+  --fondo-2: #DCE7EC;
+  --chasis: #FFFFFF;
+  --acero: #DCE7EC;
+  --cristal: rgba(255, 255, 255, 0.96);
+  --cristal-fuerte: #FFFFFF;
+  --borde: rgba(33, 57, 72, 0.24);
+  --borde-suave: rgba(33, 57, 72, 0.14);
+  --cian: #087C96;
+  --cian-oscuro: rgba(8, 124, 150, 0.12);
+  --ambar: #9A5B00;
+  --texto: #172832;
+  --secundario: #526873;
+  --error: #A43131;
+  --exito: #267341;
   --fuente: "Segoe UI", "Segoe UI Web", Tahoma, Verdana, sans-serif;
   --mono: Consolas, "Courier New", monospace;
-  --radio: 18px;
-  --radio-chico: 10px;
-  --sombra-panel: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --radio: 5px;
+  --radio-chico: 3px;
+  --sombra-panel: 0 2px 8px rgba(32, 57, 70, 0.12);
   --transicion: 160ms ease;
 }
 
@@ -85,6 +80,26 @@ body[data-tema="claro"] .pantalla-digital {
   box-shadow: inset 0 0 14px rgba(22,70,83,.16);
 }
 
+body[data-tema="oscuro"] {
+  color-scheme: dark;
+  --fondo-1: #14212A;
+  --fondo-2: #1B2B36;
+  --chasis: #243743;
+  --acero: #304957;
+  --cristal: rgba(255, 255, 255, 0.06);
+  --cristal-fuerte: rgba(18, 30, 39, 0.96);
+  --borde: rgba(255, 255, 255, 0.16);
+  --borde-suave: rgba(255, 255, 255, 0.09);
+  --cian: #6FD3E8;
+  --cian-oscuro: rgba(111, 211, 232, 0.16);
+  --ambar: #E8B15A;
+  --texto: #E6EDF3;
+  --secundario: #9FB0BF;
+  --error: #E06C6C;
+  --exito: #7ED09A;
+  background: linear-gradient(180deg, #0B1016 0%, #111A22 100%);
+}
+
 /* ---------------------------------------------------------------
    2. Base
    --------------------------------------------------------------- */
@@ -107,18 +122,68 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  /* El scroll de la aplicacion vive dentro de los paneles: asi la ventana
-     no queda con un hueco vacio debajo del contenido. */
   overflow: hidden;
   font-family: var(--fuente);
   font-size: 15px;
   line-height: 1.45;
   color: var(--texto);
   background:
-    radial-gradient(1100px 600px at 15% -10%, rgba(111, 211, 232, 0.07), transparent 60%),
-    radial-gradient(900px 500px at 95% 8%, rgba(232, 177, 90, 0.05), transparent 55%),
-    linear-gradient(160deg, var(--fondo-1) 0%, var(--fondo-2) 100%);
+    linear-gradient(180deg, #edf3f7 0%, #dde7ee 100%);
   background-attachment: fixed;
+}
+
+.menu-bar {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: #eff4f7;
+  border-bottom: 1px solid var(--borde);
+  box-shadow: inset 0 -1px 0 rgba(18, 31, 40, 0.08);
+  padding: 0 10px;
+}
+
+.menu-item {
+  position: relative;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--texto);
+  cursor: default;
+  border-left: 1px solid rgba(18, 31, 40, 0.04);
+  border-right: 1px solid rgba(18, 31, 40, 0.04);
+}
+
+.menu-item:hover .submenu,
+.menu-item:focus-within .submenu {
+  display: flex;
+}
+
+.submenu {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  display: none;
+  flex-direction: column;
+  min-width: 180px;
+  background: #f8fbfd;
+  border: 1px solid var(--borde);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  z-index: 50;
+}
+
+.menu-button {
+  appearance: none;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 10px 12px;
+  color: var(--texto);
+  cursor: pointer;
+  font: inherit;
+}
+
+.menu-button:hover {
+  background: rgba(12, 109, 136, 0.08);
 }
 
 body.con-modal {
@@ -1838,6 +1903,95 @@ body[data-tema="claro"] .ficha-solo-lectura input:disabled {
 
   .modal {
     max-height: calc(100vh - 20px);
+  }
+}
+
+/* Presentacion de gestion: menu superior, filtros compactos y grillas legibles. */
+body[data-tema="claro"] {
+  background: #E9EEF2;
+}
+
+body[data-tema="claro"] .textura {
+  display: none;
+}
+
+body[data-tema="claro"] .panel-control {
+  padding: 8px 14px;
+  background: #F8FAFC;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body[data-tema="claro"] .tablero {
+  grid-template-columns: 122px minmax(0, 1fr) 300px;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+body[data-tema="claro"] .compuerta {
+  width: 104px;
+  max-width: 104px;
+}
+
+body[data-tema="claro"] .panel {
+  background: #FFFFFF;
+  border-radius: 4px;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body[data-tema="claro"] .tabla-scroll {
+  background: #FFFFFF;
+  border-radius: 3px;
+}
+
+body[data-tema="claro"] .tabla thead th:first-child,
+body[data-tema="claro"] .tabla thead th:last-child {
+  border-radius: 0;
+}
+
+body[data-tema="claro"] .tabla tbody tr:nth-child(even) {
+  background: #F4F7F9;
+}
+
+body[data-tema="claro"] .tabla tbody td {
+  border-bottom-color: #DDE4E8;
+}
+
+body[data-tema="claro"] .tabla-ayuda {
+  color: #526873;
+}
+
+body[data-tema="claro"] input,
+body[data-tema="claro"] select,
+body[data-tema="claro"] textarea {
+  border-radius: 3px;
+}
+
+body[data-tema="claro"] .boton {
+  border-radius: 3px;
+}
+
+@media (max-width: 1100px) {
+  body[data-tema="claro"] .tablero {
+    grid-template-columns: 92px minmax(0, 1fr) 270px;
+  }
+
+  body[data-tema="claro"] .compuerta {
+    width: 82px;
+    max-width: 82px;
+  }
+}
+
+@media (max-width: 860px) {
+  body[data-tema="claro"] .tablero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body[data-tema="claro"] .columna-compuerta {
+    display: flex;
   }
 }
 

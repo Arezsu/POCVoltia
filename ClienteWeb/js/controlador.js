@@ -80,9 +80,12 @@
      */
     async recargar(opciones) {
       const silencioso = Boolean(opciones && opciones.silencioso);
+      const listarTodas = Boolean(opciones && opciones.listarTodas);
       try {
         const resultados = await Promise.all([
-          this.cliente.listarLavadoras(this.filtros),
+          listarTodas
+            ? this.cliente.listarTodasLavadoras()
+            : this.cliente.listarLavadoras(this.filtros),
           this.cliente.obtenerVersionDatos()
         ]);
         this.lavadoras = (resultados[0] || []).map((datos) => new Voltia.Lavadora(datos));
@@ -117,6 +120,11 @@
     // -------------------------------------------------------------------
     //  Filtros
     // -------------------------------------------------------------------
+    async listarTodas() {
+      this.filtros = { marca: '', tecnologiaInverter: null, conMantenimientos: null };
+      await this.recargar({ listarTodas: true });
+    }
+
     async aplicarFiltros(filtros) {
       this.filtros = {
         marca: String(filtros.marca || '').trim(),
@@ -133,8 +141,7 @@
     }
 
     async limpiarFiltros() {
-      this.filtros = { marca: '', tecnologiaInverter: null, conMantenimientos: null };
-      await this.recargar();
+      await this.listarTodas();
     }
 
     normalizarBooleano(valor) {
@@ -255,13 +262,10 @@
     async verificarVersion() {
       try {
         const version = await this.cliente.obtenerVersionDatos();
-        if (!this.cargado) {
-          // La primera carga fallo (por ejemplo el servidor estaba apagado).
-          // El vigilante aprovecha para intentar la lista completa otra vez.
-          await this.recargar({ silencioso: true });
-          return true;
-        }
-        if (this.versionDatos === null) {
+        if (!this.cargado || this.versionDatos === null) {
+          // Consultar la version no debe disparar una carga masiva de la grilla.
+          // La lista se mantiene vacia hasta que el usuario la solicite o una
+          // mutacion de esta sesion la actualice explicitamente.
           this.versionDatos = version;
           return false;
         }

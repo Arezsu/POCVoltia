@@ -1,6 +1,9 @@
 # Java / IntelliJ / Maven
 target/
 .idea/workspace.xml
+.idea/httpRequests/
+.vscode/
+*.log
 *.iml
 .mvn/wrapper/maven-wrapper.jar
 

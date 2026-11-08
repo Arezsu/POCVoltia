@@ -41,14 +41,21 @@ public class ServicioMantenimiento {
     /** Lista los mantenimientos de una lavadora (puede ser una lista vacia). */
     public List<Mantenimiento> listar(int codigoLavadora) {
         synchronized (almacen.candado()) {
-            return new ArrayList<>(servicioLavadora.exigirPorCodigo(codigoLavadora).getMantenimientos());
+            Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
+            List<Mantenimiento> resultado = new ArrayList<>(lavadora.getMantenimientos());
+            resultado.forEach(mantenimiento -> enriquecer(mantenimiento, lavadora));
+            return resultado;
         }
     }
 
     /** Busca un mantenimiento por su id dentro de una lavadora. */
     public Optional<Mantenimiento> buscarPorId(int codigoLavadora, int id) {
         synchronized (almacen.candado()) {
-            return servicioLavadora.exigirPorCodigo(codigoLavadora).buscarMantenimiento(id);
+            Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
+            return lavadora.buscarMantenimiento(id).map(mantenimiento -> {
+                enriquecer(mantenimiento, lavadora);
+                return mantenimiento;
+            });
         }
     }
 
@@ -92,8 +99,10 @@ public class ServicioMantenimiento {
                     .fecha(fecha)
                     .completado(input.completado())
                     .build();
+            enriquecer(mantenimiento, lavadora);
 
             lavadora.agregarMantenimiento(mantenimiento);
+            almacen.guardar(lavadora);
             almacen.notificar("Mantenimiento " + id + " agregado a la lavadora " + codigoLavadora);
             return mantenimiento;
         }
@@ -108,6 +117,7 @@ public class ServicioMantenimiento {
         synchronized (almacen.candado()) {
             Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
             Mantenimiento mantenimiento = buscarEnLavadora(lavadora, id);
+            enriquecer(mantenimiento, lavadora);
 
             if (input.descripcion() != null) {
                 Validaciones.texto(input.descripcion(), "La descripcion del mantenimiento");
@@ -136,6 +146,7 @@ public class ServicioMantenimiento {
                 mantenimiento.setCompletado(input.completado());
             }
 
+            almacen.guardar(lavadora);
             almacen.notificar("Mantenimiento " + id + " de la lavadora " + codigoLavadora + " actualizado");
             return mantenimiento;
         }
@@ -151,6 +162,7 @@ public class ServicioMantenimiento {
             Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
             Mantenimiento mantenimiento = buscarEnLavadora(lavadora, id);
             boolean eliminado = lavadora.quitarMantenimiento(mantenimiento);
+            almacen.guardar(lavadora);
             almacen.notificar("Mantenimiento " + id + " de la lavadora " + codigoLavadora + " eliminado");
             return eliminado;
         }
@@ -171,6 +183,11 @@ public class ServicioMantenimiento {
                 .mapToInt(Mantenimiento::getId)
                 .max()
                 .orElse(0) + 1;
+    }
+
+    private void enriquecer(Mantenimiento mantenimiento, Lavadora lavadora) {
+        mantenimiento.setCodigoLavadora(lavadora.getCodigo());
+        mantenimiento.setMarcaLavadora(lavadora.getMarca());
     }
 
     private void validarDescripcionYTecnico(String descripcion, String tecnico) {

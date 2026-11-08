@@ -25,7 +25,7 @@ public class ObjectIdScalar implements RuntimeWiringConfigurer {
                         if (dataFetcherResult instanceof ObjectId objectId) {
                             return ObjectIdScalar.this.serialize(objectId);
                         }
-                        return dataFetcherResult.toString();
+                        throw new IllegalArgumentException("El valor debe ser un org.bson.types.ObjectId");
                     }
 
                     @Override
@@ -47,7 +47,7 @@ public class ObjectIdScalar implements RuntimeWiringConfigurer {
                         if (input instanceof StringValue stringValue) {
                             return ObjectIdScalar.this.parseLiteral(stringValue);
                         }
-                        return null;
+                        throw new IllegalArgumentException("ObjectId debe recibirse como hexadecimal");
                     }
                 })
                 .build());

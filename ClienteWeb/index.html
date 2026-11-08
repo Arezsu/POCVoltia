@@ -15,6 +15,46 @@
   <!-- Textura discreta de fondo: lineas muy tenues, sin distraer -->
   <div class="textura" aria-hidden="true"></div>
 
+  <nav class="menu-bar" aria-label="Menu principal">
+    <div class="menu-item">
+      <span>Archivo</span>
+      <div class="submenu">
+        <button type="button" class="menu-button" data-action="listar">Listar lavadoras</button>
+        <button type="button" class="menu-button" data-action="agregar">Agregar lavadora</button>
+      </div>
+    </div>
+    <div class="menu-item">
+      <span>Edicion</span>
+      <div class="submenu">
+        <button type="button" class="menu-button" data-action="consultar">Consultar</button>
+        <button type="button" class="menu-button" data-action="actualizar">Actualizar</button>
+        <button type="button" class="menu-button" data-action="eliminar">Eliminar</button>
+      </div>
+    </div>
+    <div class="menu-item">
+      <span>Ver</span>
+      <div class="submenu">
+        <button type="button" class="menu-button" data-action="tema">Cambiar tema</button>
+      </div>
+    </div>
+    <div class="menu-item">
+      <span>Herramientas</span>
+      <div class="submenu">
+        <button type="button" class="menu-button" data-action="listar-mantenimientos">Listar mantenimientos</button>
+        <button type="button" class="menu-button" data-action="agregar-mantenimiento">Agregar mantenimiento</button>
+        <button type="button" class="menu-button" data-action="consultar-mantenimiento">Consultar mantenimiento</button>
+        <button type="button" class="menu-button" data-action="actualizar-mantenimiento">Actualizar mantenimiento</button>
+        <button type="button" class="menu-button" data-action="eliminar-mantenimiento">Eliminar mantenimiento</button>
+      </div>
+    </div>
+    <div class="menu-item">
+      <span>Ayuda</span>
+      <div class="submenu">
+        <button type="button" class="menu-button" data-action="acerca">Acerca de</button>
+      </div>
+    </div>
+  </nav>
+
   <!-- ================================================================
        ENCABEZADO: panel de control superior de la lavadora
        ================================================================ -->
@@ -52,12 +92,7 @@
       <span class="conexion-texto" id="texto-conexion" role="status">Sin conexion</span>
       <span class="conexion-url">localhost:8081</span>
     </div>
-    <label class="selector-api-etiqueta" for="selector-api">API</label>
-    <select class="selector-api" id="selector-api" aria-label="Protocolo de conexión">
-      <option value="graphql">GraphQL</option>
-      <option value="rest">REST</option>
-    </select>
-    <button type="button" class="boton secundario boton-tema" id="boton-tema" aria-pressed="false">Modo claro</button>
+    <button type="button" class="boton secundario boton-tema" id="boton-tema" aria-pressed="false" hidden>Modo claro</button>
   </header>
 
   <!-- ================================================================
@@ -123,32 +158,6 @@
           </div>
         </form>
 
-        <div class="grupos-casos">
-          <section class="grupo-casos" aria-labelledby="casos-lavadoras">
-            <h3 id="casos-lavadoras">LAVADORAS</h3>
-            <div class="acciones" role="group" aria-label="Casos de uso de lavadoras">
-              <button type="button" class="boton secundario boton-caso" id="boton-listar">Listar</button>
-              <button type="button" class="boton primario boton-caso" id="boton-agregar">Agregar</button>
-              <button type="button" class="boton secundario boton-caso" id="boton-consultar">Consultar</button>
-              <button type="button" class="boton secundario boton-caso" id="boton-actualizar">Actualizar</button>
-              <button type="button" class="boton peligro boton-caso" id="boton-eliminar">Eliminar</button>
-            </div>
-          </section>
-          <section class="grupo-casos" aria-labelledby="casos-mantenimientos">
-            <h3 id="casos-mantenimientos">MANTENIMIENTOS</h3>
-            <div class="acciones" role="group" aria-label="Casos de uso de mantenimientos">
-              <button type="button" class="boton secundario boton-caso" id="boton-listar-mantenimientos">Listar</button>
-              <button type="button" class="boton primario boton-caso" id="boton-agregar-mantenimiento-menu">Agregar</button>
-              <button type="button" class="boton secundario boton-caso" id="boton-consultar-mantenimiento">Consultar</button>
-              <button type="button" class="boton secundario boton-caso" id="boton-actualizar-mantenimiento">Actualizar</button>
-              <button type="button" class="boton peligro boton-caso" id="boton-eliminar-mantenimiento">Eliminar</button>
-            </div>
-          </section>
-          <section class="grupo-casos grupo-ayuda" aria-labelledby="casos-ayuda">
-            <h3 id="casos-ayuda">AYUDA</h3>
-            <button type="button" class="boton secundario boton-caso" id="boton-acerca">Acerca de</button>
-          </section>
-        </div>
       </section>
 
       <!-- Tabla de lavadoras -->
@@ -447,8 +456,8 @@
       <div class="modal-cuerpo">
         <div class="barra-mantenimientos">
           <div class="campo">
-            <label for="mat-lavadora">Lavadora</label>
-            <select id="mat-lavadora"></select>
+            <label for="mat-lavadora">Código de lavadora</label>
+            <input id="mat-lavadora" type="number" min="1" step="1" inputmode="numeric" placeholder="Código" required>
           </div>
           <form id="form-filtros-mantenimientos" class="form-filtros-mantenimientos" data-parte="filtros" novalidate>
             <div class="campo">
@@ -481,6 +490,8 @@
             <thead>
               <tr>
                 <th scope="col">ID</th>
+                <th scope="col">Codigo lavadora</th>
+                <th scope="col">Marca lavadora</th>
                 <th scope="col">Descripcion</th>
                 <th scope="col">Tecnico</th>
                 <th scope="col">Costo</th>

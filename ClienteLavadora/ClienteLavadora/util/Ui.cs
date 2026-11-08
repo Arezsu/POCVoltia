@@ -184,7 +184,7 @@ namespace ClienteLavadora.util
             marco.SetBinding(Border.BorderBrushProperty,
                 new Binding("BorderBrush") { RelativeSource = RelativeSource.TemplatedParent });
             marco.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-            marco.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
+            marco.SetValue(Border.CornerRadiusProperty, new CornerRadius(3));
             marco.SetBinding(TextElement.ForegroundProperty,
                 new Binding("Foreground") { RelativeSource = RelativeSource.TemplatedParent });
 
@@ -229,7 +229,7 @@ namespace ClienteLavadora.util
             ControlTemplate plantillaBoton = new ControlTemplate(typeof(ToggleButton));
             FrameworkElementFactory relleno = new FrameworkElementFactory(typeof(Border));
             relleno.SetValue(Border.BackgroundProperty, Brushes.Transparent);
-            relleno.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
+            relleno.SetValue(Border.CornerRadiusProperty, new CornerRadius(3));
             plantillaBoton.VisualTree = relleno;
             boton.SetValue(Control.TemplateProperty, plantillaBoton);
 
@@ -250,7 +250,7 @@ namespace ClienteLavadora.util
             bordeLista.SetValue(Border.BackgroundProperty, Tema.Pincel("#0B131B"));
             bordeLista.SetValue(Border.BorderBrushProperty, Tema.Pincel("#2A3A47"));
             bordeLista.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-            bordeLista.SetValue(Border.CornerRadiusProperty, new CornerRadius(8));
+            bordeLista.SetValue(Border.CornerRadiusProperty, new CornerRadius(3));
             bordeLista.SetValue(Border.PaddingProperty, new Thickness(4));
             bordeLista.SetValue(TextElement.ForegroundProperty, Tema.Texto);
             bordeLista.SetBinding(FrameworkElement.MinWidthProperty,

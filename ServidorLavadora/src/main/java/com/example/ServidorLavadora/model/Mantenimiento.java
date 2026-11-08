@@ -1,7 +1,13 @@
 package com.example.ServidorLavadora.model;
 
-import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.bson.types.ObjectId;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.annotation.Transient;
+
+import java.time.LocalDateTime;
 
 /**
  * Objeto DETALLE del proyecto (lado 0..* de la Figura 1: Maestro - Detalle).
@@ -9,28 +15,27 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * Un mantenimiento SIEMPRE pertenece a una lavadora concreta: no existe por
  * fuera de ella. Por eso la lavadora es el maestro (1..1) y el mantenimiento
  * es el detalle (0..*). Una lavadora puede tener cero, uno o muchos.
- *
- * Atributos (seis, con tipos variados, como pide la rubrica):
- *  - id (int): numero que identifica al mantenimiento DENTRO de su lavadora
- *  - descripcion (String): que trabajo se hizo o se va a hacer
- *  - tecnico (String): persona responsable del trabajo
- *  - costo (double): valor del mantenimiento
- *  - fecha (LocalDateTime): cuando se realizo o se agendo
- *  - completado (boolean): true si el trabajo ya termino
- *
- * Se construye con el patron Builder, igual que la lavadora:
- * Mantenimiento.builder().id(1).descripcion("...").build()
  */
+@Document(collection = "mantenimientos")
+@CompoundIndex(name = "uq_mantenimiento_lavadora_id", def = "{'codigoLavadora': 1, 'id': 1}", unique = true)
 public class Mantenimiento {
 
-    private final int id;
+    @Id
+    private ObjectId mongoId;
+
+    private int id;
+    private int codigoLavadora;
+    @Transient
+    private String marcaLavadora;
     private String descripcion;
     private String tecnico;
     private double costo;
     private LocalDateTime fecha;
     private boolean completado;
 
-    // El constructor es privado: solo el Builder puede crear mantenimientos.
+    public Mantenimiento() {
+    }
+
     private Mantenimiento(Builder builder) {
         this.id = builder.id;
         this.descripcion = builder.descripcion;
@@ -40,13 +45,40 @@ public class Mantenimiento {
         this.completado = builder.completado;
     }
 
-    /** Punto de entrada del patron Builder. */
     public static Builder builder() {
         return new Builder();
     }
 
+    public ObjectId getMongoId() {
+        return mongoId;
+    }
+
+    public void setMongoId(ObjectId mongoId) {
+        this.mongoId = mongoId;
+    }
+
     public int getId() {
         return id;
+    }
+
+    public int getCodigoLavadora() {
+        return codigoLavadora;
+    }
+
+    public void setCodigoLavadora(int codigoLavadora) {
+        this.codigoLavadora = codigoLavadora;
+    }
+
+    public String getMarcaLavadora() {
+        return marcaLavadora;
+    }
+
+    public void setMarcaLavadora(String marcaLavadora) {
+        this.marcaLavadora = marcaLavadora;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getDescripcion() {
@@ -90,10 +122,6 @@ public class Mantenimiento {
         this.completado = completado;
     }
 
-    /**
-     * Patron BUILDER: arma el mantenimiento paso a paso y sin un constructor
-     * con seis parametros seguidos (que es facil de confundir al escribir).
-     */
     public static class Builder {
         private int id;
         private String descripcion;

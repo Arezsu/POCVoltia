@@ -31,6 +31,9 @@ namespace ClienteLavadora.servicios
         /// </summary>
         Task<List<LavadoraData>> ListarAsync(string marca, bool? tecnologiaInverter, bool? conMantenimientos);
 
+        /// <summary>Lista todos los registros con la consulta GraphQL lavadoras.</summary>
+        Task<List<LavadoraData>> ListarTodasAsync();
+
         /// <summary>Busca UNA lavadora por codigo y/o marca. Devuelve null si no existe.</summary>
         Task<LavadoraData> BuscarPorCriteriosAsync(int? codigo, string marca);
 

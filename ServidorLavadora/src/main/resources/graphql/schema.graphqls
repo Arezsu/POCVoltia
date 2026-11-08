@@ -10,7 +10,10 @@
 #  una lavadora tenga un solo programa fijo.
 #
 #  Las fechas viajan como texto con el formato yyyy-MM-ddTHH:mm:ss.
+#  Los ObjectId de MongoDB se representan como string hexadecimal validado.
 # =====================================================================
+
+scalar ObjectId
 
 type Query {
     # ---------- Lavadora (maestro, 1..1) ----------
@@ -51,6 +54,7 @@ type Mutation {
 
 # Objeto maestro: la lavadora industrial.
 type Lavadora {
+    mongoId: ObjectId
     codigo: Int
     marca: String
     precioBase: Float
@@ -71,6 +75,9 @@ type Lavadora {
 
 # Objeto detalle: un mantenimiento de una lavadora concreta.
 type Mantenimiento {
+    mongoId: ObjectId
+    codigoLavadora: Int
+    marcaLavadora: String
     id: Int
     descripcion: String
     tecnico: String

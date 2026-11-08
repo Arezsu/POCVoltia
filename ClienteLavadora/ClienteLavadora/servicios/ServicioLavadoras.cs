@@ -29,6 +29,16 @@ namespace ClienteLavadora.servicios
             "mantenimientosPendientes costoMantenimientos " +
             "mantenimientos { id descripcion tecnico costo fecha completado }";
 
+        public async Task<List<LavadoraData>> ListarTodasAsync()
+        {
+            const string consulta = "query ListarLavadoras { lavadoras { " + CamposLavadora + " } }";
+            RespuestaListaLavadoras respuesta =
+                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaListaLavadoras>(consulta, new { });
+            return respuesta == null || respuesta.Lavadoras == null
+                ? new List<LavadoraData>()
+                : respuesta.Lavadoras;
+        }
+
         public async Task<List<LavadoraData>> ListarAsync(string marca, bool? tecnologiaInverter, bool? conMantenimientos)
         {
             string consulta =

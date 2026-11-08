@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using ClienteLavadora.controlador;
@@ -31,7 +32,7 @@ namespace ClienteLavadora.vista
         private readonly Ellipse puntoConexion = new Ellipse();
         private readonly TextBlock textoConexion = new TextBlock();
 
-        private readonly OjoDeBuey ojo = new OjoDeBuey(300);
+        private readonly OjoDeBuey ojo = new OjoDeBuey(120);
         private readonly TextBlock estadoTambor = new TextBlock();
 
         private bool suscrito;
@@ -75,6 +76,28 @@ namespace ClienteLavadora.vista
         /// <summary>Logo, nombre de la casa y estado de la conexion.</summary>
         private FrameworkElement CrearEncabezado()
         {
+            Menu menu = new Menu();
+            menu.Items.Add(CrearMenu("Archivo",
+                CrearAccion("Listar lavadoras", AbrirListar),
+                CrearAccion("Agregar lavadora", AbrirAgregar),
+                CrearAccion("Cerrar", () => Cerrar())));
+            menu.Items.Add(CrearMenu("Edición",
+                CrearAccion("Consultar", AbrirConsultar),
+                CrearAccion("Actualizar", AbrirActualizar),
+                CrearAccion("Eliminar", AbrirEliminar)));
+            menu.Items.Add(CrearMenu("Ver",
+                CrearAccion("Tema claro/oscuro", () => Tema.Alternar())));
+            menu.Items.Add(CrearMenu("Herramientas",
+                CrearAccion("Listar mantenimientos", AbrirListarMantenimientos),
+                CrearAccion("Agregar mantenimiento", AbrirAgregarMantenimiento),
+                CrearAccion("Consultar mantenimiento", AbrirConsultarMantenimiento),
+                CrearAccion("Actualizar mantenimiento", AbrirActualizarMantenimiento),
+                CrearAccion("Eliminar mantenimiento", AbrirEliminarMantenimiento)));
+            menu.Items.Add(CrearMenu("Ayuda", CrearAccion("Acerca de", AbrirAcercaDe)));
+
+            StackPanel contenedor = new StackPanel();
+            contenedor.Children.Add(menu);
+
             Grid cabecera = new Grid();
             cabecera.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             cabecera.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -150,7 +173,8 @@ namespace ClienteLavadora.vista
 
             Border marco = Ui.Cristal(cabecera, new Thickness(14));
             marco.Margin = new Thickness(0, 0, 0, 12);
-            return marco;
+            contenedor.Children.Add(marco);
+            return contenedor;
         }
 
         /// <summary>La puerta grande de la lavadora, girando siempre.</summary>
@@ -175,43 +199,59 @@ namespace ClienteLavadora.vista
             return panel;
         }
 
-        /// <summary>Un boton por cada caso de uso.</summary>
+        /// <summary>La pantalla de inicio se mantiene simple: las acciones se ejecutan desde el menu.</summary>
         private FrameworkElement CrearBotones()
         {
             StackPanel panel = new StackPanel();
-            panel.Margin = new Thickness(0, 6, 0, 0);
+            panel.Margin = new Thickness(0, 10, 0, 0);
+            panel.HorizontalAlignment = HorizontalAlignment.Center;
+            panel.MaxWidth = 640;
 
-            panel.Children.Add(Ui.Rotulo("LAVADORAS"));
-            UniformGrid filaLavadoras = new UniformGrid();
-            filaLavadoras.Columns = 5;
-            filaLavadoras.Children.Add(Atajo("Listar", true, AbrirListar));
-            filaLavadoras.Children.Add(Atajo("Agregar", false, AbrirAgregar));
-            filaLavadoras.Children.Add(Atajo("Consultar", false, AbrirConsultar));
-            filaLavadoras.Children.Add(Atajo("Actualizar", false, AbrirActualizar));
-            filaLavadoras.Children.Add(Atajo("Eliminar", false, AbrirEliminar));
-            panel.Children.Add(filaLavadoras);
+            panel.Children.Add(Ui.Rotulo("PANEL PRINCIPAL"));
 
-            TextBlock rotuloMantenimientos = Ui.Rotulo("MANTENIMIENTOS");
-            rotuloMantenimientos.Margin = new Thickness(0, 12, 0, 6);
-            panel.Children.Add(rotuloMantenimientos);
+            Border resumen = new Border();
+            resumen.Background = Tema.Cristal;
+            resumen.BorderBrush = Tema.CristalBorde;
+            resumen.BorderThickness = new Thickness(1);
+            resumen.CornerRadius = new CornerRadius(14);
+            resumen.Padding = new Thickness(18, 14, 18, 14);
+            resumen.Margin = new Thickness(0, 10, 0, 0);
 
-            UniformGrid filaMantenimientos = new UniformGrid();
-            filaMantenimientos.Columns = 5;
-            filaMantenimientos.Children.Add(Atajo("Listar", true, AbrirListarMantenimientos));
-            filaMantenimientos.Children.Add(Atajo("Agregar", false, AbrirAgregarMantenimiento));
-            filaMantenimientos.Children.Add(Atajo("Consultar", false, AbrirConsultarMantenimiento));
-            filaMantenimientos.Children.Add(Atajo("Actualizar", false, AbrirActualizarMantenimiento));
-            filaMantenimientos.Children.Add(Atajo("Eliminar", false, AbrirEliminarMantenimiento));
-            panel.Children.Add(filaMantenimientos);
+            StackPanel contenido = new StackPanel();
+            TextBlock titulo = Ui.Texto("El sistema se controla desde el menú superior.", 15, Tema.Texto);
+            titulo.FontWeight = FontWeights.SemiBold;
+            contenido.Children.Add(titulo);
 
-            TextBlock rotuloAyuda = Ui.Rotulo("AYUDA");
-            rotuloAyuda.Margin = new Thickness(0, 10, 0, 4);
-            panel.Children.Add(rotuloAyuda);
-            UniformGrid filaAyuda = new UniformGrid { Columns = 1 };
-            filaAyuda.Children.Add(Atajo("Acerca de", false, AbrirAcercaDe));
-            panel.Children.Add(filaAyuda);
+            TextBlock detalle = Ui.Texto("Usa Archivo, Edición, Ver y Herramientas para abrir cada caso de uso sin saturar la pantalla de inicio.", 12, Tema.TextoSecundario);
+            detalle.Margin = new Thickness(0, 8, 0, 0);
+            detalle.TextWrapping = TextWrapping.Wrap;
+            contenido.Children.Add(detalle);
+
+            resumen.Child = contenido;
+            panel.Children.Add(resumen);
 
             return panel;
+        }
+
+        private MenuItem CrearMenu(string titulo, params MenuItem[] opciones)
+        {
+            MenuItem menu = new MenuItem { Header = titulo };
+            foreach (MenuItem opcion in opciones)
+            {
+                menu.Items.Add(opcion);
+            }
+            return menu;
+        }
+
+        private MenuItem CrearAccion(string texto, Action accion)
+        {
+            MenuItem opcion = new MenuItem { Header = texto };
+            opcion.Click += (s, e) =>
+            {
+                Sonidos.Click();
+                accion();
+            };
+            return opcion;
         }
 
         private BotonVoltia Atajo(string texto, bool principal, Action accion)

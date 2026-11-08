@@ -2,6 +2,7 @@ package com.example.ServidorLavadora.model;
 
 import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 /**
  * SUPERCLASE (clase padre) de los electrodomesticos de Voltia.
@@ -11,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
  * Es abstracta: no se puede crear un "Electrodomestico" suelto, solo sus hijas.
  */
 public abstract class Electrodomestico {
+    @Indexed(unique = true)
     private int codigo;
     private String marca;
     private double precioBase;

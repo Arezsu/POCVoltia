@@ -47,6 +47,11 @@ namespace ClienteLavadora.controlador
             return await servicio.ListarAsync(marca, tecnologiaInverter, conMantenimientos);
         }
 
+        public async Task<List<LavadoraData>> ListarTodasAsync()
+        {
+            return await servicio.ListarTodasAsync();
+        }
+
         /// <summary>
         /// Busca UNA lavadora por codigo y/o marca.
         /// Si no hay criterios o no existe, lanza ArgumentException con un mensaje

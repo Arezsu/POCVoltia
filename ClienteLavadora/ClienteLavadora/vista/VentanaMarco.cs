@@ -8,9 +8,8 @@ using ClienteLavadora.vista.controles;
 namespace ClienteLavadora.vista
 {
     /// <summary>
-    /// VENTANA BASE de toda la aplicacion. Es una ventana SIN BORDE y TRANSPARENTE
-    /// (WindowStyle.None + AllowsTransparency) que por dentro lleva el MarcoLavadora:
-    /// asi la ventana completa tiene forma de lavadora y no de ventana de Windows.
+    /// Ventana base con marco nativo de Windows y una vista independiente por caso
+    /// de uso. El contenido y las reglas de negocio siguen separados por MVC.
     ///
     /// Cada caso de uso (listar, agregar, consultar...) hereda de esta clase y solo
     /// escribe su contenido con la propiedad Contenido. Aqui quedan resueltos de una
@@ -21,7 +20,7 @@ namespace ClienteLavadora.vista
     /// </summary>
     public class VentanaMarco : Window
     {
-        /// <summary>El marco (chasis + panel) que dibuja la lavadora.</summary>
+        /// <summary>Contenedor de titulo, estado y contenido de la vista.</summary>
         protected MarcoLavadora Marco { get; private set; }
 
         public VentanaMarco(string titulo, double ancho, double alto, bool mostrarOjo, double ladoOjo)
@@ -30,12 +29,12 @@ namespace ClienteLavadora.vista
             Rect areaTrabajo = SystemParameters.WorkArea;
             Width = Math.Min(ancho, Math.Max(360, areaTrabajo.Width - 24));
             Height = Math.Min(alto, Math.Max(320, areaTrabajo.Height - 24));
-            WindowStyle = WindowStyle.None;
-            AllowsTransparency = true;
-            Background = Brushes.Transparent;
-            ResizeMode = ResizeMode.NoResize;
-            WindowStartupLocation = WindowStartupLocation.CenterOwner;
-            ShowInTaskbar = false;
+            WindowStyle = WindowStyle.SingleBorderWindow;
+            AllowsTransparency = false;
+            Background = Tema.Fondo;
+            ResizeMode = ResizeMode.CanResize;
+            WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            ShowInTaskbar = true;
             FontFamily = Tema.Fuente;
 
             Marco = new MarcoLavadora(titulo, mostrarOjo, ladoOjo);
@@ -54,13 +53,13 @@ namespace ClienteLavadora.vista
         //  Apoyos que usan todas las ventanas hijas
         // ====================================================================
 
-        /// <summary>Cierra la ventana con la animacion de salida del marco.</summary>
+        /// <summary>Cierra la ventana actual.</summary>
         protected void Cerrar()
         {
             Marco.Cerrar();
         }
 
-        /// <summary>Lanza el confeti (operacion exitosa).</summary>
+        /// <summary>Actualiza el estado visible despues de una operacion exitosa.</summary>
         protected void Celebrar()
         {
             Marco.Celebrar();

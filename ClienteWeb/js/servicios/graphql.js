@@ -30,6 +30,8 @@
   //  Campos que se piden al servidor
   // ---------------------------------------------------------------------
   const CAMPOS_MANTENIMIENTO = `
+    codigoLavadora
+    marcaLavadora
     id
     descripcion
     tecnico
@@ -62,6 +64,13 @@
   //  y dejan que el servidor valide los tipos.
   // ---------------------------------------------------------------------
   const DOCUMENTOS = {
+    LAVADORAS: `
+      query ListarLavadoras {
+        lavadoras {
+          ${CAMPOS_LAVADORA}
+        }
+      }
+    `,
     LAVADORAS_POR_FILTRO: `
       query LavadorasPorFiltro($marca: String, $tecnologiaInverter: Boolean, $conMantenimientos: Boolean) {
         lavadorasPorFiltro(
@@ -83,6 +92,13 @@
     VERSION_DATOS: `
       query VersionDatos {
         versionDatos
+      }
+    `,
+    MANTENIMIENTOS: `
+      query ListarMantenimientos($codigoLavadora: Int!) {
+        mantenimientos(codigoLavadora: $codigoLavadora) {
+          ${CAMPOS_MANTENIMIENTO}
+        }
       }
     `,
     MANTENIMIENTOS_POR_FILTRO: `
@@ -331,6 +347,13 @@
       },
 
       /** Lista las lavadoras con los filtros que aplica el servidor. */
+      listarTodasLavadoras: async function () {
+        if (modoApi === 'rest') return await ejecutarRest('/lavadoras') || [];
+        const datos = await ejecutar(DOCUMENTOS.LAVADORAS, {});
+        return datos.lavadoras || [];
+      },
+
+      /** Devuelve lavadoras usando exclusivamente la consulta de filtros. */
       listarLavadoras: async function (filtros) {
         if (modoApi === 'rest') return await ejecutarRest('/lavadoras' + queryString(filtros || {})) || [];
         const datos = await ejecutar(DOCUMENTOS.LAVADORAS_POR_FILTRO, filtros || {});
@@ -354,12 +377,17 @@
       /** Mantenimientos de una lavadora, con filtros opcionales. */
       consultarMantenimientos: async function (codigoLavadora, filtros) {
         const variables = Object.assign({ codigoLavadora: codigoLavadora }, filtros || {});
+        const tieneFiltros = Boolean(variables.tecnico) || variables.completado === true || variables.completado === false;
         if (modoApi === 'rest') {
           const { codigoLavadora: codigo, ...parametros } = variables;
           return await ejecutarRest('/lavadoras/' + Number(codigo) + '/mantenimientos' + queryString(parametros)) || [];
         }
-        const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTOS_POR_FILTRO, variables);
-        return datos.mantenimientosPorFiltro || [];
+        if (tieneFiltros) {
+          const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTOS_POR_FILTRO, variables);
+          return datos.mantenimientosPorFiltro || [];
+        }
+        const datos = await ejecutar(DOCUMENTOS.MANTENIMIENTOS, { codigoLavadora: codigoLavadora });
+        return datos.mantenimientos || [];
       },
 
       consultarMantenimientoPorId: async function (codigoLavadora, id) {

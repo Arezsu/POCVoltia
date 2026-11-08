@@ -13,6 +13,9 @@ namespace ClienteLavadora.servicios
     /// </summary>
     public interface IServicioMantenimientos
     {
+        /// <summary>Lista los mantenimientos de la lavadora sin aplicar filtros.</summary>
+        Task<List<MantenimientoData>> ListarTodasAsync(int codigoLavadora);
+
         /// <summary>
         /// Lista los mantenimientos de una lavadora aplicando los filtros en el SERVIDOR.
         ///  - tecnico: texto que debe aparecer en el nombre del tecnico (null = todos)

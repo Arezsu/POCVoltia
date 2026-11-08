@@ -1,9 +1,8 @@
 package com.example.ServidorLavadora.repositorio;
 
 import com.example.ServidorLavadora.model.Lavadora;
-import com.example.ServidorLavadora.model.Mantenimiento;
 import java.util.List;
-import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -40,57 +39,6 @@ public class RepositorioMemoria implements AlmacenDatos {
 
     private RepositorioMemoria() { }
 
-    /** Carga dos maestros y dos detalles de demostracion solo si el almacen esta vacio. */
-    public void cargarDatosPruebaSiVacio() {
-        synchronized (candado) {
-            if (!lavadoras.isEmpty()) {
-                return;
-            }
-
-            Lavadora lg = Lavadora.builder()
-                    .codigo(901)
-                    .marca("LG")
-                    .precioBase(1450000)
-                    .fechaFabricacion(LocalDateTime.of(2024, 3, 10, 9, 0))
-                    .capacidadCargaKilos(18)
-                    .velocidadCentrifugadoRPM(1400)
-                    .tecnologiaInverter(true)
-                    .minutosLavado(45)
-                    .build();
-            lg.agregarMantenimiento(Mantenimiento.builder()
-                    .id(1)
-                    .descripcion("Revision de bomba de agua")
-                    .tecnico("Carlos Perez")
-                    .costo(185000)
-                    .fecha(LocalDateTime.of(2025, 6, 12, 10, 30))
-                    .completado(false)
-                    .build());
-
-            Lavadora samsung = Lavadora.builder()
-                    .codigo(902)
-                    .marca("Samsung")
-                    .precioBase(1100000)
-                    .fechaFabricacion(LocalDateTime.of(2023, 11, 5, 14, 0))
-                    .capacidadCargaKilos(12)
-                    .velocidadCentrifugadoRPM(1200)
-                    .tecnologiaInverter(false)
-                    .minutosLavado(60)
-                    .build();
-            samsung.agregarMantenimiento(Mantenimiento.builder()
-                    .id(1)
-                    .descripcion("Limpieza de filtro y mangueras")
-                    .tecnico("Laura Gomez")
-                    .costo(95000)
-                    .fecha(LocalDateTime.of(2025, 8, 20, 15, 0))
-                    .completado(true)
-                    .build());
-
-            lavadoras.add(lg);
-            lavadoras.add(samsung);
-        }
-        notificar("Se cargaron dos lavadoras y dos mantenimientos de prueba");
-    }
-
     /** Unica puerta de entrada a la instancia (Singleton). */
     public static synchronized RepositorioMemoria getInstance() {
         if (instancia == null) {
@@ -112,6 +60,47 @@ public class RepositorioMemoria implements AlmacenDatos {
     @Override
     public List<Lavadora> lavadoras() {
         return lavadoras;
+    }
+
+    @Override
+    public List<Lavadora> listarPorFiltro(String marca, Boolean tecnologiaInverter, Boolean conMantenimientos) {
+        String texto = marca == null ? "" : marca.trim().toLowerCase(java.util.Locale.ROOT);
+        return lavadoras.stream()
+                .filter(lavadora -> texto.isEmpty()
+                        || lavadora.getMarca().toLowerCase(java.util.Locale.ROOT).contains(texto))
+                .filter(lavadora -> tecnologiaInverter == null
+                        || lavadora.isTecnologiaInverter() == tecnologiaInverter)
+                .filter(lavadora -> conMantenimientos == null
+                        || (lavadora.getCantidadMantenimientos() > 0) == conMantenimientos)
+                .toList();
+    }
+
+    @Override
+    public Optional<Lavadora> buscarPorCodigo(int codigo) {
+        return lavadoras.stream().filter(lavadora -> lavadora.getCodigo() == codigo).findFirst();
+    }
+
+    @Override
+    public Optional<Lavadora> buscarPorCriterios(Integer codigo, String marca) {
+        String texto = marca == null ? "" : marca.trim().toLowerCase(java.util.Locale.ROOT);
+        return lavadoras.stream()
+                .filter(lavadora -> codigo == null || lavadora.getCodigo() == codigo)
+                .filter(lavadora -> texto.isEmpty()
+                        || lavadora.getMarca().toLowerCase(java.util.Locale.ROOT).contains(texto))
+                .findFirst();
+    }
+
+    @Override
+    public Lavadora guardar(Lavadora lavadora) {
+        if (!lavadoras.contains(lavadora)) {
+            lavadoras.add(lavadora);
+        }
+        return lavadora;
+    }
+
+    @Override
+    public boolean eliminar(int codigo) {
+        return lavadoras.removeIf(lavadora -> lavadora.getCodigo() == codigo);
     }
 
     @Override

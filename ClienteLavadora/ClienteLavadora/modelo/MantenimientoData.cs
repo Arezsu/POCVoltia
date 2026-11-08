@@ -14,6 +14,12 @@ namespace ClienteLavadora.modelo
     /// </summary>
     public class MantenimientoData
     {
+        [JsonPropertyName("codigoLavadora")]
+        public int CodigoLavadora { get; set; }
+
+        [JsonPropertyName("marcaLavadora")]
+        public string MarcaLavadora { get; set; }
+
         [JsonPropertyName("id")]
         public int Id { get; set; }
 

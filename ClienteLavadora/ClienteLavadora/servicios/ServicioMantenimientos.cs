@@ -16,7 +16,18 @@ namespace ClienteLavadora.servicios
     public class ServicioMantenimientos : IServicioMantenimientos
     {
         private const string CamposMantenimiento =
-            "id descripcion tecnico costo fecha completado";
+            "codigoLavadora marcaLavadora id descripcion tecnico costo fecha completado";
+
+        public async Task<List<MantenimientoData>> ListarTodasAsync(int codigoLavadora)
+        {
+            string consulta = "query ListarMantenimientos($codigo: Int!) { " +
+                "mantenimientos(codigoLavadora: $codigo) { " + CamposMantenimiento + " } }";
+            RespuestaListaMantenimientos respuesta =
+                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaListaMantenimientos>(
+                    consulta, new { codigo = codigoLavadora });
+            return respuesta == null || respuesta.Mantenimientos == null
+                ? new List<MantenimientoData>() : respuesta.Mantenimientos;
+        }
 
         public async Task<List<MantenimientoData>> ListarAsync(int codigoLavadora, string tecnico, bool? completado)
         {
