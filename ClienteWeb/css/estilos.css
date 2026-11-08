@@ -25,8 +25,8 @@
   --secundario: #AAB7C8;
   --error: #FF7A83;
   --exito: #72D8A5;
-  --fuente: "Segoe UI", "Segoe UI Web", Tahoma, Verdana, sans-serif;
-  --mono: Consolas, "Courier New", monospace;
+  --fuente: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
+  --mono: "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace;
   --radio: 5px;
   --radio-chico: 3px;
   --sombra-panel: 0 2px 8px rgba(32, 57, 70, 0.12);
@@ -797,6 +797,23 @@ body[data-estado="LAVANDO"] .compuerta-agua {
   background: rgba(7, 13, 18, 0.72);
   color: var(--texto);
   transition: border-color var(--transicion), box-shadow var(--transicion), background var(--transicion);
+}
+
+/* El selector nativo de fecha usa una paleta clara para conservar el contraste
+   incluso cuando el resto de la interfaz trabaja con el tema oscuro. */
+.campo input[type="date"],
+.campo input[type="datetime-local"] {
+  color-scheme: light;
+  accent-color: var(--cian);
+  color: var(--texto);
+  background-color: var(--fondo-2);
+}
+
+body[data-tema="oscuro"] .campo input[type="date"]::-webkit-calendar-picker-indicator,
+body[data-tema="oscuro"] .campo input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.9;
+  cursor: pointer;
 }
 
 .ficha-solo-lectura input:disabled {

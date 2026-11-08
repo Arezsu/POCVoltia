@@ -79,7 +79,9 @@ ve los cambios que hace el otro gracias a la version de los datos (`versionDatos
 ## Inicio local (Windows PowerShell)
 
 Inicie MongoDB, el servidor GraphQL y cada cliente en terminales separadas. El servidor
-espera MongoDB en `localhost:27017` y usa la base `poc_voltia` por defecto.
+espera MongoDB en `localhost:27017` y usa la base `voltia` por defecto.
+Las colecciones principales son `lavadoras` y `mantenimientos`. Si el servidor ya estaba
+abierto antes de este cambio, detengalo y vuelva a iniciarlo para que use `voltia`.
 
 1. Inicie el servicio MongoDB instalado en Windows:
 
@@ -93,7 +95,7 @@ espera MongoDB en `localhost:27017` y usa la base `poc_voltia` por defecto.
 
    ```powershell
    cd .\ServidorLavadora
-   $env:MONGODB_URI = 'mongodb://localhost:27017/poc_voltia'
+   $env:MONGODB_URI = 'mongodb://localhost:27017/voltia'
    .\mvnw.cmd spring-boot:run
    ```
 
@@ -451,7 +453,7 @@ este caso; esa parte debe validarse con el docente.
 ### Requisitos
 
 - Java 17 o superior (probado con JDK 21).
-- MongoDB en ejecucion. Por defecto el servidor conecta a `mongodb://localhost:27017/poc_voltia`.
+- MongoDB en ejecucion. Por defecto el servidor conecta a `mongodb://localhost:27017/voltia`.
   Para otro servidor define `MONGODB_URI`; si MongoDB no responde, el servidor falla al
   iniciar en vez de cambiar silenciosamente a memoria.
 - Node.js (solo para servir el cliente web; el cliente tambien se puede abrir como archivo).
