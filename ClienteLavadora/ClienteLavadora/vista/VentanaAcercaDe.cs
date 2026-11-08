@@ -13,7 +13,44 @@ namespace ClienteLavadora.vista
     /// </summary>
     public class VentanaAcercaDe : VentanaMarco
     {
-        public VentanaAcercaDe() : base("ACERCA DE VOLTIA", 600, 430, false, 0)
+        private static VentanaAcercaDe instancia;
+
+        /// <summary>
+        /// Muestra la unica ventana Acerca de abierta. Si ya existe, la activa;
+        /// despues de cerrarla se puede crear una nueva instancia.
+        /// </summary>
+        public static void MostrarInstancia(Window propietaria)
+        {
+            if (instancia == null)
+            {
+                instancia = new VentanaAcercaDe();
+                instancia.Closed += (s, e) =>
+                {
+                    if (ReferenceEquals(instancia, s))
+                    {
+                        instancia = null;
+                    }
+                };
+            }
+
+            if (!instancia.IsVisible)
+            {
+                if (propietaria != null)
+                {
+                    instancia.Owner = propietaria;
+                    instancia.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                }
+                instancia.Show();
+            }
+
+            if (instancia.WindowState == WindowState.Minimized)
+            {
+                instancia.WindowState = WindowState.Normal;
+            }
+            instancia.Activate();
+        }
+
+        private VentanaAcercaDe() : base("ACERCA DE VOLTIA", 600, 430, false, 0)
         {
             StackPanel contenido = new StackPanel();
             contenido.VerticalAlignment = VerticalAlignment.Center;

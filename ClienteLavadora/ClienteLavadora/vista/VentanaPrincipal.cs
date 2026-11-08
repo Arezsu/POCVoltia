@@ -80,6 +80,8 @@ namespace ClienteLavadora.vista
             {
                 Background = Tema.FondoAlto,
                 Foreground = Tema.Texto,
+                BorderBrush = Tema.Linea,
+                BorderThickness = new Thickness(0, 0, 0, 1),
                 FontFamily = Tema.Fuente,
                 FontSize = 13,
                 ItemContainerStyle = EstiloElementoMenu()
@@ -256,6 +258,7 @@ namespace ClienteLavadora.vista
             Style estilo = new Style(typeof(MenuItem));
             estilo.Setters.Add(new Setter(Control.BackgroundProperty, Tema.FondoAlto));
             estilo.Setters.Add(new Setter(Control.ForegroundProperty, Tema.Texto));
+            estilo.Setters.Add(new Setter(Control.BorderBrushProperty, Tema.Linea));
             estilo.Setters.Add(new Setter(Control.FontFamilyProperty, Tema.Fuente));
             estilo.Setters.Add(new Setter(Control.FontSizeProperty, 13.0));
             estilo.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(12, 7, 18, 7)));
@@ -411,7 +414,7 @@ namespace ClienteLavadora.vista
 
         private void AbrirAcercaDe()
         {
-            Abrir(new VentanaAcercaDe());
+            VentanaAcercaDe.MostrarInstancia(this);
         }
 
         /// <summary>
