@@ -907,6 +907,11 @@
       const boton = evento.target.closest('button[data-action]');
       if (!boton) return;
       switch (boton.dataset.action) {
+        case 'filtrar':
+          this.aplicarFiltros();
+          document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
+          break;
+        case 'limpiar-filtros': this.limpiarFiltros(); break;
         case 'listar':
           this.refs.filtroMarca.value = '';
           this.refs.filtroInverter.value = '';

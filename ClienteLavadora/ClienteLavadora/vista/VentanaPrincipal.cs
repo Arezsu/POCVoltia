@@ -269,32 +269,12 @@ namespace ClienteLavadora.vista
             return boton;
         }
 
-        /// <summary>Pie: datos del curso y boton de salida.</summary>
+        /// <summary>Pie informativo; las acciones están disponibles en el menú superior.</summary>
         private FrameworkElement CrearPie()
         {
-            Grid pie = new Grid();
+            TextBlock pie = Ui.Texto("VOLTIA  |  Gestion de electrodomesticos", 11, Tema.TextoSecundario);
             pie.Margin = new Thickness(0, 14, 0, 0);
-            pie.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            pie.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            pie.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-
-            BotonVoltia btnTema = BotonVoltia.Secundario("Modo claro");
-            btnTema.Width = 130;
-            btnTema.Margin = new Thickness(0, 0, 8, 0);
-            btnTema.Click += (s, e) =>
-            {
-                Tema.Alternar();
-                btnTema.Texto = Tema.EsClaro ? "Modo oscuro" : "Modo claro";
-            };
-            Grid.SetColumn(btnTema, 1);
-            pie.Children.Add(btnTema);
-
-            BotonVoltia btnSalir = BotonVoltia.Secundario("Cerrar");
-            btnSalir.Width = 120;
-            btnSalir.Click += (s, e) => Cerrar();
-            Grid.SetColumn(btnSalir, 2);
-            pie.Children.Add(btnSalir);
-
+            pie.HorizontalAlignment = HorizontalAlignment.Center;
             return pie;
         }
 

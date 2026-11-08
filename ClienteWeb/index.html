@@ -26,6 +26,8 @@
     <div class="menu-item">
       <span>Edicion</span>
       <div class="submenu">
+        <button type="button" class="menu-button" data-action="filtrar">Aplicar filtros</button>
+        <button type="button" class="menu-button" data-action="limpiar-filtros">Limpiar filtros</button>
         <button type="button" class="menu-button" data-action="consultar">Consultar</button>
         <button type="button" class="menu-button" data-action="actualizar">Actualizar</button>
         <button type="button" class="menu-button" data-action="eliminar">Eliminar</button>
@@ -131,7 +133,7 @@
           <p class="panel-nota" id="resumen-filtros">Sin filtros aplicados</p>
         </div>
 
-        <form class="filtros" id="form-filtros" novalidate>
+        <div class="filtros" id="form-filtros">
           <div class="campo campo-filtro">
             <label for="filtro-marca">Marca contiene</label>
             <input type="search" id="filtro-marca" name="marca" placeholder="LG, Samsung..." autocomplete="off">
@@ -152,11 +154,7 @@
               <option value="false">Solo sin mantenimientos</option>
             </select>
           </div>
-          <div class="campo-acciones-filtro">
-            <button type="submit" class="boton primario">Aplicar filtros</button>
-            <button type="button" class="boton secundario" id="boton-limpiar-filtros">Limpiar filtros</button>
-          </div>
-        </form>
+        </div>
 
       </section>
 
