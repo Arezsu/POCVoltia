@@ -1,7 +1,6 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Threading;
 using ClienteLavadora.util;
 
@@ -23,14 +22,14 @@ namespace ClienteLavadora.vista.controles
         public MarcoLavadora(string titulo, bool mostrarOjo, double ladoOjo)
         {
             tituloBase = titulo;
-            Background = Tema.Pincel("#FFFFFF");
+            Background = Tema.Fondo;
 
             RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
             Grid barra = new Grid
             {
-                Background = Tema.Pincel("#E8EEF2"),
+                Background = Tema.FondoAlto,
                 Margin = new Thickness(0),
                 Height = 38
             };
@@ -41,7 +40,7 @@ namespace ClienteLavadora.vista.controles
             tituloVista.FontFamily = Tema.Fuente;
             tituloVista.FontSize = 13;
             tituloVista.FontWeight = FontWeights.SemiBold;
-            tituloVista.Foreground = Tema.Pincel("#172832");
+            tituloVista.Foreground = Tema.Texto;
             tituloVista.VerticalAlignment = VerticalAlignment.Center;
             tituloVista.Margin = new Thickness(12, 0, 8, 0);
             barra.Children.Add(tituloVista);
@@ -49,17 +48,17 @@ namespace ClienteLavadora.vista.controles
             estado.Text = "Listo";
             estado.FontFamily = Tema.Fuente;
             estado.FontSize = 11;
-            estado.Foreground = Tema.Pincel("#526873");
+            estado.Foreground = Tema.TextoSecundario;
             estado.VerticalAlignment = VerticalAlignment.Center;
             estado.Margin = new Thickness(8, 0, 12, 0);
             Grid.SetColumn(estado, 1);
             barra.Children.Add(estado);
             Children.Add(barra);
 
-            cuerpo.Background = Brushes.White;
+            cuerpo.Background = Tema.Fondo;
             cuerpo.Margin = new Thickness(0);
             cuerpo.Padding = new Thickness(12);
-            cuerpo.BorderBrush = Tema.Pincel("#CBD5DB");
+            cuerpo.BorderBrush = Tema.Linea;
             cuerpo.BorderThickness = new Thickness(0, 1, 0, 0);
             Grid.SetRow(cuerpo, 1);
             Children.Add(cuerpo);
@@ -134,7 +133,7 @@ namespace ClienteLavadora.vista.controles
             }
 
             estado.Text = trabajando ? "Procesando" : "Listo";
-            estado.Foreground = trabajando ? Tema.Ambar : Tema.Pincel("#526873");
+            estado.Foreground = trabajando ? Tema.Ambar : Tema.TextoSecundario;
         }
     }
 }

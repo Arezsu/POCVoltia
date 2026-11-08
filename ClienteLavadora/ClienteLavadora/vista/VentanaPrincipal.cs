@@ -43,7 +43,7 @@ namespace ClienteLavadora.vista
             ShowInTaskbar = true; // La ventana principal si debe aparecer en la barra de Windows
             vigilante = new VigilanteServidor(controlador);
 
-            Grid raiz = new Grid();
+            Grid raiz = new Grid { Background = Tema.Fondo };
             raiz.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });                 // encabezado
             raiz.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }); // puerta
             raiz.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });                 // botones
@@ -96,6 +96,8 @@ namespace ClienteLavadora.vista
                 CrearAccion("Consultar mantenimiento", AbrirConsultarMantenimiento),
                 CrearAccion("Actualizar mantenimiento", AbrirActualizarMantenimiento),
                 CrearAccion("Eliminar mantenimiento", AbrirEliminarMantenimiento)));
+            menu.Items.Add(CrearMenu("Ayuda",
+                CrearAccion("Acerca de", AbrirAcercaDe)));
 
             StackPanel contenedor = new StackPanel();
             contenedor.Children.Add(menu);
@@ -224,7 +226,7 @@ namespace ClienteLavadora.vista
             titulo.FontWeight = FontWeights.SemiBold;
             contenido.Children.Add(titulo);
 
-            TextBlock detalle = Ui.Texto("Usa los menús Lavadora y Mantenimiento para abrir cada operación.", 12, Tema.TextoSecundario);
+            TextBlock detalle = Ui.Texto("Usa los menús Lavadora y Mantenimiento para abrir cada operación, y Ayuda para consultar la información del proyecto.", 12, Tema.TextoSecundario);
             detalle.Margin = new Thickness(0, 8, 0, 0);
             detalle.TextWrapping = TextWrapping.Wrap;
             contenido.Children.Add(detalle);
