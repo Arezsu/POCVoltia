@@ -24,7 +24,7 @@
   function arrancar() {
     const botonTema = document.getElementById('boton-tema');
     const temaGuardado = global.localStorage.getItem('voltia-tema');
-    document.body.dataset.tema = temaGuardado === 'oscuro' ? 'oscuro' : 'claro';
+    document.body.dataset.tema = temaGuardado === 'claro' ? 'claro' : 'oscuro';
     if (botonTema) {
       const actualizarBotonTema = () => {
         const claro = document.body.dataset.tema === 'claro';

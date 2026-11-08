@@ -76,7 +76,14 @@ namespace ClienteLavadora.vista
         /// <summary>Logo, nombre de la casa y estado de la conexion.</summary>
         private FrameworkElement CrearEncabezado()
         {
-            Menu menu = new Menu();
+            Menu menu = new Menu
+            {
+                Background = Tema.FondoAlto,
+                Foreground = Tema.Texto,
+                FontFamily = Tema.Fuente,
+                FontSize = 13,
+                ItemContainerStyle = EstiloElementoMenu()
+            };
             menu.Items.Add(CrearMenu("Lavadora",
                 CrearAccion("Listar lavadoras", AbrirListar),
                 CrearAccion("Agregar lavadora", AbrirAgregar),
@@ -217,7 +224,7 @@ namespace ClienteLavadora.vista
             titulo.FontWeight = FontWeights.SemiBold;
             contenido.Children.Add(titulo);
 
-            TextBlock detalle = Ui.Texto("Usa Archivo, Edición, Ver y Herramientas para abrir cada caso de uso sin saturar la pantalla de inicio.", 12, Tema.TextoSecundario);
+            TextBlock detalle = Ui.Texto("Usa los menús Lavadora y Mantenimiento para abrir cada operación.", 12, Tema.TextoSecundario);
             detalle.Margin = new Thickness(0, 8, 0, 0);
             detalle.TextWrapping = TextWrapping.Wrap;
             contenido.Children.Add(detalle);
@@ -230,12 +237,36 @@ namespace ClienteLavadora.vista
 
         private MenuItem CrearMenu(string titulo, params MenuItem[] opciones)
         {
-            MenuItem menu = new MenuItem { Header = titulo };
+            MenuItem menu = new MenuItem
+            {
+                Header = titulo,
+                ItemContainerStyle = EstiloElementoMenu()
+            };
             foreach (MenuItem opcion in opciones)
             {
                 menu.Items.Add(opcion);
             }
             return menu;
+        }
+
+        private static Style EstiloElementoMenu()
+        {
+            Style estilo = new Style(typeof(MenuItem));
+            estilo.Setters.Add(new Setter(Control.BackgroundProperty, Tema.FondoAlto));
+            estilo.Setters.Add(new Setter(Control.ForegroundProperty, Tema.Texto));
+            estilo.Setters.Add(new Setter(Control.FontFamilyProperty, Tema.Fuente));
+            estilo.Setters.Add(new Setter(Control.FontSizeProperty, 13.0));
+            estilo.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(12, 7, 18, 7)));
+
+            Trigger resaltado = new Trigger
+            {
+                Property = MenuItem.IsHighlightedProperty,
+                Value = true
+            };
+            resaltado.Setters.Add(new Setter(Control.BackgroundProperty, Tema.Chasis));
+            resaltado.Setters.Add(new Setter(Control.ForegroundProperty, Tema.Cian));
+            estilo.Triggers.Add(resaltado);
+            return estilo;
         }
 
         private MenuItem CrearAccion(string texto, Action accion)

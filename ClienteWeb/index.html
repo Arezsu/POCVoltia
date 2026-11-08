@@ -129,14 +129,6 @@
               <option value="false">Solo sin inverter</option>
             </select>
           </div>
-          <div class="campo campo-filtro">
-            <label for="filtro-mantenimientos">Mantenimientos</label>
-            <select id="filtro-mantenimientos" name="mantenimientos">
-              <option value="">Todos</option>
-              <option value="true">Solo con mantenimientos</option>
-              <option value="false">Solo sin mantenimientos</option>
-            </select>
-          </div>
         </div>
 
       </section>
@@ -148,7 +140,7 @@
           <span class="contador" id="contador-lavadoras">0 lavadoras</span>
         </div>
         <p class="tabla-ayuda" id="tabla-ayuda">
-          Seleccione una fila (clic o tecla Enter) para ver sus mantenimientos en el panel de detalle.
+          Seleccione una fila (clic o tecla Enter) para consultar los datos de esa lavadora.
           Si la ventana es angosta, desplace la tabla hacia la derecha para ver todas las columnas.
         </p>
         <div class="tabla-scroll" id="tabla-scroll">
@@ -164,8 +156,6 @@
                 <th scope="col">RPM</th>
                 <th scope="col">Inverter</th>
                 <th scope="col">Minutos</th>
-                <th scope="col">Manten.</th>
-                <th scope="col">Pend.</th>
                 <th scope="col">Precio final</th>
               </tr>
             </thead>
@@ -185,7 +175,7 @@
         <h2 class="visualmente-oculto" id="titulo-detalle">Detalle de la lavadora seleccionada</h2>
         <div id="detalle-contenido" aria-live="polite">
           <div class="detalle-vacio">
-            <p>Seleccione una lavadora en la tabla para ver su ficha y sus mantenimientos.</p>
+            <p>Seleccione una lavadora para ver sus datos técnicos.</p>
           </div>
         </div>
       </div>
@@ -471,8 +461,6 @@
             <thead>
               <tr>
                 <th scope="col">ID</th>
-                <th scope="col">Codigo lavadora</th>
-                <th scope="col">Marca lavadora</th>
                 <th scope="col">Descripcion</th>
                 <th scope="col">Tecnico</th>
                 <th scope="col">Costo</th>

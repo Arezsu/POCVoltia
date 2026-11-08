@@ -16,7 +16,7 @@ namespace ClienteLavadora.servicios
     public class ServicioMantenimientos : IServicioMantenimientos
     {
         private const string CamposMantenimiento =
-            "codigoLavadora marcaLavadora id descripcion tecnico costo fecha completado";
+            "codigoLavadora id descripcion tecnico costo fecha completado";
 
         public async Task<List<MantenimientoData>> ListarTodasAsync(int codigoLavadora)
         {

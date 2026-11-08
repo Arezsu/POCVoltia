@@ -18,7 +18,7 @@ namespace ClienteLavadora.util
     /// </summary>
     public static class Tema
     {
-        public static bool EsClaro { get; private set; } = true;
+        public static bool EsClaro { get; private set; } = false;
 
         static Tema()
         {
@@ -60,23 +60,23 @@ namespace ClienteLavadora.util
         //  Los ocho primero digitos son el alfa: FF = opaco, 33 = casi transparente.
         // ====================================================================
 
-        public const string HexFondo = "#14212A";          // fondo general
-        public const string HexFondoAlto = "#1B2B36";      // fondo un poco mas claro
-        public const string HexChasis = "#243743";         // chasis de la lavadora
-        public const string HexAcero = "#304957";          // acero de paneles y encabezados
-        public const string HexAceroClaro = "#8AA6B5";     // bordes y separadores de acero
-        public const string HexCian = "#6FD3E8";           // acento principal (pantallas)
-        public const string HexAmbar = "#E8B15A";          // acento secundario (alertas suaves)
-        public const string HexTexto = "#E6EDF3";          // texto principal
-        public const string HexTextoSecundario = "#9FB0BF"; // etiquetas y ayudas
-        public const string HexError = "#E06C6C";          // error
-        public const string HexExito = "#7ED09A";          // confirmacion
+        public const string HexFondo = "#10151F";
+        public const string HexFondoAlto = "#172131";
+        public const string HexChasis = "#202C3D";
+        public const string HexAcero = "#29394D";
+        public const string HexAceroClaro = "#7589A3";
+        public const string HexCian = "#59D4C7";
+        public const string HexAmbar = "#F2B86F";
+        public const string HexTexto = "#F1F4FA";
+        public const string HexTextoSecundario = "#AAB7C8";
+        public const string HexError = "#FF7A83";
+        public const string HexExito = "#72D8A5";
 
         // Cristal (glassmorphism tenue): blanco con muy poca opacidad.
-        public const string HexCristal = "#0FFFFFFF";      // blanco al 6 por ciento
-        public const string HexCristalBorde = "#24FFFFFF"; // blanco al 14 por ciento
-        public const string HexLinea = "#17FFFFFF";        // separadores sutiles
-        public const string HexPanelOscuro = "#070D13";    // pantallas digitales
+        public const string HexCristal = "#121D2B";
+        public const string HexCristalBorde = "#34465B";
+        public const string HexLinea = "#29394D";
+        public const string HexPanelOscuro = "#0B111B";
 
         // ====================================================================
         //  Pinceles de uso comun
@@ -99,9 +99,9 @@ namespace ClienteLavadora.util
         public static readonly SolidColorBrush CristalBorde = Pincel(HexCristalBorde);
         public static readonly SolidColorBrush Linea = Pincel(HexLinea);
         public static readonly SolidColorBrush PanelOscuro = Pincel(HexPanelOscuro);
-        public static readonly SolidColorBrush FondoFecha = Pincel("#0B141D");
-        public static readonly SolidColorBrush BordeFecha = Pincel("#405565");
-        public static readonly SolidColorBrush TextoFecha = Pincel("#E7F0F5");
+        public static readonly SolidColorBrush FondoFecha = Pincel("#0B111B");
+        public static readonly SolidColorBrush BordeFecha = Pincel("#40516A");
+        public static readonly SolidColorBrush TextoFecha = Pincel("#F1F4FA");
 
         // ====================================================================
         //  Tipografias
@@ -177,7 +177,7 @@ namespace ClienteLavadora.util
         {
             return EsClaro
                 ? DegradadoDiagonal("#F4F8FA", "#DCE8ED")
-                : DegradadoDiagonal(HexFondoAlto, HexFondo);
+                : DegradadoDiagonal("#1A293B", HexFondo);
         }
 
         /// <summary>Chasis de la lavadora: metal oscuro con un brillo arriba.</summary>
@@ -185,7 +185,7 @@ namespace ClienteLavadora.util
         {
             return EsClaro
                 ? Degradado("#FFFFFF", "#E8F0F3", "#D9E5EA")
-                : Degradado("#2B414E", HexChasis, "#1B2B36");
+                : Degradado("#2B3E54", HexChasis, "#172131");
         }
 
         /// <summary>Consola superior: un poco mas clara que el chasis para separarse.</summary>
@@ -193,7 +193,7 @@ namespace ClienteLavadora.util
         {
             return EsClaro
                 ? Degradado("#FFFFFF", "#E2EDF1")
-                : Degradado("#304957", "#20333F");
+                : Degradado("#33465E", "#24344A");
         }
 
         /// <summary>Aro metalico plateado del ojo de buey.</summary>
@@ -205,7 +205,7 @@ namespace ClienteLavadora.util
         /// <summary>Vidrio del ojo de buey: azul profundo con un brillo arriba a la izquierda.</summary>
         public static RadialGradientBrush Vidrio()
         {
-            return Radial(new Point(0.35, 0.28), "#274B60", "#13293A", "#061019");
+            return Radial(new Point(0.35, 0.28), "#276B70", "#143A49", "#081522");
         }
     }
 }

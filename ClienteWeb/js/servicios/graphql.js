@@ -31,7 +31,6 @@
   // ---------------------------------------------------------------------
   const CAMPOS_MANTENIMIENTO = `
     codigoLavadora
-    marcaLavadora
     id
     descripcion
     tecnico
@@ -57,6 +56,17 @@
       ${CAMPOS_MANTENIMIENTO}
     }
   `;
+  const CAMPOS_LISTADO_LAVADORA = `
+    codigo
+    marca
+    precioBase
+    fechaFabricacion
+    capacidadCargaKilos
+    velocidadCentrifugadoRPM
+    tecnologiaInverter
+    minutosLavado
+    precioFinal
+  `;
 
   // ---------------------------------------------------------------------
   //  Documentos GraphQL: queries y mutations con variables
@@ -67,7 +77,7 @@
     LAVADORAS: `
       query ListarLavadoras {
         lavadoras {
-          ${CAMPOS_LAVADORA}
+          ${CAMPOS_LISTADO_LAVADORA}
         }
       }
     `,
@@ -78,7 +88,7 @@
           tecnologiaInverter: $tecnologiaInverter
           conMantenimientos: $conMantenimientos
         ) {
-          ${CAMPOS_LAVADORA}
+          ${CAMPOS_LISTADO_LAVADORA}
         }
       }
     `,

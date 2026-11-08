@@ -279,8 +279,6 @@ namespace ClienteLavadora.vista
         private void ArmarGrilla()
         {
             grilla.Columns.Add(Ui.Columna("Id", "Id", 0.45, true));
-            grilla.Columns.Add(Ui.Columna("Codigo lavadora", "CodigoLavadora", 0.8, true));
-            grilla.Columns.Add(Ui.Columna("Marca lavadora", "MarcaLavadora", 1.0, false));
             grilla.Columns.Add(Ui.Columna("Descripcion", "Descripcion", 2.2, false));
             grilla.Columns.Add(Ui.Columna("Tecnico", "Tecnico", 1.4, false));
             grilla.Columns.Add(Ui.Columna("Fecha", "FechaTexto", 1.3, false));

@@ -96,7 +96,6 @@
         formFiltros: porId('form-filtros'),
         filtroMarca: porId('filtro-marca'),
         filtroInverter: porId('filtro-inverter'),
-        filtroMantenimientos: porId('filtro-mantenimientos'),
         botonLimpiarFiltros: porId('boton-limpiar-filtros'),
         resumenFiltros: porId('resumen-filtros'),
         botonMantenimientos: porId('boton-mantenimientos'),
@@ -543,11 +542,6 @@
         { texto: lavadora.rpmTexto, clase: 'num' },
         { texto: lavadora.inverterTexto, clase: 'centro' },
         { texto: lavadora.minutosTexto, clase: 'num' },
-        { texto: lavadora.cantidadMantenimientos, clase: 'num' },
-        {
-          texto: lavadora.mantenimientosPendientes,
-          clase: 'num ' + (lavadora.mantenimientosPendientes > 0 ? 'alerta' : 'ok')
-        },
         { texto: lavadora.precioFinalTexto, clase: 'num final' }
       ];
 
@@ -595,7 +589,7 @@
       if (!lavadora) {
         const vacio = this.elemento('div', 'detalle-vacio');
         vacio.appendChild(this.elemento('p', null,
-          'Seleccione una lavadora en la tabla para ver su ficha y sus mantenimientos.'));
+          'Seleccione una lavadora para ver sus datos técnicos.'));
         contenedor.appendChild(vacio);
         return;
       }
@@ -610,30 +604,9 @@
 
       const resumen = this.elemento('div', 'detalle-resumen');
       resumen.appendChild(this.crearResumen('Precio final', lavadora.precioFinalTexto));
-      resumen.appendChild(this.crearResumen('Mantenim.', lavadora.cantidadMantenimientos));
-      resumen.appendChild(this.crearResumen(
-        'Pendientes',
-        lavadora.mantenimientosPendientes,
-        lavadora.mantenimientosPendientes > 0 ? 'alerta' : null
-      ));
       contenedor.appendChild(resumen);
 
       contenedor.appendChild(this.crearSeccionDatos(lavadora));
-
-      const seccionDetalle = this.elemento('div', 'detalle-seccion');
-      const cabeceraDetalle = this.elemento('div', 'detalle-seccion-cabecera');
-      cabeceraDetalle.appendChild(this.elemento('h3', null, 'Mantenimientos'));
-      const botonGestionar = this.elemento('button', 'boton primario chico boton-caso', 'Gestionar');
-      botonGestionar.type = 'button';
-      botonGestionar.dataset.accion = 'gestionar';
-      botonGestionar.dataset.codigo = String(lavadora.codigo);
-      botonGestionar.title = 'Gestionar los mantenimientos de la lavadora ' + lavadora.codigo;
-      botonGestionar.setAttribute('aria-label',
-        'Gestionar los mantenimientos de la lavadora ' + lavadora.codigo);
-      cabeceraDetalle.appendChild(botonGestionar);
-      seccionDetalle.appendChild(cabeceraDetalle);
-      seccionDetalle.appendChild(this.crearListaMantenimientos(lavadora.mantenimientos));
-      contenedor.appendChild(seccionDetalle);
     }
 
     crearResumen(etiqueta, valor, clase) {
@@ -654,10 +627,6 @@
         ['Capacidad', lavadora.capacidadTexto, null],
         ['Centrifugado', lavadora.rpmTexto, null],
         ['Minutos de lavado', lavadora.minutosTexto, null],
-        ['Mantenimientos', String(lavadora.cantidadMantenimientos), null],
-        ['Pendientes', String(lavadora.mantenimientosPendientes),
-          lavadora.mantenimientosPendientes > 0 ? 'alerta' : null],
-        ['Costo mantenimientos', lavadora.costoMantenimientosTexto, null],
         ['Precio final', lavadora.precioFinalTexto, 'destacado']
       ];
 
@@ -709,8 +678,6 @@
       const fila = document.createElement('tr');
       fila.dataset.id = String(mantenimiento.id);
       fila.appendChild(this.elemento('td', 'num', mantenimiento.id));
-      fila.appendChild(this.elemento('td', 'num', mantenimiento.codigoLavadora));
-      fila.appendChild(this.elemento('td', null, mantenimiento.marcaLavadora));
       fila.appendChild(this.elemento('td', null, mantenimiento.descripcion));
       fila.appendChild(this.elemento('td', null, mantenimiento.tecnico));
       fila.appendChild(this.elemento('td', 'num', mantenimiento.costoTexto));
@@ -896,7 +863,7 @@
       const filtros = {
         marca: this.refs.filtroMarca.value.trim(),
         tecnologiaInverter: this.valorBooleano(this.refs.filtroInverter.value),
-        conMantenimientos: this.valorBooleano(this.refs.filtroMantenimientos.value)
+        conMantenimientos: null
       };
       // El controlador ya avisa el error por el notificador; aqui solo se
       // evita que quede una promesa sin manejar.
@@ -915,7 +882,6 @@
         case 'listar':
           this.refs.filtroMarca.value = '';
           this.refs.filtroInverter.value = '';
-          this.refs.filtroMantenimientos.value = '';
           this.controladorLavadoras.listarTodas().catch(() => {});
           document.getElementById('panel-tabla').scrollIntoView({ behavior: 'smooth', block: 'start' });
           break;
@@ -936,7 +902,6 @@
     limpiarFiltros() {
       this.refs.filtroMarca.value = '';
       this.refs.filtroInverter.value = '';
-      this.refs.filtroMantenimientos.value = '';
       this.controladorLavadoras.limpiarFiltros().catch(() => {});
     }
 

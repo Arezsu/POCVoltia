@@ -408,13 +408,13 @@ namespace ClienteLavadora.util
             grilla.ColumnHeaderHeight = 34;
             grilla.FontFamily = Tema.Fuente;
             grilla.FontSize = 12.5;
-            grilla.Background = Tema.Pincel("#0E1620");
-            grilla.RowBackground = Tema.Pincel("#0E1620");
-            grilla.AlternatingRowBackground = Tema.Pincel("#121C25");
+            grilla.Background = Tema.PanelOscuro;
+            grilla.RowBackground = Tema.PanelOscuro;
+            grilla.AlternatingRowBackground = Tema.Pincel("#121C2A");
             grilla.Foreground = Tema.Texto;
             grilla.BorderBrush = Tema.CristalBorde;
             grilla.BorderThickness = new Thickness(1);
-            grilla.HorizontalGridLinesBrush = Tema.Pincel("#1B2731");
+            grilla.HorizontalGridLinesBrush = Tema.Linea;
             grilla.ColumnHeaderStyle = EstiloEncabezado();
             grilla.CellStyle = EstiloCelda();
             grilla.RowStyle = EstiloFila();
@@ -453,7 +453,7 @@ namespace ClienteLavadora.util
             estilo.Setters.Add(new Setter(Control.FontSizeProperty, 11.5));
             estilo.Setters.Add(new Setter(Control.FontWeightProperty, FontWeights.SemiBold));
             estilo.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 7, 8, 7)));
-            estilo.Setters.Add(new Setter(Control.BorderBrushProperty, Tema.Pincel("#2E4050")));
+            estilo.Setters.Add(new Setter(Control.BorderBrushProperty, Tema.Linea));
             estilo.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0, 0, 1, 1)));
             estilo.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
             return estilo;
@@ -486,13 +486,13 @@ namespace ClienteLavadora.util
             Trigger encima = new Trigger();
             encima.Property = UIElement.IsMouseOverProperty;
             encima.Value = true;
-            encima.Setters.Add(new Setter(Control.BackgroundProperty, Tema.Pincel("#182833")));
+            encima.Setters.Add(new Setter(Control.BackgroundProperty, Tema.Chasis));
             estilo.Triggers.Add(encima);
 
             Trigger seleccionada = new Trigger();
             seleccionada.Property = DataGridRow.IsSelectedProperty;
             seleccionada.Value = true;
-            seleccionada.Setters.Add(new Setter(Control.BackgroundProperty, Tema.Pincel("#1E3A46")));
+            seleccionada.Setters.Add(new Setter(Control.BackgroundProperty, Tema.Pincel("#173B42")));
             estilo.Triggers.Add(seleccionada);
             return estilo;
         }

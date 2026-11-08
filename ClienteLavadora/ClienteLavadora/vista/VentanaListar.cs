@@ -15,9 +15,8 @@ namespace ClienteLavadora.vista
     /// <summary>
     /// CASO DE USO LISTAR (ventana independiente).
     ///
-    /// Muestra la grilla de lavadoras con tres filtros que aplica el SERVIDOR
-    /// (marca que contiene el texto, inverter y con/sin mantenimientos), un contador
-    /// digital, y a la derecha el DETALLE de la fila seleccionada con sus mantenimientos.
+    /// Muestra una grilla de lavadoras con filtros por marca e inverter. Los detalles
+    /// de mantenimiento se administran desde su propio caso de uso.
     ///
     /// PATRON OBSERVER (lo mas importante de esta ventana):
     ///  - se SUSCRIBE a NotificadorDatos.DatosCambiaron al construirse;
@@ -34,18 +33,11 @@ namespace ClienteLavadora.vista
 
         private readonly CampoTexto txtMarca = new CampoTexto();
         private readonly ComboBox cmbInverter = Ui.Combo("Todos", "Con inverter", "Sin inverter");
-        private readonly ComboBox cmbMantenimientos = Ui.Combo("Todos", "Con mantenimientos", "Sin mantenimientos");
 
         private readonly DataGrid grilla = Ui.Grilla();
         private readonly TextBlock contador = new TextBlock();
         private readonly TextBlock aviso = new TextBlock();
 
-        private readonly FichaLavadora ficha = new FichaLavadora();
-        private readonly ListaMantenimientos listaMantenimientos = new ListaMantenimientos();
-        private readonly TextBlock tituloDetalle = new TextBlock();
-        private readonly BotonVoltia btnMantenimientos = BotonVoltia.Acento("Abrir Mantenimientos");
-
-        private LavadoraData seleccionada;
         private bool cargando;
         private bool filtrosAplicados;
 
@@ -93,8 +85,6 @@ namespace ClienteLavadora.vista
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
             rejilla.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
             txtMarca.Ayuda = "Escriba parte de la marca";
@@ -107,10 +97,6 @@ namespace ClienteLavadora.vista
             StackPanel celdaInverter = Ui.Celda("Tecnologia inverter", cmbInverter);
             Grid.SetColumn(celdaInverter, 2);
             rejilla.Children.Add(celdaInverter);
-
-            StackPanel celdaMantenimientos = Ui.Celda("Mantenimientos", cmbMantenimientos);
-            Grid.SetColumn(celdaMantenimientos, 4);
-            rejilla.Children.Add(celdaMantenimientos);
 
             StackPanel botones = new StackPanel();
             botones.Orientation = Orientation.Horizontal;
@@ -132,7 +118,7 @@ namespace ClienteLavadora.vista
             };
             botones.Children.Add(btnLimpiar);
 
-            Grid.SetColumn(botones, 6);
+            Grid.SetColumn(botones, 4);
             rejilla.Children.Add(botones);
 
             Border panel = Ui.Cristal(rejilla, new Thickness(12, 10, 12, 10));
@@ -140,23 +126,11 @@ namespace ClienteLavadora.vista
             return panel;
         }
 
-        /// <summary>Grilla a la izquierda y panel de detalle a la derecha.</summary>
+        /// <summary>La lista contiene únicamente atributos de lavadoras.</summary>
         private FrameworkElement CrearCuerpo()
         {
             ArmarGrilla();
-
-            Grid cuerpo = new Grid();
-            cuerpo.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            cuerpo.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(12) });
-            cuerpo.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(390) });
-
-            Grid.SetColumn(grilla, 0);
-            cuerpo.Children.Add(grilla);
-
-            FrameworkElement detalle = CrearDetalle();
-            Grid.SetColumn(detalle, 2);
-            cuerpo.Children.Add(detalle);
-            return cuerpo;
+            return grilla;
         }
 
         /// <summary>Columnas de la grilla: las mismas del schema, con grilla oscura.</summary>
@@ -170,55 +144,9 @@ namespace ClienteLavadora.vista
             grilla.Columns.Add(Ui.Columna("Precio base", "PrecioBaseTexto", 1.35, true));
             grilla.Columns.Add(Ui.Columna("Capacidad", "CapacidadTexto", 1.0, true));
             grilla.Columns.Add(Ui.Columna("Inverter", "InverterTexto", 0.9, false));
-            grilla.Columns.Add(Ui.Columna("Mant.", "CantidadMantenimientos", 0.75, true));
             grilla.Columns.Add(Ui.Columna("Precio final", "PrecioFinalTexto", 1.45, true));
 
-            grilla.SelectionChanged += AlSeleccionar;
-            grilla.MouseDoubleClick += AlDobleClic;
             grilla.LoadingRow += (s, e) => Anime.Entrada(e.Row, Math.Min(e.Row.GetIndex(), 12) * 40);
-        }
-
-        /// <summary>Panel de cristal con la ficha y los mantenimientos de la fila escogida.</summary>
-        private FrameworkElement CrearDetalle()
-        {
-            tituloDetalle.Text = "DETALLE";
-            tituloDetalle.FontFamily = Tema.Numeros;
-            tituloDetalle.FontSize = 12;
-            tituloDetalle.FontWeight = FontWeights.Bold;
-            tituloDetalle.Foreground = Tema.Cian;
-            tituloDetalle.Margin = new Thickness(0, 0, 0, 8);
-
-            ScrollViewer desplazable = Ui.Desplazable(ficha);
-            desplazable.MaxHeight = 205;
-            desplazable.Margin = new Thickness(0, 0, 0, 6);
-
-            TextBlock rotulo = Ui.Rotulo("MANTENIMIENTOS DE LA LAVADORA");
-            rotulo.Margin = new Thickness(0, 2, 0, 6);
-
-            btnMantenimientos.Height = 32;
-            btnMantenimientos.Habilitado = false;
-            btnMantenimientos.Margin = new Thickness(0, 8, 0, 0);
-            btnMantenimientos.Click += (s, e) => AbrirMantenimientos();
-
-            Grid panel = new Grid();
-            panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            panel.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            panel.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-
-            panel.Children.Add(tituloDetalle);
-            Grid.SetRow(desplazable, 1);
-            panel.Children.Add(desplazable);
-            Grid.SetRow(rotulo, 2);
-            panel.Children.Add(rotulo);
-            Grid.SetRow(listaMantenimientos, 3);
-            panel.Children.Add(listaMantenimientos);
-            Grid.SetRow(btnMantenimientos, 4);
-            panel.Children.Add(btnMantenimientos);
-
-            Border cristal = Ui.Cristal(panel, new Thickness(13));
-            return cristal;
         }
 
         /// <summary>Contador digital y botones de accion.</summary>
@@ -291,7 +219,6 @@ namespace ClienteLavadora.vista
             filtrosAplicados = false;
             txtMarca.Texto = "";
             cmbInverter.SelectedIndex = 0;
-            cmbMantenimientos.SelectedIndex = 0;
             await CargarListaAsync(false);
         }
 
@@ -309,7 +236,8 @@ namespace ClienteLavadora.vista
             cargando = true;
 
             // Codigo de la fila que estaba seleccionada, para volver a seleccionarla.
-            int codigoAnterior = seleccionada == null ? 0 : seleccionada.Codigo;
+            LavadoraData filaSeleccionada = grilla.SelectedItem as LavadoraData;
+            int codigoAnterior = filaSeleccionada == null ? 0 : filaSeleccionada.Codigo;
             aviso.Text = "Consultando...";
 
             try
@@ -320,12 +248,11 @@ namespace ClienteLavadora.vista
                     marca = null;
                 }
                 bool? inverter = conFiltros ? Opcion(cmbInverter.SelectedIndex) : null;
-                bool? conMantenimientos = conFiltros ? Opcion(cmbMantenimientos.SelectedIndex) : null;
 
                 // Task.Run: la red corre fuera del hilo de la interfaz.
                 List<LavadoraData> lista = await Task.Run(
                     () => conFiltros
-                        ? controlador.ListarAsync(marca, inverter, conMantenimientos)
+                        ? controlador.ListarAsync(marca, inverter, null)
                         : controlador.ListarTodasAsync());
 
                 grilla.ItemsSource = lista;
@@ -335,10 +262,6 @@ namespace ClienteLavadora.vista
                 if (codigoAnterior != 0)
                 {
                     SeleccionarPorCodigo(lista, codigoAnterior);
-                }
-                else
-                {
-                    MostrarDetalle(null);
                 }
             }
             catch (Exception ex)
@@ -377,57 +300,6 @@ namespace ClienteLavadora.vista
                     return;
                 }
             }
-            MostrarDetalle(null); // Ya no existe (otro cliente lo elimino)
-        }
-
-        // ====================================================================
-        //  Seleccion y detalle
-        // ====================================================================
-
-        private void AlSeleccionar(object remitente, SelectionChangedEventArgs argumentos)
-        {
-            MostrarDetalle(grilla.SelectedItem as LavadoraData);
-        }
-
-        private void MostrarDetalle(LavadoraData lavadora)
-        {
-            seleccionada = lavadora;
-
-            if (lavadora == null)
-            {
-                tituloDetalle.Text = "DETALLE";
-                ficha.MostrarVacio("Escoja una lavadora en la grilla para ver su ficha y sus mantenimientos.");
-                listaMantenimientos.Mostrar(null, "Sin mantenimientos para mostrar.");
-                btnMantenimientos.Habilitado = false;
-                return;
-            }
-
-            tituloDetalle.Text = "DETALLE  " + lavadora.Codigo + "  -  " + lavadora.Marca;
-            ficha.Mostrar(lavadora);
-            listaMantenimientos.Mostrar(lavadora.ListaMantenimientos,
-                "Esta lavadora no tiene mantenimientos registrados.");
-            btnMantenimientos.Habilitado = true;
-        }
-
-        private void AlDobleClic(object remitente, MouseButtonEventArgs argumentos)
-        {
-            if (seleccionada != null)
-            {
-                AbrirMantenimientos();
-            }
-        }
-
-        private void AbrirMantenimientos()
-        {
-            if (seleccionada == null)
-            {
-                return;
-            }
-            VentanaMantenimientos ventana = new VentanaListarMantenimientos(seleccionada.Codigo);
-            // Es una ventana de caso de uso independiente; no debe cerrarse al cerrar
-            // la ventana de listado ni cerrar otras ventanas abiertas.
-            ventana.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            ventana.Show();
         }
 
         // ====================================================================

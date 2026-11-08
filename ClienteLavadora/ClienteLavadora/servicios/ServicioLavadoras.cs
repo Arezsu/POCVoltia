@@ -28,10 +28,13 @@ namespace ClienteLavadora.servicios
             "tecnologiaInverter minutosLavado precioFinal cantidadMantenimientos " +
             "mantenimientosPendientes costoMantenimientos " +
             "mantenimientos { id descripcion tecnico costo fecha completado }";
+        private const string CamposListadoLavadora =
+            "codigo marca precioBase fechaFabricacion capacidadCargaKilos velocidadCentrifugadoRPM " +
+            "tecnologiaInverter minutosLavado precioFinal";
 
         public async Task<List<LavadoraData>> ListarTodasAsync()
         {
-            const string consulta = "query ListarLavadoras { lavadoras { " + CamposLavadora + " } }";
+            const string consulta = "query ListarLavadoras { lavadoras { " + CamposListadoLavadora + " } }";
             RespuestaListaLavadoras respuesta =
                 await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaListaLavadoras>(consulta, new { });
             return respuesta == null || respuesta.Lavadoras == null
@@ -44,7 +47,7 @@ namespace ClienteLavadora.servicios
             string consulta =
                 "query listar($marca: String, $inverter: Boolean, $con: Boolean) { " +
                 "lavadorasPorFiltro(marca: $marca, tecnologiaInverter: $inverter, conMantenimientos: $con) { " +
-                CamposLavadora + " } }";
+                CamposListadoLavadora + " } }";
 
             // Los nombres de las propiedades de este objeto deben ser iguales a las
             // variables de la consulta ($marca, $inverter, $con).
