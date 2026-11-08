@@ -76,6 +76,53 @@ docente, pero no especifica cuales se acordaron para este proyecto.
 Los dos clientes son independientes entre si: se pueden abrir al mismo tiempo y cada uno
 ve los cambios que hace el otro gracias a la version de los datos (`versionDatos`).
 
+## Inicio local (Windows PowerShell)
+
+Inicie MongoDB, el servidor GraphQL y cada cliente en terminales separadas. El servidor
+espera MongoDB en `localhost:27017` y usa la base `voltia` por defecto.
+
+1. Inicie el servicio MongoDB instalado en Windows:
+
+   ```powershell
+   Start-Service MongoDB
+   ```
+
+   Si su instancia usa otra direccion, defina `MONGODB_URI` en la terminal del servidor.
+
+2. Inicie el servidor GraphQL desde la raiz del repositorio:
+
+   ```powershell
+   cd .\ServidorLavadora
+   $env:MONGODB_URI = 'mongodb://localhost:27017/voltia'
+   .\mvnw.cmd spring-boot:run
+   ```
+
+   GraphQL queda disponible en `http://localhost:8081/graphql` y GraphiQL en
+   `http://localhost:8081/graphiql`.
+
+3. Inicie el cliente web en otra terminal:
+
+   ```powershell
+   cd .\ClienteWeb
+   npm install
+   npm start
+   ```
+
+   Abra `http://localhost:5501`.
+
+4. Inicie el cliente de escritorio en otra terminal. Si no existe el ejecutable, primero
+   compílelo con `dotnet build`:
+
+   ```powershell
+   cd .\ClienteLavadora
+   dotnet build .\ClienteLavadora\ClienteLavadora.csproj
+   .\ClienteLavadora\bin\Debug\net48\ClienteLavadora.exe
+   ```
+
+En ambos clientes, las operaciones se abren desde los menús superiores **Lavadora** y
+**Mantenimiento**. La ventana de listado consulta registros solo cuando se ejecuta
+**Listar** o **Filtrar**.
+
 ---
 
 ## 3. Modelo de dominio: relacion Maestro - Detalle (Figura 1)

@@ -77,23 +77,18 @@ namespace ClienteLavadora.vista
         private FrameworkElement CrearEncabezado()
         {
             Menu menu = new Menu();
-            menu.Items.Add(CrearMenu("Archivo",
+            menu.Items.Add(CrearMenu("Lavadora",
                 CrearAccion("Listar lavadoras", AbrirListar),
                 CrearAccion("Agregar lavadora", AbrirAgregar),
-                CrearAccion("Cerrar", () => Cerrar())));
-            menu.Items.Add(CrearMenu("Edición",
                 CrearAccion("Consultar", AbrirConsultar),
                 CrearAccion("Actualizar", AbrirActualizar),
                 CrearAccion("Eliminar", AbrirEliminar)));
-            menu.Items.Add(CrearMenu("Ver",
-                CrearAccion("Tema claro/oscuro", () => Tema.Alternar())));
-            menu.Items.Add(CrearMenu("Herramientas",
+            menu.Items.Add(CrearMenu("Mantenimiento",
                 CrearAccion("Listar mantenimientos", AbrirListarMantenimientos),
                 CrearAccion("Agregar mantenimiento", AbrirAgregarMantenimiento),
                 CrearAccion("Consultar mantenimiento", AbrirConsultarMantenimiento),
                 CrearAccion("Actualizar mantenimiento", AbrirActualizarMantenimiento),
                 CrearAccion("Eliminar mantenimiento", AbrirEliminarMantenimiento)));
-            menu.Items.Add(CrearMenu("Ayuda", CrearAccion("Acerca de", AbrirAcercaDe)));
 
             StackPanel contenedor = new StackPanel();
             contenedor.Children.Add(menu);
