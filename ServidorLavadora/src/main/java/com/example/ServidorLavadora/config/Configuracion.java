@@ -21,6 +21,11 @@ public class Configuracion {
     public AlmacenDatos almacenDatos(@Value("${voltia.almacen:mongo}") String tipoAlmacen,
                                     MongoTemplate mongoTemplate) {
         if ("mongo".equalsIgnoreCase(tipoAlmacen)) {
+            String nombreBase = mongoTemplate.getDb().getName();
+            if (!"voltia".equals(nombreBase)) {
+                throw new IllegalStateException("La base de datos de Voltia debe llamarse 'voltia'. "
+                        + "La configuracion actual apunta a '" + nombreBase + "'.");
+            }
             mongoTemplate.executeCommand("{ ping: 1 }");
             RepositorioMongo repositorio = new RepositorioMongo(mongoTemplate);
             repositorio.agregarObservador(new RegistroCambios());
