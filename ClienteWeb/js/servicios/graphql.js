@@ -81,6 +81,13 @@
         }
       }
     `,
+    LAVADORAS_CON_MANTENIMIENTOS: `
+      query LavadorasConMantenimientos {
+        lavadoras {
+          ${CAMPOS_LAVADORA}
+        }
+      }
+    `,
     LAVADORAS_POR_FILTRO: `
       query LavadorasPorFiltro($marca: String, $tecnologiaInverter: Boolean, $conMantenimientos: Boolean) {
         lavadorasPorFiltro(
@@ -408,6 +415,31 @@
           codigoLavadora: Number(codigoLavadora), id: Number(id)
         });
         return datos.mantenimientoPorId || null;
+      },
+
+      /** Lista mantenimientos de todas las lavadoras y aplica filtros opcionales en el cliente. */
+      consultarTodosMantenimientos: async function (filtros) {
+        let lavadoras;
+        if (modoApi === 'rest') {
+          lavadoras = await ejecutarRest('/lavadoras') || [];
+        } else {
+          const datos = await ejecutar(DOCUMENTOS.LAVADORAS_CON_MANTENIMIENTOS, {});
+          lavadoras = datos.lavadoras || [];
+        }
+        const opciones = filtros || {};
+        const codigoFiltro = Number(opciones.codigoLavadora) || null;
+        const tecnicoFiltro = String(opciones.tecnico || '').trim().toLocaleLowerCase();
+        const completadoFiltro = opciones.completado;
+        return lavadoras.flatMap((lavadora) => (lavadora.mantenimientos || []).map((mantenimiento) => ({
+          ...mantenimiento,
+          codigoLavadora: lavadora.codigo,
+          marcaLavadora: lavadora.marca
+        }))).filter((mantenimiento) => {
+          if (codigoFiltro && Number(mantenimiento.codigoLavadora) !== codigoFiltro) return false;
+          if (tecnicoFiltro && !String(mantenimiento.tecnico || '').toLocaleLowerCase().includes(tecnicoFiltro)) return false;
+          if (completadoFiltro !== null && completadoFiltro !== undefined && mantenimiento.completado !== completadoFiltro) return false;
+          return true;
+        });
       },
 
       agregarLavadora: async function (input) {

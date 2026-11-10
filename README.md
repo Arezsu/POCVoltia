@@ -82,6 +82,9 @@ Inicie MongoDB, el servidor GraphQL y cada cliente en terminales separadas. El s
 espera MongoDB en `localhost:27017` y usa la base `voltia`.
 Las colecciones principales son `lavadoras` y `mantenimientos`. Si el servidor ya estaba
 abierto antes de este cambio, detengalo y vuelva a iniciarlo para que use `voltia`.
+El servidor fija la base tanto en su `MongoTemplate` como en las operaciones de indices;
+una variable externa con el nombre `test` no cambia el destino. Al iniciar, crea las dos
+colecciones en `voltia` si todavía no existen.
 
 1. Inicie el servicio MongoDB instalado en Windows:
 
@@ -119,8 +122,9 @@ abierto antes de este cambio, detengalo y vuelva a iniciarlo para que use `volti
    ```
 
 En ambos clientes, las operaciones se abren desde los menús superiores **Lavadora** y
-**Mantenimiento**. La ventana de listado consulta registros solo cuando se ejecuta
-**Listar** o **Filtrar**.
+**Mantenimiento**. El listado de mantenimientos carga todos los registros al abrirse; el
+código de lavadora es un filtro opcional junto con técnico y estado. Para crear un
+mantenimiento se indica la lavadora a la que quedará asociado.
 
 ---
 
@@ -396,9 +400,11 @@ oscuro y la simulación de tambor se mantiene como indicador secundario.
   superficies planas, bordes finos y radios pequeños.
 - **C#:** cada caso abre una ventana independiente con el marco nativo de Windows. La
   ventana principal ofrece el menú de navegación y una simulación compacta de la lavadora.
-- **Listados:** la grilla de lavadoras y la de mantenimientos abren vacías; el usuario
-  solicita la consulta con Listar o Filtrar. Un cambio actualiza el listado solo cuando
-  la vista correspondiente está abierta.
+- **Listados:** el listado de lavadoras conserva sus filtros. El listado de mantenimientos
+  muestra todos los registros de forma predeterminada, con código y marca de la lavadora,
+  y permite filtrar sin tener que buscar primero una lavadora.
+- **Fechas:** el selector de escritorio pinta el calendario con colores de alto contraste;
+  la web usa el selector nativo del navegador según el tema activo.
 - En C# no existe ningun archivo `.xaml`; las ventanas se construyen en codigo C#.
 
 ---

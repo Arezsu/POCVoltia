@@ -19,17 +19,24 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 public class Configuracion {
 
     @Bean // Spring guarda este objeto y lo entrega a quien lo pida
+    public MongoTemplate mongoTemplate(MongoClient mongoClient) {
+        // Define el nombre de la base tambien para los componentes automaticos de
+        // Spring Data (por ejemplo, la creacion de indices al iniciar).
+        return new MongoTemplate(mongoClient, "voltia");
+    }
+
+    @Bean
     public AlmacenDatos almacenDatos(@Value("${voltia.almacen:mongo}") String tipoAlmacen,
-                                    MongoTemplate mongoTemplate,
-                                    MongoClient mongoClient) {
+                                    MongoTemplate mongoTemplate) {
         if ("mongo".equalsIgnoreCase(tipoAlmacen)) {
-            // Fijar la base de datos de la aplicacion evita que una propiedad
-            // externa (por ejemplo, SPRING_DATA_MONGODB_DATABASE=test en el IDE)
-            // desvie las operaciones a otra base. Se conserva el cliente Mongo
-            // configurado por Spring, incluyendo host, credenciales y opciones.
-            MongoTemplate mongoVoltia = new MongoTemplate(mongoClient, "voltia");
-            mongoVoltia.executeCommand("{ ping: 1 }");
-            RepositorioMongo repositorio = new RepositorioMongo(mongoVoltia);
+            mongoTemplate.executeCommand("{ ping: 1 }");
+            if (!mongoTemplate.collectionExists("lavadoras")) {
+                mongoTemplate.createCollection("lavadoras");
+            }
+            if (!mongoTemplate.collectionExists("mantenimientos")) {
+                mongoTemplate.createCollection("mantenimientos");
+            }
+            RepositorioMongo repositorio = new RepositorioMongo(mongoTemplate);
             repositorio.agregarObservador(new RegistroCambios());
             return repositorio;
         }

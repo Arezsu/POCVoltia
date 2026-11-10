@@ -51,9 +51,56 @@ namespace ClienteLavadora.vista.controles
         private static Style CrearEstiloCalendario()
         {
             Style estilo = new Style(typeof(System.Windows.Controls.Calendar));
-            estilo.Setters.Add(new System.Windows.Setter(Control.BackgroundProperty, Tema.Acero));
+            estilo.Setters.Add(new System.Windows.Setter(Control.BackgroundProperty, Tema.PanelOscuro));
             estilo.Setters.Add(new System.Windows.Setter(Control.ForegroundProperty, Tema.Texto));
             estilo.Setters.Add(new System.Windows.Setter(Control.BorderBrushProperty, Tema.BordeFecha));
+
+            Style dia = new Style(typeof(CalendarDayButton));
+            dia.Setters.Add(new System.Windows.Setter(Control.ForegroundProperty, Tema.Texto));
+            dia.Setters.Add(new System.Windows.Setter(Control.BackgroundProperty, Tema.PanelOscuro));
+            dia.Setters.Add(new System.Windows.Setter(Control.BorderBrushProperty, Tema.PanelOscuro));
+            dia.Setters.Add(new System.Windows.Setter(Control.BorderThicknessProperty, new Thickness(1)));
+            dia.Triggers.Add(new Trigger
+            {
+                Property = CalendarDayButton.IsInactiveProperty,
+                Value = true,
+                Setters = { new System.Windows.Setter(Control.ForegroundProperty, Tema.TextoSecundario),
+                    new System.Windows.Setter(UIElement.OpacityProperty, 0.58) }
+            });
+            dia.Triggers.Add(new Trigger
+            {
+                Property = CalendarDayButton.IsMouseOverProperty,
+                Value = true,
+                Setters = { new System.Windows.Setter(Control.BackgroundProperty, Tema.Acero),
+                    new System.Windows.Setter(Control.BorderBrushProperty, Tema.BordeFecha) }
+            });
+            dia.Triggers.Add(new Trigger
+            {
+                Property = CalendarDayButton.IsTodayProperty,
+                Value = true,
+                Setters = { new System.Windows.Setter(Control.BorderBrushProperty, Tema.Cian) }
+            });
+            dia.Triggers.Add(new Trigger
+            {
+                Property = CalendarDayButton.IsSelectedProperty,
+                Value = true,
+                Setters = { new System.Windows.Setter(Control.BackgroundProperty, Tema.Cian),
+                    new System.Windows.Setter(Control.ForegroundProperty, Tema.Fondo),
+                    new System.Windows.Setter(Control.BorderBrushProperty, Tema.Cian) }
+            });
+            estilo.Resources.Add(typeof(CalendarDayButton), dia);
+
+            Style navegacion = new Style(typeof(CalendarButton));
+            navegacion.Setters.Add(new System.Windows.Setter(Control.ForegroundProperty, Tema.Texto));
+            navegacion.Setters.Add(new System.Windows.Setter(Control.BackgroundProperty, Tema.PanelOscuro));
+            navegacion.Triggers.Add(new Trigger
+            {
+                Property = UIElement.IsMouseOverProperty,
+                Value = true,
+                Setters = { new System.Windows.Setter(Control.BackgroundProperty, Tema.Acero),
+                    new System.Windows.Setter(Control.ForegroundProperty, Tema.Cian) }
+            });
+            estilo.Resources.Add(typeof(CalendarButton), navegacion);
             return estilo;
         }
 

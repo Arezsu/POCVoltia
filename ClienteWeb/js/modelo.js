@@ -176,6 +176,8 @@
   class Mantenimiento {
     constructor(datos) {
       const origen = datos || {};
+      this.codigoLavadora = aNumero(origen.codigoLavadora);
+      this.marcaLavadora = String(origen.marcaLavadora || '').trim();
       this.id = aNumero(origen.id);
       this.descripcion = String(origen.descripcion || '').trim();
       this.tecnico = String(origen.tecnico || '').trim();
@@ -207,6 +209,8 @@
     /** Copia plana, util para comparar y para armar entradas GraphQL. */
     aObjetoPlano() {
       return {
+        codigoLavadora: this.codigoLavadora,
+        marcaLavadora: this.marcaLavadora,
         id: this.id,
         descripcion: this.descripcion,
         tecnico: this.tecnico,

@@ -342,6 +342,16 @@
       }
     }
 
+    async cargarTodosMantenimientos(filtros) {
+      try {
+        const datos = await this.cliente.consultarTodosMantenimientos(filtros || {});
+        return (datos || []).map((elemento) => new Voltia.Mantenimiento(elemento));
+      } catch (error) {
+        this.avisarError(error);
+        throw error;
+      }
+    }
+
     async consultarPorId(codigoLavadora, id) {
       try {
         const datos = await this.cliente.consultarMantenimientoPorId(

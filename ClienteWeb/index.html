@@ -457,8 +457,8 @@
       <div class="modal-cuerpo">
         <div class="barra-mantenimientos">
           <div class="campo">
-            <label for="mat-lavadora">Código de lavadora</label>
-            <input id="mat-lavadora" type="number" min="1" step="1" inputmode="numeric" placeholder="Código" required>
+            <label for="mat-lavadora">Código de lavadora (opcional)</label>
+            <input id="mat-lavadora" type="number" min="1" step="1" inputmode="numeric" placeholder="Todas las lavadoras">
           </div>
           <form id="form-filtros-mantenimientos" class="form-filtros-mantenimientos" data-parte="filtros" novalidate>
             <div class="campo">
@@ -487,10 +487,12 @@
 
         <div class="tabla-scroll tabla-scroll-mantenimientos" data-parte="tabla">
           <table class="tabla tabla-mantenimientos">
-            <caption class="visualmente-oculto">Mantenimientos de la lavadora elegida</caption>
+              <caption class="visualmente-oculto">Mantenimientos registrados en todas las lavadoras</caption>
             <thead>
               <tr>
                 <th scope="col">ID</th>
+                  <th scope="col">Lavadora</th>
+                  <th scope="col">Marca</th>
                 <th scope="col">Descripcion</th>
                 <th scope="col">Tecnico</th>
                 <th scope="col">Costo</th>
@@ -503,7 +505,7 @@
           </table>
         </div>
         <p class="vacio" id="mantenimientos-vacio" hidden>
-          Esta lavadora no tiene mantenimientos con los filtros indicados (el detalle puede estar en cero).
+          No hay mantenimientos que coincidan con los filtros.
         </p>
 
       </div>

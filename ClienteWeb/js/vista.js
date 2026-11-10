@@ -312,6 +312,7 @@
         this.cargarMantenimientos();
       });
       this.escuchar(this.refs.botonLimpiarFiltrosMantenimientos, 'click', () => {
+        this.refs.matLavadora.value = '';
         this.refs.matFiltroTecnico.value = '';
         this.refs.matFiltroCompletado.value = '';
         this.cerrarFormularioMantenimiento();
@@ -697,7 +698,10 @@
     crearFilaMantenimiento(mantenimiento, conAcciones) {
       const fila = document.createElement('tr');
       fila.dataset.id = String(mantenimiento.id);
+      fila.dataset.codigoLavadora = String(mantenimiento.codigoLavadora || '');
       fila.appendChild(this.elemento('td', 'num', mantenimiento.id));
+      fila.appendChild(this.elemento('td', 'num', mantenimiento.codigoLavadora));
+      fila.appendChild(this.elemento('td', null, mantenimiento.marcaLavadora));
       fila.appendChild(this.elemento('td', null, mantenimiento.descripcion));
       fila.appendChild(this.elemento('td', null, mantenimiento.tecnico));
       fila.appendChild(this.elemento('td', 'num', mantenimiento.costoTexto));
@@ -711,16 +715,25 @@
       if (conAcciones) {
         const celdaAcciones = document.createElement('td');
         const grupo = this.elemento('div', 'acciones-fila');
-
-        const accion = this.modoMantenimientos;
-        const etiqueta = accion === 'consultar' ? 'Consultar' : (accion === 'actualizar' ? 'Actualizar' : 'Eliminar');
-        const clase = accion === 'eliminar' ? 'boton peligro chico boton-caso' : 'boton secundario chico boton-caso';
-        const botonAccion = this.elemento('button', clase, etiqueta);
-        botonAccion.type = 'button';
-        botonAccion.dataset.accion = accion === 'consultar' ? 'consultar' : (accion === 'actualizar' ? 'editar' : 'eliminar');
-        botonAccion.dataset.id = String(mantenimiento.id);
-        botonAccion.setAttribute('aria-label', etiqueta + ' el mantenimiento ' + mantenimiento.id);
-        grupo.appendChild(botonAccion);
+        const acciones = this.modoMantenimientos === 'listar'
+          ? [['consultar', 'Ver', 'boton secundario chico boton-caso'],
+            ['editar', 'Editar', 'boton secundario chico boton-caso'],
+            ['eliminar', 'Eliminar', 'boton peligro chico boton-caso']]
+          : [[this.modoMantenimientos === 'consultar' ? 'consultar' :
+            (this.modoMantenimientos === 'actualizar' ? 'editar' : 'eliminar'),
+          this.modoMantenimientos === 'consultar' ? 'Ver' :
+            (this.modoMantenimientos === 'actualizar' ? 'Editar' : 'Eliminar'),
+          this.modoMantenimientos === 'eliminar' ? 'boton peligro chico boton-caso' : 'boton secundario chico boton-caso']];
+        acciones.forEach(([accion, etiqueta, clase]) => {
+          const botonAccion = this.elemento('button', clase, etiqueta);
+          botonAccion.type = 'button';
+          botonAccion.dataset.accion = accion;
+          botonAccion.dataset.id = String(mantenimiento.id);
+          botonAccion.dataset.codigoLavadora = String(mantenimiento.codigoLavadora);
+          botonAccion.setAttribute('aria-label', etiqueta + ' el mantenimiento ' + mantenimiento.id +
+            ' de la lavadora ' + mantenimiento.codigoLavadora);
+          grupo.appendChild(botonAccion);
+        });
         celdaAcciones.appendChild(grupo);
         fila.appendChild(celdaAcciones);
       }
@@ -1512,8 +1525,9 @@
       this.refs.filtrosMantenimientos.hidden = esAlta;
       this.refs.tablaMantenimientos.hidden = esAlta;
       this.refs.accionesListadoMantenimientos.hidden = false;
-      this.refs.encabezadoAccionesMantenimiento.hidden = true;
+      this.refs.encabezadoAccionesMantenimiento.hidden = false;
       this.llenarSelectorLavadoras(codigoLavadora);
+      this.refs.matLavadora.value = codigoLavadora ? String(codigoLavadora) : '';
       this.refs.matFiltroTecnico.value = '';
       this.refs.matFiltroCompletado.value = '';
       this.refs.errorMantenimientos.textContent = '';
@@ -1538,9 +1552,8 @@
           this.cargarMantenimientos();
         }
       } else {
-        this.lavadoraMantenimientos = null;
-        this.refs.mantenimientosVacio.hidden = false;
-        this.refs.mantenimientosVacio.textContent = 'Ingrese el código de una lavadora para consultar sus mantenimientos.';
+        this.lavadoraMantenimientos = { codigo: null, mantenimientos: [] };
+        if (!esAlta) this.cargarMantenimientos();
       }
     }
 
@@ -1552,9 +1565,10 @@
 
     async cargarMantenimientos() {
       const version = ++this.versionMantenimientos;
-      const codigo = Number(this.refs.matLavadora.value);
-      if (!codigo) {
-        this.refs.errorMantenimientos.textContent = 'Elija una lavadora para ver sus mantenimientos.';
+      const textoCodigo = this.refs.matLavadora.value.trim();
+      const codigo = textoCodigo ? Number(textoCodigo) : null;
+      if (textoCodigo && (!Number.isSafeInteger(codigo) || codigo < 1)) {
+        this.refs.errorMantenimientos.textContent = 'Ingrese un código de lavadora válido o déjelo vacío para listar todas.';
         return;
       }
 
@@ -1566,7 +1580,8 @@
       };
 
       try {
-        const lista = await this.controladorMantenimientos.cargarMantenimientos(codigo, filtros);
+        filtros.codigoLavadora = codigo;
+        const lista = await this.controladorMantenimientos.cargarTodosMantenimientos(filtros);
         if (version !== this.versionMantenimientos || this.refs.modalMantenimientos.hidden) return;
         this.lavadoraMantenimientos = { codigo: codigo, mantenimientos: lista };
         this.renderMantenimientos();
@@ -1588,25 +1603,26 @@
       const cuerpo = this.refs.cuerpoMantenimientos;
       cuerpo.textContent = '';
 
-      const conAcciones = false;
+      const conAcciones = true;
       lista.forEach((mantenimiento) => {
         cuerpo.appendChild(this.crearFilaMantenimiento(mantenimiento, conAcciones));
       });
       this.refs.mantenimientosVacio.hidden = lista.length > 0;
       this.refs.mantenimientosVacio.textContent =
-        'Esta lavadora no tiene mantenimientos con los filtros indicados.';
+        'No hay mantenimientos con los filtros indicados.';
       this.refs.contadorMantenimientos.textContent = lista.length === 1
         ? '1 mantenimiento'
         : lista.length + ' mantenimientos';
     }
 
-    mantenimientoPorId(id) {
+    mantenimientoPorId(id, codigoLavadora) {
       if (!this.lavadoraMantenimientos) {
         return null;
       }
       const buscado = Number(id);
       return this.lavadoraMantenimientos.mantenimientos
-        .find((mantenimiento) => mantenimiento.id === buscado) || null;
+        .find((mantenimiento) => mantenimiento.id === buscado &&
+          Number(mantenimiento.codigoLavadora) === Number(codigoLavadora)) || null;
     }
 
     alHacerClicMantenimientos(evento) {
@@ -1615,12 +1631,13 @@
         return;
       }
       const id = Number(boton.dataset.id);
+      const codigo = Number(boton.dataset.codigoLavadora);
       if (boton.dataset.accion === 'consultar') {
-        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id), 'consultar');
+        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id, codigo), 'consultar');
       } else if (boton.dataset.accion === 'editar') {
-        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id), 'actualizar');
+        this.abrirFormularioMantenimiento(this.mantenimientoPorId(id, codigo), 'actualizar');
       } else if (boton.dataset.accion === 'eliminar') {
-        this.pedirEliminarMantenimiento(id);
+        this.pedirEliminarMantenimiento(id, codigo);
       }
     }
 
@@ -1704,8 +1721,14 @@
         return;
       }
 
-      const codigo = this.lavadoraMantenimientos.codigo;
       const enEdicion = this.mantenimientoEnEdicion;
+      const codigo = enEdicion
+        ? Number(enEdicion.codigoLavadora)
+        : Number(this.refs.matLavadora.value || this.lavadoraMantenimientos.codigo);
+      if (!Number.isSafeInteger(codigo) || codigo < 1) {
+        this.refs.errorMantenimiento.textContent = 'Seleccione la lavadora a la que pertenece el mantenimiento.';
+        return;
+      }
       this.bloquearBoton(this.refs.botonGuardarMantenimiento, true, 'Guardando...');
       try {
         if (enEdicion) {
@@ -1717,7 +1740,6 @@
         }
         this.cerrarFormularioMantenimiento();
         await this.cargarMantenimientos();
-        this.llenarSelectorLavadoras(codigo);
         if (this.modoMantenimientos === 'agregar') {
           this.lavadoraMantenimientos = this.lavadoraMantenimientos || { codigo: codigo, mantenimientos: [] };
           this.abrirFormularioMantenimiento(null, 'agregar');
@@ -1729,8 +1751,8 @@
       }
     }
 
-    pedirEliminarMantenimiento(id) {
-      const mantenimiento = this.mantenimientoPorId(id);
+    pedirEliminarMantenimiento(id, codigoLavadora) {
+      const mantenimiento = this.mantenimientoPorId(id, codigoLavadora);
       if (!mantenimiento || !this.lavadoraMantenimientos) {
         return;
       }
@@ -1740,7 +1762,7 @@
         'Mantenimiento ' + mantenimiento.id + ' · ' + mantenimiento.descripcion +
         ' · Tecnico: ' + mantenimiento.tecnico + ' · Costo: ' + mantenimiento.costoTexto +
         ' · Fecha: ' + mantenimiento.fechaTexto + ' · Estado: ' + mantenimiento.estadoTexto +
-        ' · Lavadora: ' + this.lavadoraMantenimientos.codigo + '. Esta accion no se puede deshacer.';
+        ' · Lavadora: ' + mantenimiento.codigoLavadora + '. Esta accion no se puede deshacer.';
       this.abrirFormularioMantenimiento(mantenimiento, 'consultar');
       this.refs.confirmacionMantenimiento.hidden = false;
       this.refs.botonConfirmarEliminarMantenimiento.focus();
@@ -1760,7 +1782,7 @@
       if (!this.mantenimientoAEliminar || !this.lavadoraMantenimientos) {
         return;
       }
-      const codigo = this.lavadoraMantenimientos.codigo;
+      const codigo = this.mantenimientoAEliminar.codigoLavadora;
       const id = this.mantenimientoAEliminar.id;
       this.bloquearBoton(this.refs.botonConfirmarEliminarMantenimiento, true, 'Eliminando...');
       try {
@@ -1769,7 +1791,6 @@
         this.cancelarEliminarMantenimiento();
         this.cerrarFormularioMantenimiento();
         await this.cargarMantenimientos();
-        this.llenarSelectorLavadoras(codigo);
       } catch (error) {
         this.refs.errorMantenimientos.textContent = error.message;
       } finally {

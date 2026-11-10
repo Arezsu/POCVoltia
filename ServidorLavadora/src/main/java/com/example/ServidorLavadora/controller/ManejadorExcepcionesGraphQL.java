@@ -4,7 +4,10 @@ import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
+import org.springframework.graphql.execution.ErrorType;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * Convierte las excepciones de negocio (codigo repetido, lavadora no
@@ -16,11 +19,15 @@ public class ManejadorExcepcionesGraphQL extends DataFetcherExceptionResolverAda
 
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
-        String mensaje = (ex instanceof IllegalArgumentException)
-                ? ex.getMessage()
-                : "Error interno del servidor: " + ex.getMessage();
+        boolean esValidacion = ex instanceof IllegalArgumentException;
+        String mensaje = esValidacion
+                ? (ex.getMessage() == null ? "Los datos enviados no son válidos." : ex.getMessage())
+                : "Ocurrió un error interno al procesar la operación.";
+        String codigo = esValidacion ? "VALIDACION" : "ERROR_INTERNO";
         return GraphqlErrorBuilder.newError(env)
                 .message(mensaje)
+                .errorType(esValidacion ? ErrorType.BAD_REQUEST : ErrorType.INTERNAL_ERROR)
+                .extensions(Map.of("codigo", codigo))
                 .build();
     }
 }

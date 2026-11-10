@@ -803,10 +803,15 @@ body[data-estado="LAVANDO"] .compuerta-agua {
    incluso cuando el resto de la interfaz trabaja con el tema oscuro. */
 .campo input[type="date"],
 .campo input[type="datetime-local"] {
-  color-scheme: light;
+  color-scheme: dark;
   accent-color: var(--cian);
   color: var(--texto);
   background-color: var(--fondo-2);
+}
+
+body[data-tema="claro"] .campo input[type="date"],
+body[data-tema="claro"] .campo input[type="datetime-local"] {
+  color-scheme: light;
 }
 
 body[data-tema="oscuro"] .campo input[type="date"]::-webkit-calendar-picker-indicator,
@@ -1569,6 +1574,11 @@ body[data-tema="claro"] .ficha-solo-lectura input:disabled {
   width: min(980px, 100%);
 }
 
+#contenido-mantenimientos.modal.ancho {
+  width: min(1240px, 96vw);
+  max-height: calc(100vh - 24px);
+}
+
 .modal-cabecera {
   display: flex;
   align-items: center;
@@ -1735,11 +1745,12 @@ body[data-tema="claro"] .ficha-solo-lectura input:disabled {
 }
 
 .tabla-scroll-mantenimientos {
-  max-height: 260px;
+  min-height: 240px;
+  max-height: min(62vh, 680px);
 }
 
 .tabla-mantenimientos {
-  min-width: 720px;
+  min-width: 1080px;
 }
 
 .tabla-mantenimientos .acciones-fila {
