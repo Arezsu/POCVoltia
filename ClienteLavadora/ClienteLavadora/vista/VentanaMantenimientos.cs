@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,6 +34,8 @@ namespace ClienteLavadora.vista
         private StackPanel celdaEstado;
         private StackPanel botonesSelector;
         private Grid rejillaSelector;
+        private BotonVoltia btnFiltrar;
+        private BotonVoltia btnRecargar;
 
         private readonly DataGrid grilla = Ui.Grilla();
         private readonly CamposMantenimiento campos = new CamposMantenimiento();
@@ -94,7 +97,13 @@ namespace ClienteLavadora.vista
                 }
                 grilla.ItemsSource = new List<MantenimientoData>();
                 contador.Text = "0 mantenimiento(s)";
-                aviso.Text = "Ingrese un codigo y seleccione Filtrar para consultar.";
+                aviso.Text = modo == "agregar"
+                    ? "Ingrese el codigo de la lavadora y seleccione Cargar lavadora."
+                    : "Consultando mantenimientos...";
+                if (modo != "agregar" || codigoInicial > 0)
+                {
+                    _ = CargarMantenimientosAsync();
+                }
             };
         }
 
@@ -160,13 +169,23 @@ namespace ClienteLavadora.vista
             campos.PermitirEdicion(agregar);
             if (agregar || operacionConRegistro)
             {
-                for (int i = 1; i < rejillaSelector.ColumnDefinitions.Count; i++)
+                for (int i = 1; i < rejillaSelector.ColumnDefinitions.Count - 1; i++)
                 {
                     rejillaSelector.ColumnDefinitions[i].Width = new GridLength(0);
                 }
                 celdaTecnico.Visibility = Visibility.Collapsed;
                 celdaEstado.Visibility = Visibility.Collapsed;
-                botonesSelector.Visibility = Visibility.Collapsed;
+                btnRecargar.Visibility = Visibility.Collapsed;
+                btnFiltrar.Visibility = agregar ? Visibility.Visible : Visibility.Collapsed;
+                if (agregar)
+                {
+                    btnFiltrar.Texto = "Cargar lavadora";
+                    btnFiltrar.Width = 145;
+                }
+                else
+                {
+                    botonesSelector.Visibility = Visibility.Collapsed;
+                }
             }
 
             if (modo == "listar" || modo == "consultar")
@@ -202,10 +221,15 @@ namespace ClienteLavadora.vista
 
             txtCodigoLavadora.SinNegativos = true;
             txtCodigoLavadora.Fuente = Tema.Numeros;
-            txtCodigoLavadora.Ayuda = "Codigo de la lavadora que contiene los mantenimientos";
+            txtCodigoLavadora.Ayuda = modo == "listar"
+                ? "Opcional: filtrar por codigo de lavadora"
+                : "Codigo de la lavadora que contiene los mantenimientos";
             txtTecnico.TeclaPresionada += AlPresionarTecla;
+            txtCodigoLavadora.TeclaPresionada += AlPresionarTecla;
 
-            StackPanel celdaLavadora = Ui.Celda("Codigo de lavadora", txtCodigoLavadora);
+            StackPanel celdaLavadora = Ui.Celda(
+                modo == "listar" ? "Codigo de lavadora (opcional)" : "Codigo de lavadora",
+                txtCodigoLavadora);
             Grid.SetColumn(celdaLavadora, 0);
             rejilla.Children.Add(celdaLavadora);
 
@@ -221,14 +245,14 @@ namespace ClienteLavadora.vista
             botonesSelector.Orientation = Orientation.Horizontal;
             botonesSelector.VerticalAlignment = VerticalAlignment.Bottom;
 
-            BotonVoltia btnFiltrar = BotonVoltia.Principal("Filtrar");
+            btnFiltrar = BotonVoltia.Principal("Filtrar");
             btnFiltrar.Width = 95;
             btnFiltrar.Height = 32;
             btnFiltrar.Margin = new Thickness(0, 0, 8, 0);
             btnFiltrar.Click += async (s, e) => await CargarMantenimientosAsync();
             botonesSelector.Children.Add(btnFiltrar);
 
-            BotonVoltia btnRecargar = BotonVoltia.Secundario("Listar todos");
+            btnRecargar = BotonVoltia.Secundario("Listar todos");
             btnRecargar.Width = 110;
             btnRecargar.Height = 32;
             btnRecargar.Click += async (s, e) => await ListarTodosAsync();
@@ -279,6 +303,8 @@ namespace ClienteLavadora.vista
         private void ArmarGrilla()
         {
             grilla.Columns.Add(Ui.Columna("Id", "Id", 0.45, true));
+            grilla.Columns.Add(Ui.Columna("Lavadora", "CodigoLavadora", 0.75, true));
+            grilla.Columns.Add(Ui.Columna("Marca", "MarcaLavadora", 1.1, false));
             grilla.Columns.Add(Ui.Columna("Descripcion", "Descripcion", 2.2, false));
             grilla.Columns.Add(Ui.Columna("Tecnico", "Tecnico", 1.4, false));
             grilla.Columns.Add(Ui.Columna("Fecha", "FechaTexto", 1.3, false));
@@ -400,43 +426,85 @@ namespace ClienteLavadora.vista
         private async Task CargarMantenimientosAsync()
         {
             int solicitud = ++versionCarga;
-            int codigo;
-            if (!int.TryParse(txtCodigoLavadora.Texto, out codigo) || codigo <= 0)
+            bool esAlta = modo == "agregar";
+            int codigo = 0;
+            bool tieneCodigo = int.TryParse(txtCodigoLavadora.Texto, out codigo) && codigo > 0;
+            if (esAlta && !tieneCodigo)
             {
                 lavadoraActual = null;
-                grilla.ItemsSource = null;
-                contador.Text = "0 mantenimiento(s)";
-                aviso.Text = "Ingrese un codigo de lavadora valido.";
+                resumenLavadora.Text = "Ingrese un codigo y cargue la lavadora antes de agregar.";
+                aviso.Text = "Codigo de lavadora invalido.";
                 btnAgregar.Habilitado = false;
+                return;
+            }
+            if (!esAlta && !string.IsNullOrWhiteSpace(txtCodigoLavadora.Texto) && !tieneCodigo)
+            {
+                grilla.ItemsSource = new List<MantenimientoData>();
+                contador.Text = "0 mantenimiento(s)";
+                aviso.Text = "El codigo de lavadora debe ser un numero positivo.";
                 return;
             }
 
             aviso.Text = "Consultando...";
-            lavadoraActual = null;
-            grilla.ItemsSource = new List<MantenimientoData>();
-            contador.Text = "Consultando...";
-            btnAgregar.Habilitado = false;
+            if (esAlta)
+            {
+                lavadoraActual = null;
+                btnAgregar.Habilitado = false;
+            }
+            else
+            {
+                grilla.ItemsSource = new List<MantenimientoData>();
+                contador.Text = "Consultando...";
+            }
 
             try
             {
-                LavadoraData lavadora = await Task.Run(() => controladorLavadoras.BuscarAsync(codigo, null));
-                lavadoraActual = lavadora;
-                btnAgregar.Habilitado = modo == "agregar";
-                string tecnico = txtTecnico.Texto.Trim();
-                if (tecnico.Length == 0)
+                if (esAlta)
                 {
-                    tecnico = null;
+                    lavadoraActual = await Task.Run(() => controladorLavadoras.BuscarAsync(codigo, null));
+                    if (solicitud != versionCarga || !IsLoaded || !IsVisible)
+                    {
+                        return;
+                    }
+                    if (lavadoraActual == null)
+                    {
+                        resumenLavadora.Text = "No se encontro la lavadora " + codigo + ".";
+                        aviso.Text = "Revise el codigo e intente de nuevo.";
+                        return;
+                    }
+                    resumenLavadora.Text = "Lavadora " + lavadoraActual.Codigo + " - " + lavadoraActual.Marca +
+                                           " | " + lavadoraActual.CantidadMantenimientos + " mantenimiento(s)";
+                    btnAgregar.Habilitado = true;
+                    aviso.Text = "Lavadora lista para recibir un mantenimiento.";
+                    return;
                 }
+
+                List<LavadoraData> lavadoras = await Task.Run(() => controladorLavadoras.ListarTodasAsync());
+                string tecnico = txtTecnico.Texto.Trim();
                 bool? completado = Opcion(cmbCompletado.SelectedIndex);
+                IEnumerable<MantenimientoData> consulta = lavadoras
+                    .SelectMany(lavadora => lavadora.ListaMantenimientos.Select(mantenimiento =>
+                    {
+                        mantenimiento.CodigoLavadora = lavadora.Codigo;
+                        mantenimiento.MarcaLavadora = lavadora.Marca;
+                        return mantenimiento;
+                    }));
+                if (tieneCodigo)
+                {
+                    consulta = consulta.Where(mantenimiento => mantenimiento.CodigoLavadora == codigo);
+                }
+                if (!string.IsNullOrWhiteSpace(tecnico))
+                {
+                    consulta = consulta.Where(mantenimiento => mantenimiento.Tecnico != null &&
+                        mantenimiento.Tecnico.IndexOf(tecnico, StringComparison.OrdinalIgnoreCase) >= 0);
+                }
+                if (completado.HasValue)
+                {
+                    consulta = consulta.Where(mantenimiento => mantenimiento.Completado == completado.Value);
+                }
+                List<MantenimientoData> lista = consulta.OrderBy(mantenimiento => mantenimiento.CodigoLavadora)
+                    .ThenBy(mantenimiento => mantenimiento.Id).ToList();
 
-                bool hayFiltros = tecnico != null || completado.HasValue;
-                List<MantenimientoData> lista = await Task.Run(
-                    () => hayFiltros
-                        ? controlador.ListarAsync(codigo, tecnico, completado)
-                        : controlador.ListarTodasAsync(codigo));
-
-                // Si el usuario cambió lavadora/filtros durante la petición, no mostrar
-                // una respuesta anterior encima del resultado más reciente.
                 if (solicitud != versionCarga || !IsLoaded || !IsVisible)
                 {
                     return;
@@ -445,13 +513,10 @@ namespace ClienteLavadora.vista
                 grilla.ItemsSource = lista;
                 Anime.Contar(contador, lista.Count, "{0} mantenimiento(s)");
                 aviso.Text = "Actualizado " + DateTime.Now.ToString("HH:mm:ss");
-
-                resumenLavadora.Text = "Lavadora " + lavadora.Codigo + " - " + lavadora.Marca +
-                                       "  |  precio final " + lavadora.PrecioFinalTexto +
-                                       "  |  " + lavadora.CantidadMantenimientos + " mantenimiento(s) en total, " +
-                                       lavadora.MantenimientosPendientes + " pendiente(s)";
-
-                PrepararNuevo(); // Sin fila seleccionada se empieza un mantenimiento nuevo
+                resumenLavadora.Text = tieneCodigo
+                    ? "Mantenimientos de la lavadora " + codigo
+                    : "Mantenimientos de todas las lavadoras";
+                PrepararNuevo();
             }
             catch (Exception ex)
             {
@@ -466,6 +531,7 @@ namespace ClienteLavadora.vista
 
         private async Task ListarTodosAsync()
         {
+            txtCodigoLavadora.Texto = string.Empty;
             txtTecnico.Texto = string.Empty;
             cmbCompletado.SelectedIndex = 0;
             await CargarMantenimientosAsync();
@@ -498,12 +564,16 @@ namespace ClienteLavadora.vista
                 campos.Limpiar();
                 campos.PermitirEdicion(false);
                 tituloFormulario.Text = modo == "agregar" ? "NUEVO MANTENIMIENTO" : "SELECCIONE UN MANTENIMIENTO";
+                resumenLavadora.Text = modo == "agregar" ? "Escoja una lavadora." : "Seleccione un mantenimiento de la lista.";
                 btnActualizar.Habilitado = false;
                 btnEliminar.Habilitado = false;
                 return;
             }
 
             campos.Mostrar(mantenimiento);
+            resumenLavadora.Text = "Lavadora " + mantenimiento.CodigoLavadora +
+                                   (string.IsNullOrWhiteSpace(mantenimiento.MarcaLavadora)
+                                       ? string.Empty : " - " + mantenimiento.MarcaLavadora);
             tituloFormulario.Text = modo == "consultar" ? "CONSULTA  id " + mantenimiento.Id :
                 (modo == "eliminar" ? "ELIMINAR  id " + mantenimiento.Id :
                 (modo == "actualizar" ? "ACTUALIZAR  id " + mantenimiento.Id : "MANTENIMIENTO  id " + mantenimiento.Id));
@@ -586,7 +656,7 @@ namespace ClienteLavadora.vista
 
         private async void AlActualizar(object remitente, RoutedEventArgs argumentos)
         {
-            if (lavadoraActual == null || seleccionado == null)
+            if (seleccionado == null)
             {
                 Aviso("Falta escoger un mantenimiento", "Haga clic en una fila de la grilla para actualizarla.");
                 return;
@@ -595,7 +665,7 @@ namespace ClienteLavadora.vista
             try
             {
                 MantenimientoUpdateInput input = campos.LeerUpdateInput();
-                int codigo = lavadoraActual.Codigo;
+                int codigo = seleccionado.CodigoLavadora;
                 int id = seleccionado.Id;
 
                 btnActualizar.Habilitado = false;
@@ -628,13 +698,13 @@ namespace ClienteLavadora.vista
 
         private async void AlEliminar(object remitente, RoutedEventArgs argumentos)
         {
-            if (lavadoraActual == null || seleccionado == null)
+            if (seleccionado == null)
             {
                 Aviso("Falta escoger un mantenimiento", "Haga clic en una fila de la grilla para eliminarla.");
                 return;
             }
 
-            int codigo = lavadoraActual.Codigo;
+            int codigo = seleccionado.CodigoLavadora;
             int id = seleccionado.Id;
             string mensaje = "Se eliminara el mantenimiento id " + id + " (" + seleccionado.Descripcion + ")" +
                              " de la lavadora " + codigo + "." + Environment.NewLine + Environment.NewLine +

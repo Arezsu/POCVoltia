@@ -4,6 +4,7 @@ import com.example.ServidorLavadora.repositorio.AlmacenDatos;
 import com.example.ServidorLavadora.repositorio.RegistroCambios;
 import com.example.ServidorLavadora.repositorio.RepositorioMemoria;
 import com.example.ServidorLavadora.repositorio.RepositorioMongo;
+import com.mongodb.client.MongoClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,15 +20,16 @@ public class Configuracion {
 
     @Bean // Spring guarda este objeto y lo entrega a quien lo pida
     public AlmacenDatos almacenDatos(@Value("${voltia.almacen:mongo}") String tipoAlmacen,
-                                    MongoTemplate mongoTemplate) {
+                                    MongoTemplate mongoTemplate,
+                                    MongoClient mongoClient) {
         if ("mongo".equalsIgnoreCase(tipoAlmacen)) {
-            String nombreBase = mongoTemplate.getDb().getName();
-            if (!"voltia".equals(nombreBase)) {
-                throw new IllegalStateException("La base de datos de Voltia debe llamarse 'voltia'. "
-                        + "La configuracion actual apunta a '" + nombreBase + "'.");
-            }
-            mongoTemplate.executeCommand("{ ping: 1 }");
-            RepositorioMongo repositorio = new RepositorioMongo(mongoTemplate);
+            // Fijar la base de datos de la aplicacion evita que una propiedad
+            // externa (por ejemplo, SPRING_DATA_MONGODB_DATABASE=test en el IDE)
+            // desvie las operaciones a otra base. Se conserva el cliente Mongo
+            // configurado por Spring, incluyendo host, credenciales y opciones.
+            MongoTemplate mongoVoltia = new MongoTemplate(mongoClient, "voltia");
+            mongoVoltia.executeCommand("{ ping: 1 }");
+            RepositorioMongo repositorio = new RepositorioMongo(mongoVoltia);
             repositorio.agregarObservador(new RegistroCambios());
             return repositorio;
         }

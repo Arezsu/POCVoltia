@@ -34,9 +34,9 @@ namespace ClienteLavadora.servicios
 
         public async Task<List<LavadoraData>> ListarTodasAsync()
         {
-            const string consulta = "query ListarLavadoras { lavadoras { " + CamposListadoLavadora + " } }";
-            RespuestaListaLavadoras respuesta =
-                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaListaLavadoras>(consulta, new { });
+            string consulta = "query ListarLavadoras { lavadoras { " + CamposLavadora + " } }";
+            RespuestaTodasLavadoras respuesta =
+                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaTodasLavadoras>(consulta, new { });
             return respuesta == null || respuesta.Lavadoras == null
                 ? new List<LavadoraData>()
                 : respuesta.Lavadoras;

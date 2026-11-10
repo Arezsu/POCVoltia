@@ -20,6 +20,12 @@ namespace ClienteLavadora.modelo
         public List<LavadoraData> Lavadoras { get; set; }
     }
 
+    public class RespuestaTodasLavadoras
+    {
+        [JsonPropertyName("lavadoras")]
+        public List<LavadoraData> Lavadoras { get; set; }
+    }
+
     public class RespuestaLavadoraPorCriterios
     {
         [JsonPropertyName("lavadoraPorCriterios")]
@@ -47,6 +53,12 @@ namespace ClienteLavadora.modelo
     public class RespuestaListaMantenimientos
     {
         [JsonPropertyName("mantenimientosPorFiltro")]
+        public List<MantenimientoData> Mantenimientos { get; set; }
+    }
+
+    public class RespuestaMantenimientos
+    {
+        [JsonPropertyName("mantenimientos")]
         public List<MantenimientoData> Mantenimientos { get; set; }
     }
 

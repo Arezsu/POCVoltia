@@ -22,8 +22,8 @@ namespace ClienteLavadora.servicios
         {
             string consulta = "query ListarMantenimientos($codigo: Int!) { " +
                 "mantenimientos(codigoLavadora: $codigo) { " + CamposMantenimiento + " } }";
-            RespuestaListaMantenimientos respuesta =
-                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaListaMantenimientos>(
+            RespuestaMantenimientos respuesta =
+                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaMantenimientos>(
                     consulta, new { codigo = codigoLavadora });
             return respuesta == null || respuesta.Mantenimientos == null
                 ? new List<MantenimientoData>() : respuesta.Mantenimientos;
