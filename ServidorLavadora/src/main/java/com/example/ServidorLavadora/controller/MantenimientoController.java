@@ -17,8 +17,8 @@ import java.util.Optional;
 /**
  * CONTROLADOR (la C de MVC) de los mantenimientos, que son el DETALLE de la lavadora.
  *
- * Todas las operaciones piden el codigo de la lavadora porque un mantenimiento no
- * existe solo: siempre esta dentro de una lavadora.
+ * Cada operación identifica al mantenimiento por su id único; el vínculo con
+ * la lavadora viaja en los datos del mantenimiento.
  */
 @Controller
 public class MantenimientoController {
@@ -33,19 +33,19 @@ public class MantenimientoController {
 
     /** Mantenimientos de una lavadora. Puede devolver una lista vacia (0..*). */
     @QueryMapping
-    public List<Mantenimiento> mantenimientos(@Argument int codigoLavadora) {
-        return servicio.listar(codigoLavadora);
+    public List<Mantenimiento> mantenimientos(@Argument Integer codigoLavadora) {
+        return codigoLavadora == null ? servicio.listarTodos() : servicio.listar(codigoLavadora);
     }
 
-    /** Un mantenimiento por su id dentro de la lavadora. */
+    /** Un mantenimiento por su id global. */
     @QueryMapping
-    public Optional<Mantenimiento> mantenimientoPorId(@Argument int codigoLavadora, @Argument int id) {
-        return servicio.buscarPorId(codigoLavadora, id);
+    public Optional<Mantenimiento> mantenimientoPorId(@Argument int id) {
+        return servicio.buscarPorId(id);
     }
 
     /** Listado de mantenimientos con filtros aplicados en el servidor. */
     @QueryMapping
-    public List<Mantenimiento> mantenimientosPorFiltro(@Argument int codigoLavadora,
+    public List<Mantenimiento> mantenimientosPorFiltro(@Argument Integer codigoLavadora,
                                                        @Argument String tecnico,
                                                        @Argument Boolean completado) {
         return servicio.listarPorFiltro(codigoLavadora, tecnico, completado);
@@ -55,23 +55,21 @@ public class MantenimientoController {
 
     /** Agrega un mantenimiento a una lavadora que primero se busca. */
     @MutationMapping
-    public Mantenimiento addMantenimiento(@Argument int codigoLavadora,
-                                          @Argument("input") MantenimientoInput input) {
-        return servicio.agregar(codigoLavadora, input);
+    public Mantenimiento addMantenimiento(@Argument("input") MantenimientoInput input) {
+        return servicio.agregar(input);
     }
 
     /** Actualiza un mantenimiento que primero se busca. */
     @MutationMapping
-    public Mantenimiento actualizarMantenimiento(@Argument int codigoLavadora,
-                                                 @Argument int id,
+    public Mantenimiento actualizarMantenimiento(@Argument int id,
                                                  @Argument("input") MantenimientoUpdateInput input) {
-        return servicio.actualizar(codigoLavadora, id, input);
+        return servicio.actualizar(id, input);
     }
 
     /** Elimina un mantenimiento que primero se busca. */
     @MutationMapping
-    public boolean eliminarMantenimiento(@Argument int codigoLavadora, @Argument int id) {
-        return servicio.eliminar(codigoLavadora, id);
+    public boolean eliminarMantenimiento(@Argument int id) {
+        return servicio.eliminar(id);
     }
 
     // ================= Campos con formato propio =================

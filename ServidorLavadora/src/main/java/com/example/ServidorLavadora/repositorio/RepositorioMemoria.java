@@ -14,24 +14,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  * de los datos y no en la que consulta el otro cliente. El constructor es privado
  * y la unica forma de obtener el objeto es RepositorioMemoria.getInstance().
  *
- * Patron OBSERVER (como sujeto): guarda una lista de observadores y les avisa en
- * cada cambio. Ademas, cada aviso sube en 1 el numero de "version".
- *
  * Listas concurrentes: se usa CopyOnWriteArrayList porque el servidor atiende
  * varias peticiones al mismo tiempo. Las operaciones que cambian datos se hacen
  * dentro del candado para que no se crucen.
  */
 public class RepositorioMemoria implements AlmacenDatos {
 
-    // volatile: la instancia se crea una vez y todos los hilos deben ver el mismo valor.
-    private static volatile RepositorioMemoria instancia;
+    private static RepositorioMemoria instancia;
 
     private final Object candado = new Object();
 
     // Lista concurrente: varias peticiones pueden leerla sin bloquearse.
     private final List<Lavadora> lavadoras = new CopyOnWriteArrayList<>();
-
-    // Lista de observadores suscritos (el RegistroCambios de la consola).
     private final List<ObservadorRepositorio> observadores = new CopyOnWriteArrayList<>();
 
     // Version de los datos. AtomicInteger permite aumentarla sin candado.
@@ -47,7 +41,6 @@ public class RepositorioMemoria implements AlmacenDatos {
         return instancia;
     }
 
-    /** Suscribe un observador para que reciba los avisos de cambio. */
     public void agregarObservador(ObservadorRepositorio observador) {
         observadores.add(observador);
     }
@@ -109,11 +102,9 @@ public class RepositorioMemoria implements AlmacenDatos {
     }
 
     @Override
-    public void notificar(String evento) {
-        version.incrementAndGet(); // Los clientes ven que algo cambio
-        for (ObservadorRepositorio observador : observadores) {
-            observador.alCambiar(evento);
-        }
+    public void registrarCambio(String evento) {
+        version.incrementAndGet();
+        observadores.forEach(observador -> observador.alCambiar(evento));
     }
 
 }

@@ -41,8 +41,6 @@
     }
     const notificador = Voltia.notificador;
     const cliente = Voltia.clienteGraphQL;
-    cliente.setModoApi('graphql');
-
     // Composicion de dependencias: se crean una sola vez y se pasan a quien
     // las necesita. Ni la vista ni el controlador crean servicios por su cuenta.
     const controladorLavadoras = new Voltia.ControladorLavadoras(cliente, notificador);

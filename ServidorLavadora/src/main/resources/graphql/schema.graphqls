@@ -25,10 +25,10 @@ type Query {
     lavadorasPorFiltro(marca: String, tecnologiaInverter: Boolean, conMantenimientos: Boolean): [Lavadora]
 
     # ---------- Mantenimiento (detalle, 0..*) ----------
-    mantenimientos(codigoLavadora: Int!): [Mantenimiento]
-    mantenimientoPorId(codigoLavadora: Int!, id: Int!): Mantenimiento
+    mantenimientos(codigoLavadora: Int): [Mantenimiento]
+    mantenimientoPorId(id: Int!): Mantenimiento
     # Listar con filtros que aplica el SERVIDOR
-    mantenimientosPorFiltro(codigoLavadora: Int!, tecnico: String, completado: Boolean): [Mantenimiento]
+    mantenimientosPorFiltro(codigoLavadora: Int, tecnico: String, completado: Boolean): [Mantenimiento]
 
     # ---------- Estado del servidor ----------
     # Sube en 1 cada vez que cualquier cliente cambia algo. Los clientes lo
@@ -43,9 +43,9 @@ type Mutation {
     eliminarLavadora(codigo: Int!): Boolean
 
     # ---------- Mantenimiento (detalle) ----------
-    addMantenimiento(codigoLavadora: Int!, input: MantenimientoInput!): Mantenimiento
-    actualizarMantenimiento(codigoLavadora: Int!, id: Int!, input: MantenimientoUpdateInput!): Mantenimiento
-    eliminarMantenimiento(codigoLavadora: Int!, id: Int!): Boolean
+    addMantenimiento(input: MantenimientoInput!): Mantenimiento
+    actualizarMantenimiento(id: Int!, input: MantenimientoUpdateInput!): Mantenimiento
+    eliminarMantenimiento(id: Int!): Boolean
 }
 
 # =====================================================================
@@ -113,8 +113,10 @@ input LavadoraUpdateInput {
     minutosLavado: Int
 }
 
-# El id no se manda: lo calcula el servidor.
+# El id se ingresa al crear y debe ser unico en toda la coleccion.
 input MantenimientoInput {
+    id: Int!
+    codigoLavadora: Int!
     descripcion: String!
     tecnico: String!
     costo: Float!

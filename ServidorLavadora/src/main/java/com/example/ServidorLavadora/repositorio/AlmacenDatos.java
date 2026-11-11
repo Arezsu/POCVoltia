@@ -41,8 +41,8 @@ public interface AlmacenDatos {
     /** Elimina una lavadora por su codigo y sus detalles asociados. */
     boolean eliminar(int codigo);
 
-    /** Avisa a los observadores que algo cambio (patron Observer). */
-    void notificar(String evento);
+    /** Registra un cambio y avisa a los observadores del servidor. */
+    void registrarCambio(String evento);
 
     /**
      * Numero que sube en 1 cada vez que cambian los datos. Los clientes lo

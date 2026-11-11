@@ -352,11 +352,9 @@
       }
     }
 
-    async consultarPorId(codigoLavadora, id) {
+    async consultarPorId(id) {
       try {
-        const datos = await this.cliente.consultarMantenimientoPorId(
-          Number(codigoLavadora), Number(id)
-        );
+        const datos = await this.cliente.consultarMantenimientoPorId(Number(id));
         return datos ? new Voltia.Mantenimiento(datos) : null;
       } catch (error) {
         this.avisarError(error);
@@ -366,10 +364,10 @@
 
     async agregar(codigoLavadora, datos) {
       try {
-        const creado = await this.cliente.agregarMantenimiento(
-          Number(codigoLavadora),
-          this.entradaMantenimiento(datos)
-        );
+        const input = Object.assign(this.entradaMantenimiento(datos), {
+          id: Number(datos.id), codigoLavadora: Number(codigoLavadora)
+        });
+        const creado = await this.cliente.agregarMantenimiento(input);
         if (!creado) throw new Error('GraphQL no confirmó que el mantenimiento se guardó.');
         await this.refrescarMaestro();
         const texto = creado
@@ -383,10 +381,9 @@
       }
     }
 
-    async actualizar(codigoLavadora, id, datos) {
+    async actualizar(id, datos) {
       try {
         const actualizado = await this.cliente.actualizarMantenimiento(
-          Number(codigoLavadora),
           Number(id),
           this.entradaMantenimiento(datos)
         );
@@ -403,14 +400,14 @@
       }
     }
 
-    async eliminar(codigoLavadora, id) {
+    async eliminar(id) {
       try {
-        const eliminado = await this.cliente.eliminarMantenimiento(Number(codigoLavadora), Number(id));
+        const eliminado = await this.cliente.eliminarMantenimiento(Number(id));
         if (!eliminado) throw new Error('GraphQL no confirmó que el mantenimiento se eliminó.');
         await this.refrescarMaestro();
         this.notificador.notificar(EVENTOS.MENSAJE, {
           tipo: 'exito',
-          texto: 'Mantenimiento ' + id + ' eliminado de la lavadora ' + codigoLavadora + '.'
+          texto: 'Mantenimiento ' + id + ' eliminado correctamente.'
         });
       } catch (error) {
         this.avisarError(error);
@@ -418,7 +415,7 @@
       }
     }
 
-    /** Entrada MantenimientoInput: el id NO se manda, lo calcula el servidor. */
+    /** Entrada MantenimientoInput: el id y la lavadora se incluyen al crear. */
     entradaMantenimiento(datos) {
       return {
         descripcion: String(datos.descripcion || '').trim(),

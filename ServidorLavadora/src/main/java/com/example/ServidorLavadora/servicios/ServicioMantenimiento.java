@@ -10,15 +10,15 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Logica de negocio del objeto DETALLE: el mantenimiento.
  *
- * Todo mantenimiento vive DENTRO de una lavadora (relacion maestro-detalle), por
- * eso cada operacion recibe el codigo de la lavadora. Primero se busca la lavadora
- * y despues se trabaja sobre su lista de mantenimientos.
+ * Cada mantenimiento conserva la referencia a su lavadora, pero se consulta
+ * globalmente por su id unico.
  *
  * Este servicio reutiliza ServicioLavadora para buscar al maestro y no repetir
  * el mismo codigo de busqueda en dos clases (principio de responsabilidad unica).
@@ -48,14 +48,25 @@ public class ServicioMantenimiento {
         }
     }
 
-    /** Busca un mantenimiento por su id dentro de una lavadora. */
-    public Optional<Mantenimiento> buscarPorId(int codigoLavadora, int id) {
+    /** Lista todos los mantenimientos sin exigir primero el código del maestro. */
+    public List<Mantenimiento> listarTodos() {
         synchronized (almacen.candado()) {
-            Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
-            return lavadora.buscarMantenimiento(id).map(mantenimiento -> {
-                enriquecer(mantenimiento, lavadora);
-                return mantenimiento;
-            });
+            return almacen.lavadoras().stream()
+                    .flatMap(lavadora -> lavadora.getMantenimientos().stream()
+                            .map(mantenimiento -> {
+                                enriquecer(mantenimiento, lavadora);
+                                return mantenimiento;
+                    }))
+                    .sorted(Comparator.comparingInt(Mantenimiento::getCodigoLavadora)
+                            .thenComparingInt(Mantenimiento::getId))
+                    .toList();
+        }
+    }
+
+    /** Busca un mantenimiento por su ID único. */
+    public Optional<Mantenimiento> buscarPorId(int id) {
+        synchronized (almacen.candado()) {
+            return buscarEnTodas(id);
         }
     }
 
@@ -65,8 +76,16 @@ public class ServicioMantenimiento {
      *  - completado: true = terminados, false = pendientes, null = todos
      */
     public List<Mantenimiento> listarPorFiltro(int codigoLavadora, String tecnico, Boolean completado) {
+        return filtrar(listar(codigoLavadora), tecnico, completado);
+    }
+
+    public List<Mantenimiento> listarPorFiltro(Integer codigoLavadora, String tecnico, Boolean completado) {
+        return filtrar(codigoLavadora == null ? listarTodos() : listar(codigoLavadora), tecnico, completado);
+    }
+
+    private List<Mantenimiento> filtrar(List<Mantenimiento> mantenimientos, String tecnico, Boolean completado) {
         String texto = (tecnico == null) ? "" : tecnico.trim().toLowerCase();
-        return listar(codigoLavadora).stream()
+        return mantenimientos.stream()
                 .filter(mantenimiento -> texto.isEmpty()
                         || mantenimiento.getTecnico().toLowerCase().contains(texto))
                 .filter(mantenimiento -> completado == null
@@ -79,20 +98,21 @@ public class ServicioMantenimiento {
     // ==================================================================
 
     /**
-     * Agrega un mantenimiento a una lavadora existente. El id lo calcula el servidor:
-     * toma el mayor id de esa lavadora y le suma uno. Asi nunca se repite.
+     * Agrega un mantenimiento con id elegido por el usuario a una lavadora existente.
      */
-    public Mantenimiento agregar(int codigoLavadora, MantenimientoInput input) {
+    public Mantenimiento agregar(MantenimientoInput input) {
         synchronized (almacen.candado()) {
-            Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
+            Lavadora lavadora = servicioLavadora.exigirPorCodigo(input.codigoLavadora());
+            if (input.id() < 1) throw new IllegalArgumentException("El ID debe ser mayor que cero.");
+            if (buscarEnTodas(input.id()).isPresent())
+                throw new IllegalArgumentException("Ya existe un mantenimiento con el ID " + input.id());
 
             validarDescripcionYTecnico(input.descripcion(), input.tecnico());
             Validaciones.noNegativo(input.costo(), "El costo del mantenimiento");
             LocalDateTime fecha = Validaciones.fecha(input.fecha());
 
-            int id = siguienteId(lavadora);
             Mantenimiento mantenimiento = Mantenimiento.builder()
-                    .id(id)
+                    .id(input.id())
                     .descripcion(input.descripcion().trim())
                     .tecnico(input.tecnico().trim())
                     .costo(input.costo())
@@ -103,7 +123,7 @@ public class ServicioMantenimiento {
 
             lavadora.agregarMantenimiento(mantenimiento);
             almacen.guardar(lavadora);
-            almacen.notificar("Mantenimiento " + id + " agregado a la lavadora " + codigoLavadora);
+            almacen.registrarCambio("Mantenimiento " + input.id() + " agregado a la lavadora " + input.codigoLavadora());
             return mantenimiento;
         }
     }
@@ -113,10 +133,11 @@ public class ServicioMantenimiento {
     // ==================================================================
 
     /** Busca el mantenimiento, valida lo que llego y cambia solo esos campos. */
-    public Mantenimiento actualizar(int codigoLavadora, int id, MantenimientoUpdateInput input) {
+    public Mantenimiento actualizar(int id, MantenimientoUpdateInput input) {
         synchronized (almacen.candado()) {
-            Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
-            Mantenimiento mantenimiento = buscarEnLavadora(lavadora, id);
+            Mantenimiento mantenimiento = buscarEnTodas(id).orElseThrow(() ->
+                    new IllegalArgumentException("No existe un mantenimiento con el ID " + id));
+            Lavadora lavadora = servicioLavadora.exigirPorCodigo(mantenimiento.getCodigoLavadora());
             enriquecer(mantenimiento, lavadora);
 
             if (input.descripcion() != null) {
@@ -149,7 +170,7 @@ public class ServicioMantenimiento {
             Lavadora lavadoraGuardada = almacen.guardar(lavadora);
             Mantenimiento mantenimientoGuardado = buscarEnLavadora(lavadoraGuardada, id);
             enriquecer(mantenimientoGuardado, lavadoraGuardada);
-            almacen.notificar("Mantenimiento " + id + " de la lavadora " + codigoLavadora + " actualizado");
+            almacen.registrarCambio("Mantenimiento " + id + " de la lavadora " + lavadora.getCodigo() + " actualizado");
             return mantenimientoGuardado;
         }
     }
@@ -159,13 +180,14 @@ public class ServicioMantenimiento {
     // ==================================================================
 
     /** Elimina un mantenimiento. Primero se BUSCA para confirmar que existe. */
-    public boolean eliminar(int codigoLavadora, int id) {
+    public boolean eliminar(int id) {
         synchronized (almacen.candado()) {
-            Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
-            Mantenimiento mantenimiento = buscarEnLavadora(lavadora, id);
+            Mantenimiento mantenimiento = buscarEnTodas(id).orElseThrow(() ->
+                    new IllegalArgumentException("No existe un mantenimiento con el ID " + id));
+            Lavadora lavadora = servicioLavadora.exigirPorCodigo(mantenimiento.getCodigoLavadora());
             boolean eliminado = lavadora.quitarMantenimiento(mantenimiento);
             almacen.guardar(lavadora);
-            almacen.notificar("Mantenimiento " + id + " de la lavadora " + codigoLavadora + " eliminado");
+            almacen.registrarCambio("Mantenimiento " + id + " de la lavadora " + lavadora.getCodigo() + " eliminado");
             return eliminado;
         }
     }
@@ -180,11 +202,16 @@ public class ServicioMantenimiento {
                         "La lavadora " + lavadora.getCodigo() + " no tiene un mantenimiento con el id " + id));
     }
 
-    private int siguienteId(Lavadora lavadora) {
-        return lavadora.getMantenimientos().stream()
-                .mapToInt(Mantenimiento::getId)
-                .max()
-                .orElse(0) + 1;
+    private Optional<Mantenimiento> buscarEnTodas(int id) {
+        return almacen.lavadoras().stream()
+                .flatMap(lavadora -> lavadora.getMantenimientos().stream())
+                .filter(mantenimiento -> mantenimiento.getId() == id)
+                .findFirst()
+                .map(mantenimiento -> {
+                    almacen.buscarPorCodigo(mantenimiento.getCodigoLavadora())
+                            .ifPresent(lavadora -> enriquecer(mantenimiento, lavadora));
+                    return mantenimiento;
+                });
     }
 
     private void enriquecer(Mantenimiento mantenimiento, Lavadora lavadora) {

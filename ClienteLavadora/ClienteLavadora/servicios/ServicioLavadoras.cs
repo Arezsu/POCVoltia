@@ -10,8 +10,7 @@ namespace ClienteLavadora.servicios
     ///
     /// POR QUE AQUI Y NO EN LA VENTANA:
     /// si la ventana escribiera "query lavadorasPorFiltro(...)", la interfaz quedaria
-    /// casada con GraphQL. Manana, si el servidor cambia a REST, solo se cambia este
-    /// archivo y las ventanas ni se enteran.
+    /// conectada al servidor GraphQL; las ventanas no conocen los detalles de red.
     ///
     /// RESPONSABILIDAD UNICA: esta clase solo sabe de lavadoras (maestro). Los
     /// mantenimientos tienen su propia clase (ServicioMantenimientos).

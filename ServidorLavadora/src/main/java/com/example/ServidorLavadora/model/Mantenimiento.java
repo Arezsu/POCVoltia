@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
@@ -17,12 +17,12 @@ import java.time.LocalDateTime;
  * es el detalle (0..*). Una lavadora puede tener cero, uno o muchos.
  */
 @Document(collection = "mantenimientos")
-@CompoundIndex(name = "uq_mantenimiento_lavadora_id", def = "{'codigoLavadora': 1, 'id': 1}", unique = true)
 public class Mantenimiento {
 
     @Id
     private ObjectId mongoId;
 
+    @Indexed(name = "uq_mantenimiento_id", unique = true)
     private int id;
     private int codigoLavadora;
     @Transient

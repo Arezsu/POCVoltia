@@ -13,9 +13,7 @@ namespace ClienteLavadora.controlador
     /// Es el hermano de ControladorLavadoras y trabaja igual: la vista pide, el
     /// controlador llama al servicio y avisa a los demas cuando algo cambio.
     ///
-    /// DETALLE IMPORTANTE DE LA RELACION MAESTRO-DETALLE:
-    /// todas las operaciones piden primero el codigo de la lavadora. Un mantenimiento
-    /// no se puede buscar "suelto": siempre se busca dentro de su lavadora.
+    /// Cada detalle conserva su relacion con una lavadora y se identifica por su id unico.
     ///
     /// Despues de agregar, actualizar o eliminar se llama a
     /// NotificadorDatos.AvisarDatosCambiaron(). La ventana Listar y la ventana de
@@ -38,25 +36,20 @@ namespace ClienteLavadora.controlador
         //  Consultas
         // ====================================================================
 
-        public async Task<List<MantenimientoData>> ListarTodasAsync(int codigoLavadora)
-        {
-            return await servicio.ListarTodasAsync(codigoLavadora);
-        }
-
-        /// <summary>Lista los mantenimientos de una lavadora con los filtros del servidor.</summary>
-        public async Task<List<MantenimientoData>> ListarAsync(int codigoLavadora, string tecnico, bool? completado)
+        /// <summary>Lista todos los mantenimientos; los filtros son opcionales.</summary>
+        public async Task<List<MantenimientoData>> ListarAsync(int? codigoLavadora, string tecnico, bool? completado)
         {
             return await servicio.ListarAsync(codigoLavadora, tecnico, completado);
         }
 
         /// <summary>Busca un mantenimiento por id. Si no existe lanza un mensaje claro.</summary>
-        public async Task<MantenimientoData> BuscarAsync(int codigoLavadora, int id)
+        public async Task<MantenimientoData> BuscarAsync(int id)
         {
-            MantenimientoData mantenimiento = await servicio.BuscarPorIdAsync(codigoLavadora, id);
+            MantenimientoData mantenimiento = await servicio.BuscarPorIdAsync(id);
             if (mantenimiento == null)
             {
                 throw new ArgumentException(
-                    "La lavadora " + codigoLavadora + " no tiene un mantenimiento con el id " + id + ".");
+                    "No existe un mantenimiento con el id " + id + ".");
             }
             return mantenimiento;
         }
@@ -72,16 +65,16 @@ namespace ClienteLavadora.controlador
             return creado;
         }
 
-        public async Task<MantenimientoData> ActualizarAsync(int codigoLavadora, int id, MantenimientoUpdateInput input)
+        public async Task<MantenimientoData> ActualizarAsync(int id, MantenimientoUpdateInput input)
         {
-            MantenimientoData actualizado = await servicio.ActualizarAsync(codigoLavadora, id, input);
+            MantenimientoData actualizado = await servicio.ActualizarAsync(id, input);
             NotificadorDatos.AvisarDatosCambiaron();
             return actualizado;
         }
 
-        public async Task EliminarAsync(int codigoLavadora, int id)
+        public async Task EliminarAsync(int id)
         {
-            bool eliminado = await servicio.EliminarAsync(codigoLavadora, id);
+            bool eliminado = await servicio.EliminarAsync(id);
             if (!eliminado)
             {
                 throw new Exception("El servidor no pudo eliminar el mantenimiento " + id + ".");

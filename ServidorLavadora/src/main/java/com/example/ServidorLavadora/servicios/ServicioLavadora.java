@@ -124,7 +124,7 @@ public class ServicioLavadora {
                     .build();
 
             lavadora = almacen.guardar(lavadora);
-            almacen.notificar("Lavadora " + lavadora.getCodigo() + " (" + lavadora.getMarca() + ") agregada");
+            almacen.registrarCambio("Lavadora " + lavadora.getCodigo() + " (" + lavadora.getMarca() + ") agregada");
             return lavadora;
         }
     }
@@ -185,7 +185,7 @@ public class ServicioLavadora {
             }
 
             lavadora = almacen.guardar(lavadora);
-            almacen.notificar("Lavadora " + codigo + " actualizada");
+            almacen.registrarCambio("Lavadora " + codigo + " actualizada");
             return lavadora;
         }
     }
@@ -203,7 +203,7 @@ public class ServicioLavadora {
         synchronized (almacen.candado()) {
             Lavadora lavadora = exigirPorCodigo(codigo);
             boolean eliminada = almacen.eliminar(codigo);
-            almacen.notificar("Lavadora " + codigo + " eliminada");
+            almacen.registrarCambio("Lavadora " + codigo + " eliminada");
             return eliminada;
         }
     }

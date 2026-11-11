@@ -8,31 +8,18 @@ namespace ClienteLavadora.servicios
     /// Implementacion real de IServicioMantenimientos: arma las cadenas GraphQL del
     /// objeto DETALLE y las envia por ClienteGraphQL.
     ///
-    /// Observe que TODAS las operaciones llevan "codigoLavadora" primero: asi lo pide
-    /// el schema porque un mantenimiento siempre pertenece a una lavadora concreta.
-    /// Ejemplo real de la mutacion:
-    ///     mutation { addMantenimiento(codigoLavadora: 101, input: {...}) { id } }
+    /// Las operaciones sobre un mantenimiento existente se hacen con su id.
+    /// Al crearlo, el input incluye el id elegido y el codigo de la lavadora asociada.
     /// </summary>
     public class ServicioMantenimientos : IServicioMantenimientos
     {
         private const string CamposMantenimiento =
-            "codigoLavadora id descripcion tecnico costo fecha completado";
+            "codigoLavadora marcaLavadora id descripcion tecnico costo fecha completado";
 
-        public async Task<List<MantenimientoData>> ListarTodasAsync(int codigoLavadora)
-        {
-            string consulta = "query ListarMantenimientos($codigo: Int!) { " +
-                "mantenimientos(codigoLavadora: $codigo) { " + CamposMantenimiento + " } }";
-            RespuestaMantenimientos respuesta =
-                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaMantenimientos>(
-                    consulta, new { codigo = codigoLavadora });
-            return respuesta == null || respuesta.Mantenimientos == null
-                ? new List<MantenimientoData>() : respuesta.Mantenimientos;
-        }
-
-        public async Task<List<MantenimientoData>> ListarAsync(int codigoLavadora, string tecnico, bool? completado)
+        public async Task<List<MantenimientoData>> ListarAsync(int? codigoLavadora, string tecnico, bool? completado)
         {
             string consulta =
-                "query listar($codigo: Int!, $tecnico: String, $completado: Boolean) { " +
+                "query listar($codigo: Int, $tecnico: String, $completado: Boolean) { " +
                 "mantenimientosPorFiltro(codigoLavadora: $codigo, tecnico: $tecnico, completado: $completado) { " +
                 CamposMantenimiento + " } }";
 
@@ -48,16 +35,14 @@ namespace ClienteLavadora.servicios
             return respuesta.Mantenimientos;
         }
 
-        public async Task<MantenimientoData> BuscarPorIdAsync(int codigoLavadora, int id)
+        public async Task<MantenimientoData> BuscarPorIdAsync(int id)
         {
             string consulta =
-                "query buscar($codigo: Int!, $id: Int!) { " +
-                "mantenimientoPorId(codigoLavadora: $codigo, id: $id) { " + CamposMantenimiento + " } }";
-
-            object variables = new { codigo = codigoLavadora, id = id };
+                "query buscar($id: Int!) { " +
+                "mantenimientoPorId(id: $id) { " + CamposMantenimiento + " } }";
 
             RespuestaMantenimientoPorId respuesta =
-                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaMantenimientoPorId>(consulta, variables);
+                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaMantenimientoPorId>(consulta, new { id = id });
 
             return respuesta == null ? null : respuesta.Mantenimiento;
         }
@@ -65,10 +50,11 @@ namespace ClienteLavadora.servicios
         public async Task<MantenimientoData> AgregarAsync(int codigoLavadora, MantenimientoInput input)
         {
             string consulta =
-                "mutation agregar($codigo: Int!, $input: MantenimientoInput!) { " +
-                "addMantenimiento(codigoLavadora: $codigo, input: $input) { " + CamposMantenimiento + " } }";
+                "mutation agregar($input: MantenimientoInput!) { " +
+                "addMantenimiento(input: $input) { " + CamposMantenimiento + " } }";
 
-            object variables = new { codigo = codigoLavadora, input = input };
+            input.CodigoLavadora = codigoLavadora;
+            object variables = new { input = input };
 
             RespuestaAgregarMantenimiento respuesta =
                 await ClienteGraphQL.Instancia.MutarAsync<RespuestaAgregarMantenimiento>(consulta, variables);
@@ -80,14 +66,14 @@ namespace ClienteLavadora.servicios
             return respuesta.Mantenimiento;
         }
 
-        public async Task<MantenimientoData> ActualizarAsync(int codigoLavadora, int id, MantenimientoUpdateInput input)
+        public async Task<MantenimientoData> ActualizarAsync(int id, MantenimientoUpdateInput input)
         {
             string consulta =
-                "mutation actualizar($codigo: Int!, $id: Int!, $input: MantenimientoUpdateInput!) { " +
-                "actualizarMantenimiento(codigoLavadora: $codigo, id: $id, input: $input) { " +
+                "mutation actualizar($id: Int!, $input: MantenimientoUpdateInput!) { " +
+                "actualizarMantenimiento(id: $id, input: $input) { " +
                 CamposMantenimiento + " } }";
 
-            object variables = new { codigo = codigoLavadora, id = id, input = input };
+            object variables = new { id = id, input = input };
 
             RespuestaActualizarMantenimiento respuesta =
                 await ClienteGraphQL.Instancia.MutarAsync<RespuestaActualizarMantenimiento>(consulta, variables);
@@ -99,13 +85,13 @@ namespace ClienteLavadora.servicios
             return respuesta.Mantenimiento;
         }
 
-        public async Task<bool> EliminarAsync(int codigoLavadora, int id)
+        public async Task<bool> EliminarAsync(int id)
         {
             string consulta =
-                "mutation eliminar($codigo: Int!, $id: Int!) { " +
-                "eliminarMantenimiento(codigoLavadora: $codigo, id: $id) }";
+                "mutation eliminar($id: Int!) { " +
+                "eliminarMantenimiento(id: $id) }";
 
-            object variables = new { codigo = codigoLavadora, id = id };
+            object variables = new { id = id };
 
             RespuestaEliminarMantenimiento respuesta =
                 await ClienteGraphQL.Instancia.MutarAsync<RespuestaEliminarMantenimiento>(consulta, variables);

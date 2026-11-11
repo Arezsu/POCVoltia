@@ -196,9 +196,9 @@ classDiagram
 
     class ServicioMantenimiento {
         +listar(int) List
-        +agregar(int, MantenimientoInput) Mantenimiento
-        +actualizar(int, int, MantenimientoUpdateInput) Mantenimiento
-        +eliminar(int, int) boolean
+        +agregar(MantenimientoInput) Mantenimiento
+        +actualizar(int, MantenimientoUpdateInput) Mantenimiento
+        +eliminar(int) boolean
     }
 
     Electrodomestico <|-- Lavadora : herencia
@@ -245,15 +245,15 @@ lleva la consulta y, opcionalmente, variables.
 | Query | `lavadoraPorCriterios(codigo, marca)` | Busca una lavadora por uno o dos criterios |
 | Query | `lavadorasPorFiltro(marca, tecnologiaInverter, conMantenimientos)` | Listado con filtros aplicados en el servidor |
 | Query | `mantenimientos(codigoLavadora)` | Detalle de una lavadora |
-| Query | `mantenimientoPorId(codigoLavadora, id)` | Un mantenimiento puntual |
+| Query | `mantenimientoPorId(id)` | Un mantenimiento puntual por su ID único |
 | Query | `mantenimientosPorFiltro(codigoLavadora, tecnico, completado)` | Filtros del detalle en el servidor |
 | Query | `versionDatos` | Numero que sube cuando un cliente cambia algo |
 | Mutation | `addLavadora(input)` | Crea una lavadora (nace con cero mantenimientos) |
 | Mutation | `actualizarLavadora(codigo, input)` | Actualiza previa busqueda; solo cambia lo enviado |
 | Mutation | `eliminarLavadora(codigo)` | Elimina previa busqueda; borra tambien su detalle |
-| Mutation | `addMantenimiento(codigoLavadora, input)` | Agrega un detalle; el id lo calcula el servidor |
-| Mutation | `actualizarMantenimiento(codigoLavadora, id, input)` | Actualiza previa busqueda |
-| Mutation | `eliminarMantenimiento(codigoLavadora, id)` | Elimina previa busqueda |
+| Mutation | `addMantenimiento(input)` | Agrega un detalle con ID elegido por el usuario y lavadora asociada |
+| Mutation | `actualizarMantenimiento(id, input)` | Actualiza previa busqueda por ID |
+| Mutation | `eliminarMantenimiento(id)` | Elimina previa busqueda por ID |
 
 Detalles importantes del contrato:
 
@@ -264,9 +264,9 @@ Detalles importantes del contrato:
 - Los errores de negocio (codigo repetido, fecha invalida, lavadora inexistente) llegan
   como errores GraphQL con un mensaje en espanol listo para mostrar al usuario.
 
-Los dos clientes usan GraphQL de forma directa para todas las consultas y mutaciones.
-El servidor conserva rutas REST auxiliares, pero la interfaz no permite cambiar de
-protocolo y no las usa.
+Los dos clientes usan GraphQL para todas las consultas y mutaciones. El servidor expone
+el servicio en `/graphql`; GraphiQL es la interfaz opcional para explorar y probar ese
+mismo esquema.
 
 En el listado web se pueden combinar **marca**, **inverter** (con o sin) y **mantenimientos**
 (con o sin). Por ejemplo, elegir “Solo con inverter” y “Con mantenimientos” devuelve unicamente
@@ -281,7 +281,7 @@ las lavadoras que cumplen ambos filtros.
 | **MVC** | Servidor: `model` / `controller` / `servicios`. Clientes: `modelo` / `vista` / `controlador` | Separar datos, interfaz y coordinacion de casos de uso |
 | **Singleton** | `RepositorioMemoria.getInstance()` disponible para desarrollo; `ClienteGraphQL` en los dos clientes | Conexion HTTP reutilizada por cada cliente; MongoDB mantiene persistencia compartida |
 | **Builder** | `Lavadora.builder()`, `Mantenimiento.builder()` en Java; `ConstructorLavadora`, `ConstructorMantenimiento` en los clientes | Armar objetos de muchos atributos paso a paso sin constructores enormes |
-| **Observer** | `ObservadorRepositorio` + `RegistroCambios` en el servidor; `NotificadorDatos` + vigilante de `versionDatos` en los clientes | Refrescar la grilla sola cuando cambian los datos, incluso si el cambio lo hizo el otro cliente |
+| **Observer** | `RegistroCambios` en el servidor y `NotificadorDatos` en los clientes | Registrar cambios y refrescar las vistas |
 | **SOLID** | Ver la seccion 6 | Codigo mantenible y facil de explicar |
 
 ### 5.1 MVC en el servidor
@@ -353,7 +353,7 @@ ventana hace un cambio.
 | **S** - Responsabilidad unica | Cada clase tiene un solo motivo para cambiar: validar, guardar, mapear, dibujar | `Validaciones`, `RepositorioMemoria`, `LavadoraController` |
 | **O** - Abierto / cerrado | Se pueden agregar otros electrodomesticos heredando de `Electrodomestico` sin tocar lo existente | `Electrodomestico`, `Lavadora` |
 | **L** - Sustitucion de Liskov | Una `Lavadora` se usa como `Electrodomestico` y su `calcularPrecioFinal()` respeta el contrato | `Lavadora.calcularPrecioFinal()` |
-| **I** - Segregacion de interfaces | Interfaces pequenas y por caso de uso | `AlmacenDatos`, `ObservadorRepositorio`, `IServicioLavadoras`, `IServicioMantenimientos` |
+| **I** - Segregacion de interfaces | Interfaces pequenas y por caso de uso | `AlmacenDatos`, `IServicioLavadoras`, `IServicioMantenimientos` |
 | **D** - Inversion de dependencias | Los servicios dependen de `AlmacenDatos`, no de la clase concreta; los controladores de los clientes dependen de interfaces de servicio | `ServicioLavadora`, `ControladorLavadoras` |
 
 ---
@@ -368,8 +368,8 @@ ventana hace un cambio.
   dos clientes no pisan la misma lavadora al mismo tiempo.
 - Probado con 40 mutaciones simultaneas: se crearon las 40 lavadoras sin errores y sin
   perder datos.
-- El observador `RegistroCambios` y el contador `versionDatos` usan estructuras seguras
-  para varios hilos (`CopyOnWriteArrayList` y `AtomicInteger`).
+- `RegistroCambios` escribe los cambios en la consola del servidor. `versionDatos` usa
+  `AtomicInteger` para que los clientes detecten cambios hechos desde la otra aplicación.
 
 ### 7.2 Cliente C#
 

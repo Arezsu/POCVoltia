@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -363,7 +362,7 @@ namespace ClienteLavadora.vista
             btnNuevo.Click += (s, e) => PrepararNuevo();
 
             pistaBuilder = Ui.Pista(
-                "El id del mantenimiento lo calcula el servidor y solo es unico dentro de su lavadora.");
+                "Ingrese un ID único para identificar este mantenimiento.");
 
             StackPanel contenido = new StackPanel();
             contenido.Children.Add(tituloFormulario);
@@ -479,31 +478,11 @@ namespace ClienteLavadora.vista
                     return;
                 }
 
-                List<LavadoraData> lavadoras = await Task.Run(() => controladorLavadoras.ListarTodasAsync());
                 string tecnico = txtTecnico.Texto.Trim();
                 bool? completado = Opcion(cmbCompletado.SelectedIndex);
-                IEnumerable<MantenimientoData> consulta = lavadoras
-                    .SelectMany(lavadora => lavadora.ListaMantenimientos.Select(mantenimiento =>
-                    {
-                        mantenimiento.CodigoLavadora = lavadora.Codigo;
-                        mantenimiento.MarcaLavadora = lavadora.Marca;
-                        return mantenimiento;
-                    }));
-                if (tieneCodigo)
-                {
-                    consulta = consulta.Where(mantenimiento => mantenimiento.CodigoLavadora == codigo);
-                }
-                if (!string.IsNullOrWhiteSpace(tecnico))
-                {
-                    consulta = consulta.Where(mantenimiento => mantenimiento.Tecnico != null &&
-                        mantenimiento.Tecnico.IndexOf(tecnico, StringComparison.OrdinalIgnoreCase) >= 0);
-                }
-                if (completado.HasValue)
-                {
-                    consulta = consulta.Where(mantenimiento => mantenimiento.Completado == completado.Value);
-                }
-                List<MantenimientoData> lista = consulta.OrderBy(mantenimiento => mantenimiento.CodigoLavadora)
-                    .ThenBy(mantenimiento => mantenimiento.Id).ToList();
+                int? filtroCodigo = tieneCodigo ? codigo : (int?)null;
+                List<MantenimientoData> lista = await Task.Run(() =>
+                    controlador.ListarAsync(filtroCodigo, tecnico, completado));
 
                 if (solicitud != versionCarga || !IsLoaded || !IsVisible)
                 {
@@ -670,7 +649,7 @@ namespace ClienteLavadora.vista
 
                 btnActualizar.Habilitado = false;
                 guardando = true;
-                MantenimientoData actualizado = await Task.Run(() => controlador.ActualizarAsync(codigo, id, input));
+                MantenimientoData actualizado = await Task.Run(() => controlador.ActualizarAsync(id, input));
                 guardando = false;
 
                 Sonidos.Click();
@@ -719,7 +698,7 @@ namespace ClienteLavadora.vista
             {
                 btnEliminar.Habilitado = false;
                 guardando = true;
-                await Task.Run(() => controlador.EliminarAsync(codigo, id));
+                await Task.Run(() => controlador.EliminarAsync(id));
                 guardando = false;
 
                 Sonidos.Click();

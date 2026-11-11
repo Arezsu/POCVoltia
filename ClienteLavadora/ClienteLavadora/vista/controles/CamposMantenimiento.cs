@@ -10,31 +10,32 @@ namespace ClienteLavadora.vista.controles
     /// <summary>
     /// Formulario con los datos de un MANTENIMIENTO (objeto detalle).
     ///
-    /// El id NO aparece en el formulario porque lo calcula el servidor: el cliente
-    /// nunca lo inventa. Cuando se actualiza un mantenimiento, su id viaja como
-    /// parametro de la mutacion (ver IServicioMantenimientos).
+    /// El ID se ingresa al crear y luego se conserva para consultar, actualizar o eliminar.
     ///
     /// Se usa en la ventana de Mantenimientos para agregar y para actualizar.
     /// </summary>
     public class CamposMantenimiento : StackPanel
     {
+        private readonly CampoTexto txtId = new CampoTexto();
         private readonly CampoTexto txtDescripcion = new CampoTexto();
         private readonly CampoTexto txtTecnico = new CampoTexto();
         private readonly CampoTexto txtCosto = new CampoTexto();
         private readonly CampoFecha txtFecha = new CampoFecha();
         private readonly CheckBox chkCompletado = Ui.Check("Mantenimiento completado");
+        private bool idBloqueado;
 
-        private readonly Grid[] filas = new Grid[4];
+        private readonly Grid[] filas = new Grid[5];
 
         public CamposMantenimiento()
         {
             txtCosto.SinNegativos = true;
             txtCosto.Fuente = Tema.Numeros;
 
-            filas[0] = Ui.Fila(Ui.Celda("Descripcion del trabajo", txtDescripcion), null);
-            filas[1] = Ui.Fila(Ui.Celda("Tecnico", txtTecnico), Ui.Celda("Costo (pesos)", txtCosto));
-            filas[2] = Ui.Fila(Ui.Celda("Fecha", txtFecha), null);
-            filas[3] = Ui.Fila(Ui.Celda(null, chkCompletado), null);
+            filas[0] = Ui.Fila(Ui.Celda("ID del mantenimiento", txtId), null);
+            filas[1] = Ui.Fila(Ui.Celda("Descripcion del trabajo", txtDescripcion), null);
+            filas[2] = Ui.Fila(Ui.Celda("Tecnico", txtTecnico), Ui.Celda("Costo (pesos)", txtCosto));
+            filas[3] = Ui.Fila(Ui.Celda("Fecha", txtFecha), null);
+            filas[4] = Ui.Fila(Ui.Celda(null, chkCompletado), null);
 
             foreach (Grid fila in filas)
             {
@@ -54,6 +55,9 @@ namespace ClienteLavadora.vista.controles
 
         public void Limpiar()
         {
+            txtId.Texto = "";
+            idBloqueado = false;
+            txtId.SoloLectura = false;
             txtDescripcion.Texto = "";
             txtTecnico.Texto = "";
             txtCosto.Texto = "";
@@ -70,6 +74,9 @@ namespace ClienteLavadora.vista.controles
                 return;
             }
 
+            txtId.Texto = mantenimiento.Id.ToString();
+            idBloqueado = true;
+            txtId.SoloLectura = true;
             txtDescripcion.Texto = mantenimiento.Descripcion ?? "";
             txtTecnico.Texto = mantenimiento.Tecnico ?? "";
             txtCosto.Texto = mantenimiento.Costo.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
@@ -82,6 +89,7 @@ namespace ClienteLavadora.vista.controles
         {
             txtDescripcion.SoloLectura = !permitir;
             txtTecnico.SoloLectura = !permitir;
+            txtId.SoloLectura = !permitir || idBloqueado;
             txtCosto.SoloLectura = !permitir;
             txtFecha.SoloLectura = !permitir;
             chkCompletado.IsEnabled = permitir;
@@ -89,10 +97,12 @@ namespace ClienteLavadora.vista.controles
 
         // ================= Leer lo que escribio el usuario =================
 
-        /// <summary>Datos para crear un mantenimiento (sin id: lo calcula el servidor).</summary>
+        /// <summary>Datos para crear un mantenimiento con ID ingresado por el usuario.</summary>
         public MantenimientoInput LeerInput()
         {
             MantenimientoInput input = new MantenimientoInput();
+            if (!int.TryParse(txtId.Texto, out input.Id) || input.Id < 1)
+                throw new ArgumentException("Escriba un ID de mantenimiento mayor que cero.");
             input.Descripcion = Formato.LeerTexto(txtDescripcion.Texto,
                 "Escriba la descripcion del mantenimiento.");
             input.Tecnico = Formato.LeerTexto(txtTecnico.Texto, "Escriba el nombre del tecnico.");

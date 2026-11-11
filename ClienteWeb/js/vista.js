@@ -347,13 +347,13 @@
         const formulario = alta ? `
           <form data-form-mantenimiento-caso="${caso}" novalidate>
             <div class="campo"><label>Código de lavadora</label><input name="codigoLavadora" type="number" min="1" step="1" required></div>
+            <div class="campo"><label>ID del mantenimiento</label><input name="idMantenimiento" type="number" min="1" step="1" required></div>
             ${campos(caso, false)}
             <p class="error-formulario" data-error-mantenimiento-caso role="alert"></p>
             <div class="modal-pie"><button type="button" class="boton secundario" data-cerrar="${id}">Cancelar</button><button class="boton primario" type="submit">${textoBoton}</button></div>
           </form>` : `
           <form data-form-mantenimiento-caso="${caso}" novalidate>
             <div class="rejilla-campos">
-              <div class="campo"><label>Código de lavadora</label><input name="codigoLavadora" type="number" min="1" step="1" required></div>
               <div class="campo"><label>ID del mantenimiento</label><input name="idMantenimiento" type="number" min="1" step="1" required></div>
             </div>
             <p class="error-formulario" data-error-mantenimiento-caso role="alert"></p>
@@ -413,6 +413,10 @@
           return;
         }
         const codigo = Number(formulario.elements.codigoLavadora.value);
+        const id = Number(formulario.elements.idMantenimiento.value);
+        if (!Number.isSafeInteger(id) || id < 1) { error.textContent = 'Escriba un ID de mantenimiento mayor que cero.'; return; }
+        datos.id = id;
+        datos.codigoLavadora = codigo;
         try {
           await this.controladorMantenimientos.agregar(codigo, datos);
           this.reproducirSonido('lavadora');
@@ -421,19 +425,18 @@
         } catch (e) { error.textContent = e.message; }
         return;
       }
-      const codigo = Number(formulario.elements.codigoLavadora.value);
       const id = Number(formulario.elements.idMantenimiento.value);
-      if (!Number.isSafeInteger(codigo) || codigo < 1 || !Number.isSafeInteger(id) || id < 1) {
-        error.textContent = 'Ingrese un código de lavadora y un ID de mantenimiento válidos.';
+      if (!Number.isSafeInteger(id) || id < 1) {
+        error.textContent = 'Ingrese un ID de mantenimiento válido.';
         return;
       }
       formulario.querySelector('[data-detalle-mantenimiento]').hidden = true;
       formulario.querySelector('[data-acciones-mantenimiento-caso]').hidden = true;
       this.datosMantenimientoCaso = null;
       try {
-        const mantenimiento = await this.controladorMantenimientos.consultarPorId(codigo, id);
-        if (!mantenimiento) { error.textContent = 'No se encontró ese mantenimiento para la lavadora indicada.'; return; }
-        this.datosMantenimientoCaso = { codigo, id, mantenimiento };
+        const mantenimiento = await this.controladorMantenimientos.consultarPorId(id);
+        if (!mantenimiento) { error.textContent = 'No se encontró un mantenimiento con ese ID.'; return; }
+        this.datosMantenimientoCaso = { codigo: mantenimiento.codigoLavadora, id, mantenimiento };
         const detalle = formulario.querySelector('[data-detalle-mantenimiento]');
         detalle.hidden = false;
         detalle.querySelector('[name="descripcion"]').value = mantenimiento.descripcion;
@@ -467,11 +470,11 @@
           const cambios = this.leerDatosCasoMantenimiento(formulario);
           const errores = Voltia.Validaciones.validarMantenimiento(cambios);
           if (Voltia.Validaciones.hayErrores(errores)) { error.textContent = Object.values(errores).filter(Boolean).join(' '); return; }
-          await this.controladorMantenimientos.actualizar(datos.codigo, datos.id, cambios);
+          await this.controladorMantenimientos.actualizar(datos.id, cambios);
           this.reproducirSonido('click');
         } else {
           if (!global.confirm(`¿Eliminar el mantenimiento ${datos.id} de la lavadora ${datos.codigo}?`)) return;
-          await this.controladorMantenimientos.eliminar(datos.codigo, datos.id);
+          await this.controladorMantenimientos.eliminar(datos.id);
           this.reproducirSonido('click');
         }
         this.datosMantenimientoCaso = null;
@@ -1732,7 +1735,7 @@
       this.bloquearBoton(this.refs.botonGuardarMantenimiento, true, 'Guardando...');
       try {
         if (enEdicion) {
-          await this.controladorMantenimientos.actualizar(codigo, enEdicion.id, datos);
+          await this.controladorMantenimientos.actualizar(enEdicion.id, datos);
           this.reproducirSonido('click');
         } else {
           await this.controladorMantenimientos.agregar(codigo, datos);
@@ -1786,7 +1789,7 @@
       const id = this.mantenimientoAEliminar.id;
       this.bloquearBoton(this.refs.botonConfirmarEliminarMantenimiento, true, 'Eliminando...');
       try {
-        await this.controladorMantenimientos.eliminar(codigo, id);
+        await this.controladorMantenimientos.eliminar(id);
         this.reproducirSonido('click');
         this.cancelarEliminarMantenimiento();
         this.cerrarFormularioMantenimiento();

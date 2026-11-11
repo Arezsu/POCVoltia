@@ -3,7 +3,7 @@ using System;
 namespace ClienteLavadora.util
 {
     /// <summary>
-    /// Patron OBSERVER del lado del cliente (igual que ObservadorRepositorio en el Java).
+    /// Patron OBSERVER del lado del cliente para refrescar las vistas tras cambios locales.
     ///
     /// IDEA EN UNA FRASE: un objeto avisa y muchos escuchan, sin conocerse entre si.
     /// Ejemplo real de esta aplicacion:

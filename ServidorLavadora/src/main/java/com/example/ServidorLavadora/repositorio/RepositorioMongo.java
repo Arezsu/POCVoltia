@@ -123,11 +123,9 @@ public class RepositorioMongo implements AlmacenDatos {
     }
 
     @Override
-    public void notificar(String evento) {
+    public void registrarCambio(String evento) {
         version.incrementAndGet();
-        for (ObservadorRepositorio observador : observadores) {
-            observador.alCambiar(evento);
-        }
+        observadores.forEach(observador -> observador.alCambiar(evento));
     }
 
     @Override

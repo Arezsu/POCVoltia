@@ -66,9 +66,15 @@ namespace ClienteLavadora.modelo
         public int? MinutosLavado { get; set; }
     }
 
-    /// <summary>Datos para crear un mantenimiento. El id NO se manda: lo calcula el servidor.</summary>
+    /// <summary>Datos para crear un mantenimiento; el usuario ingresa el id y la lavadora.</summary>
     public class MantenimientoInput
     {
+        [JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        [JsonPropertyName("codigoLavadora")]
+        public int CodigoLavadora { get; set; }
+
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; }
 

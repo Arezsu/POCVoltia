@@ -12,8 +12,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 
 /**
  * Aqui se arma lo que Spring le entrega a los servicios.
- * Se entrega el Singleton del repositorio (como AlmacenDatos) con el observador
- * de registro ya conectado.
+ * Se entrega un repositorio como AlmacenDatos para que lo usen los servicios.
  */
 @Configuration // Clase de configuracion
 public class Configuracion {
@@ -45,7 +44,7 @@ public class Configuracion {
             throw new IllegalArgumentException("Almacen no soportado: " + tipoAlmacen);
         }
         RepositorioMemoria repositorio = RepositorioMemoria.getInstance();
-        repositorio.agregarObservador(new RegistroCambios()); // Patron Observer
+        repositorio.agregarObservador(new RegistroCambios());
         return repositorio;
     }
 }

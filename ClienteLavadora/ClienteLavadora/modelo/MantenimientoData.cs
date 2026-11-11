@@ -7,10 +7,7 @@ namespace ClienteLavadora.modelo
     /// <summary>
     /// Datos de un MANTENIMIENTO (el objeto DETALLE de la relacion maestro-detalle).
     ///
-    /// Cada mantenimiento vive DENTRO de una lavadora: por eso no se busca por su
-    /// cuenta, sino que siempre se pide junto con el codigo de su lavadora
-    /// (ver IServicioMantenimientos). El "id" lo calcula el servidor y solo es
-    /// unico dentro de esa lavadora.
+    /// Cada mantenimiento pertenece a una lavadora y tiene un ID único en el sistema.
     /// </summary>
     public class MantenimientoData
     {
