@@ -33,6 +33,7 @@
     id
     descripcion
     tecnico
+    codigoTecnico
     costo
     fecha
     completado
@@ -73,6 +74,7 @@
   //  y dejan que el servidor valide los tipos.
   // ---------------------------------------------------------------------
   const DOCUMENTOS = {
+    MARCAS_LAVADORAS: `query MarcasLavadoras { marcasLavadoras }`,
     LAVADORAS: `
       query ListarLavadoras {
         lavadoras {
@@ -172,7 +174,27 @@
       mutation EliminarMantenimiento($id: Int!) {
         eliminarMantenimiento(id: $id)
       }
-    `
+    `,
+    TECNICOS: `query Tecnicos($texto: String, $especialidad: String, $activo: Boolean) {
+      tecnicos(texto: $texto, especialidad: $especialidad, activo: $activo) {
+        codigo documento nombre especialidad telefono fechaIngreso activo
+      }
+    }`,
+    TECNICOS_CON_LAVADORAS: `query TecnicosConLavadoras($texto: String, $especialidad: String, $activo: Boolean) {
+      tecnicosConLavadoras(texto: $texto, especialidad: $especialidad, activo: $activo) {
+        codigo documento nombre especialidad telefono fechaIngreso activo codigoLavadora marcaLavadora
+      }
+    }`,
+    TECNICO_POR_CODIGO: `query TecnicoPorCodigo($codigo: Int!) {
+      tecnicoPorCodigo(codigo: $codigo) { codigo documento nombre especialidad telefono fechaIngreso activo }
+    }`,
+    AGREGAR_TECNICO: `mutation AgregarTecnico($input: TecnicoInput!) {
+      addTecnico(input: $input) { codigo documento nombre especialidad telefono fechaIngreso activo }
+    }`,
+    ACTUALIZAR_TECNICO: `mutation ActualizarTecnico($codigo: Int!, $input: TecnicoInput!) {
+      actualizarTecnico(codigo: $codigo, input: $input) { codigo documento nombre especialidad telefono fechaIngreso activo }
+    }`,
+    ELIMINAR_TECNICO: `mutation EliminarTecnico($codigo: Int!) { eliminarTecnico(codigo: $codigo) }`
   };
 
   // ---------------------------------------------------------------------
@@ -306,6 +328,11 @@
         return datos.lavadoras || [];
       },
 
+      listarMarcasLavadoras: async function () {
+        const datos = await ejecutar(DOCUMENTOS.MARCAS_LAVADORAS, {});
+        return datos.marcasLavadoras || [];
+      },
+
       /** Devuelve lavadoras usando exclusivamente la consulta de filtros. */
       listarLavadoras: async function (filtros) {
         const datos = await ejecutar(DOCUMENTOS.LAVADORAS_POR_FILTRO, filtros || {});
@@ -380,6 +407,27 @@
       eliminarMantenimiento: async function (id) {
         const datos = await ejecutar(DOCUMENTOS.ELIMINAR_MANTENIMIENTO, { id: id });
         return datos.eliminarMantenimiento === true;
+      },
+
+      listarTecnicos: async function (filtros) {
+        const datos = await ejecutar(DOCUMENTOS.TECNICOS_CON_LAVADORAS, filtros || {});
+        return datos.tecnicosConLavadoras || [];
+      },
+      consultarTecnico: async function (codigo) {
+        const datos = await ejecutar(DOCUMENTOS.TECNICO_POR_CODIGO, { codigo: Number(codigo) });
+        return datos.tecnicoPorCodigo || null;
+      },
+      agregarTecnico: async function (input) {
+        const datos = await ejecutar(DOCUMENTOS.AGREGAR_TECNICO, { input: input });
+        return datos.addTecnico;
+      },
+      actualizarTecnico: async function (codigo, input) {
+        const datos = await ejecutar(DOCUMENTOS.ACTUALIZAR_TECNICO, { codigo: Number(codigo), input: input });
+        return datos.actualizarTecnico;
+      },
+      eliminarTecnico: async function (codigo) {
+        const datos = await ejecutar(DOCUMENTOS.ELIMINAR_TECNICO, { codigo: Number(codigo) });
+        return datos.eliminarTecnico === true;
       },
 
       /** Documentos expuestos solo para revisar el contrato en la consola. */

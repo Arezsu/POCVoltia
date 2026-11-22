@@ -4,6 +4,8 @@ import com.example.ServidorLavadora.model.Lavadora;
 import com.example.ServidorLavadora.model.LavadoraInput;
 import com.example.ServidorLavadora.model.LavadoraUpdateInput;
 import com.example.ServidorLavadora.servicios.ServicioLavadora;
+import com.example.ServidorLavadora.servicios.ServicioMantenimiento;
+import com.example.ServidorLavadora.model.Mantenimiento;
 import com.example.ServidorLavadora.util.Validaciones;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -25,9 +27,11 @@ import java.util.Optional;
 public class LavadoraController {
 
     private final ServicioLavadora servicio;
+    private final ServicioMantenimiento mantenimientos;
 
-    public LavadoraController(ServicioLavadora servicio) {
+    public LavadoraController(ServicioLavadora servicio, ServicioMantenimiento mantenimientos) {
         this.servicio = servicio;
+        this.mantenimientos = mantenimientos;
     }
 
     // ================= Queries (solo leen datos) =================
@@ -36,6 +40,11 @@ public class LavadoraController {
     @QueryMapping
     public List<Lavadora> lavadoras() {
         return servicio.listar();
+    }
+
+    @QueryMapping
+    public List<String> marcasLavadoras() {
+        return servicio.listarMarcas();
     }
 
     /** Una lavadora por codigo. */
@@ -95,4 +104,13 @@ public class LavadoraController {
     public String fechaFabricacion(Lavadora lavadora) {
         return lavadora.getFechaFabricacion().format(Validaciones.FORMATO_FECHA);
     }
+
+    @SchemaMapping(typeName = "Lavadora", field = "mantenimientos")
+    public List<Mantenimiento> mantenimientos(Lavadora lavadora) { return mantenimientos.deLavadora(lavadora.getCodigo()); }
+    @SchemaMapping(typeName = "Lavadora", field = "cantidadMantenimientos")
+    public int cantidad(Lavadora lavadora) { return mantenimientos.cantidad(lavadora.getCodigo()); }
+    @SchemaMapping(typeName = "Lavadora", field = "mantenimientosPendientes")
+    public int pendientes(Lavadora lavadora) { return mantenimientos.pendientes(lavadora.getCodigo()); }
+    @SchemaMapping(typeName = "Lavadora", field = "costoMantenimientos")
+    public double costo(Lavadora lavadora) { return mantenimientos.costo(lavadora.getCodigo()); }
 }

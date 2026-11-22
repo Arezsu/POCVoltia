@@ -26,6 +26,12 @@ namespace ClienteLavadora.modelo
         public List<LavadoraData> Lavadoras { get; set; }
     }
 
+    public class RespuestaMarcasLavadoras
+    {
+        [JsonPropertyName("marcasLavadoras")]
+        public List<string> Marcas { get; set; }
+    }
+
     public class RespuestaLavadoraPorCriterios
     {
         [JsonPropertyName("lavadoraPorCriterios")]

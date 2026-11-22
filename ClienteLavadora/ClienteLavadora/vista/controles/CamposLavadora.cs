@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using ClienteLavadora.modelo;
@@ -44,12 +45,8 @@ namespace ClienteLavadora.vista.controles
             txtRpm.SinNegativos = true;
             txtMinutos.SinNegativos = true;
             cmbMarca = Ui.Combo();
-            cmbMarca.IsEditable = true; // El usuario puede escribir una marca nueva
-            string[] marcas = { "LG", "Samsung", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Siemens" };
-            foreach (string marca in marcas)
-            {
-                cmbMarca.Items.Add(marca);
-            }
+            cmbMarca.IsEditable = false;
+            EstablecerMarcas(null);
 
             // Los numeros y la fecha se ven en Consolas para que queden alineados.
             txtCodigo.Fuente = Tema.Numeros;
@@ -80,6 +77,7 @@ namespace ClienteLavadora.vista.controles
             txtMinutos.TextoCambiado += AlCambiarTexto;
             chkInverter.Checked += AlCambiarOpcion;
             chkInverter.Unchecked += AlCambiarOpcion;
+            cmbMarca.SelectionChanged += (s, e) => AvisarCambio();
 
             Limpiar();
         }
@@ -97,13 +95,34 @@ namespace ClienteLavadora.vista.controles
             get { return filas; }
         }
 
+        /// <summary>Actualiza las marcas del selector conservando la elegida.</summary>
+        public void EstablecerMarcas(IEnumerable<string> marcas)
+        {
+            string seleccionada = cmbMarca == null ? null : cmbMarca.SelectedItem as string;
+            List<string> opciones = new List<string>();
+            if (marcas != null)
+                foreach (string marca in marcas)
+                    if (!string.IsNullOrWhiteSpace(marca) && !opciones.Exists(x => string.Equals(x, marca.Trim(), StringComparison.OrdinalIgnoreCase)))
+                        opciones.Add(marca.Trim());
+            if (opciones.Count == 0)
+                opciones.AddRange(new[] { "LG", "Samsung", "Whirlpool", "Mabe", "Haceb", "Electrolux", "Bosch", "Siemens" });
+            opciones.Sort((a, b) => StringComparer.CurrentCultureIgnoreCase.Compare(a, b));
+            cmbMarca.ItemsSource = opciones;
+            if (!string.IsNullOrWhiteSpace(seleccionada) && !opciones.Exists(x => string.Equals(x, seleccionada, StringComparison.OrdinalIgnoreCase)))
+            {
+                opciones.Add(seleccionada);
+                cmbMarca.ItemsSource = null;
+                cmbMarca.ItemsSource = opciones;
+            }
+            cmbMarca.SelectedItem = opciones.Find(x => string.Equals(x, seleccionada, StringComparison.OrdinalIgnoreCase));
+        }
+
         // ================= Limpiar y mostrar =================
 
         /// <summary>Deja el formulario listo para escribir una lavadora nueva.</summary>
         public void Limpiar()
         {
             txtCodigo.Texto = "";
-            cmbMarca.Text = "";
             cmbMarca.SelectedIndex = -1;
             txtFecha.Texto = Formato.FechaServidor(DateTime.Now);
             txtPrecio.Texto = "";
@@ -123,7 +142,9 @@ namespace ClienteLavadora.vista.controles
             }
 
             txtCodigo.Texto = lavadora.Codigo.ToString(CultureInfo.InvariantCulture);
-            cmbMarca.Text = lavadora.Marca;
+            if (!string.IsNullOrWhiteSpace(lavadora.Marca) && !((IEnumerable<string>)cmbMarca.ItemsSource).Contains(lavadora.Marca))
+                EstablecerMarcas(new List<string>(((IEnumerable<string>)cmbMarca.ItemsSource).Concat(new[] { lavadora.Marca })));
+            cmbMarca.SelectedItem = lavadora.Marca;
             txtFecha.Texto = lavadora.FechaFabricacion ?? "";
             txtPrecio.Texto = lavadora.PrecioBase.ToString("0.##", CultureInfo.InvariantCulture);
             txtCapacidad.Texto = lavadora.CapacidadCargaKilos.ToString("0.##", CultureInfo.InvariantCulture);
@@ -172,7 +193,7 @@ namespace ClienteLavadora.vista.controles
             LavadoraInput input = new LavadoraInput();
             input.Codigo = Formato.LeerEntero(txtCodigo.Texto, 1,
                 "El codigo debe ser un numero entero mayor que cero.");
-            input.Marca = Formato.LeerTexto(cmbMarca.Text, "Escriba la marca de la lavadora.");
+            input.Marca = Formato.LeerTexto(cmbMarca.SelectedItem as string, "Seleccione la marca de la lavadora.");
             input.FechaFabricacion = Formato.LeerFechaServidor(txtFecha.Texto,
                 "Seleccione una fecha valida en el calendario.");
             input.PrecioBase = Formato.LeerDecimal(txtPrecio.Texto,
@@ -240,7 +261,7 @@ namespace ClienteLavadora.vista.controles
 
             LavadoraInput input = new LavadoraInput();
             input.Codigo = codigo;
-            input.Marca = cmbMarca.Text;
+            input.Marca = cmbMarca.SelectedItem as string;
             input.FechaFabricacion = txtFecha.Texto;
             input.PrecioBase = precio;
             input.CapacidadCargaKilos = capacidad;

@@ -4,6 +4,7 @@ import com.example.ServidorLavadora.model.Lavadora;
 import com.example.ServidorLavadora.model.Mantenimiento;
 import com.example.ServidorLavadora.model.MantenimientoInput;
 import com.example.ServidorLavadora.model.MantenimientoUpdateInput;
+import com.example.ServidorLavadora.model.TecnicoDto;
 import com.example.ServidorLavadora.repositorio.AlmacenDatos;
 import com.example.ServidorLavadora.util.Validaciones;
 import org.springframework.stereotype.Service;
@@ -28,10 +29,12 @@ public class ServicioMantenimiento {
 
     private final AlmacenDatos almacen;
     private final ServicioLavadora servicioLavadora;
+    private final ClienteTecnicos clienteTecnicos;
 
-    public ServicioMantenimiento(AlmacenDatos almacen, ServicioLavadora servicioLavadora) {
+    public ServicioMantenimiento(AlmacenDatos almacen, ServicioLavadora servicioLavadora, ClienteTecnicos clienteTecnicos) {
         this.almacen = almacen;
         this.servicioLavadora = servicioLavadora;
+        this.clienteTecnicos = clienteTecnicos;
     }
 
     // ==================================================================
@@ -42,7 +45,7 @@ public class ServicioMantenimiento {
     public List<Mantenimiento> listar(int codigoLavadora) {
         synchronized (almacen.candado()) {
             Lavadora lavadora = servicioLavadora.exigirPorCodigo(codigoLavadora);
-            List<Mantenimiento> resultado = new ArrayList<>(lavadora.getMantenimientos());
+            List<Mantenimiento> resultado = new ArrayList<>(almacen.mantenimientosPorLavadora(codigoLavadora));
             resultado.forEach(mantenimiento -> enriquecer(mantenimiento, lavadora));
             return resultado;
         }
@@ -51,12 +54,12 @@ public class ServicioMantenimiento {
     /** Lista todos los mantenimientos sin exigir primero el código del maestro. */
     public List<Mantenimiento> listarTodos() {
         synchronized (almacen.candado()) {
-            return almacen.lavadoras().stream()
-                    .flatMap(lavadora -> lavadora.getMantenimientos().stream()
-                            .map(mantenimiento -> {
-                                enriquecer(mantenimiento, lavadora);
-                                return mantenimiento;
-                    }))
+            return almacen.mantenimientos().stream()
+                    .map(mantenimiento -> {
+                        almacen.buscarPorCodigo(mantenimiento.getCodigoLavadora())
+                                .ifPresent(lavadora -> enriquecer(mantenimiento, lavadora));
+                        return mantenimiento;
+                    })
                     .sorted(Comparator.comparingInt(Mantenimiento::getCodigoLavadora)
                             .thenComparingInt(Mantenimiento::getId))
                     .toList();
@@ -104,25 +107,26 @@ public class ServicioMantenimiento {
         synchronized (almacen.candado()) {
             Lavadora lavadora = servicioLavadora.exigirPorCodigo(input.codigoLavadora());
             if (input.id() < 1) throw new IllegalArgumentException("El ID debe ser mayor que cero.");
-            if (buscarEnTodas(input.id()).isPresent())
+            if (almacen.buscarMantenimiento(input.id()).isPresent())
                 throw new IllegalArgumentException("Ya existe un mantenimiento con el ID " + input.id());
 
-            validarDescripcionYTecnico(input.descripcion(), input.tecnico());
+            validarDescripcionYTecnico(input.descripcion());
+            TecnicoDto tecnico = exigirTecnicoActivo(input.codigoTecnico());
             Validaciones.noNegativo(input.costo(), "El costo del mantenimiento");
             LocalDateTime fecha = Validaciones.fecha(input.fecha());
 
             Mantenimiento mantenimiento = Mantenimiento.builder()
                     .id(input.id())
                     .descripcion(input.descripcion().trim())
-                    .tecnico(input.tecnico().trim())
+                    .tecnico(tecnico.nombre())
                     .costo(input.costo())
                     .fecha(fecha)
                     .completado(input.completado())
                     .build();
+            mantenimiento.setCodigoTecnico(tecnico.codigo());
             enriquecer(mantenimiento, lavadora);
 
-            lavadora.agregarMantenimiento(mantenimiento);
-            almacen.guardar(lavadora);
+            almacen.guardarMantenimiento(mantenimiento);
             almacen.registrarCambio("Mantenimiento " + input.id() + " agregado a la lavadora " + input.codigoLavadora());
             return mantenimiento;
         }
@@ -143,9 +147,7 @@ public class ServicioMantenimiento {
             if (input.descripcion() != null) {
                 Validaciones.texto(input.descripcion(), "La descripcion del mantenimiento");
             }
-            if (input.tecnico() != null) {
-                Validaciones.texto(input.tecnico(), "El tecnico");
-            }
+            TecnicoDto tecnicoActualizado = input.codigoTecnico() == null ? null : exigirTecnicoActivo(input.codigoTecnico());
             if (input.costo() != null) {
                 Validaciones.noNegativo(input.costo(), "El costo del mantenimiento");
             }
@@ -154,8 +156,9 @@ public class ServicioMantenimiento {
             if (input.descripcion() != null) {
                 mantenimiento.setDescripcion(input.descripcion().trim());
             }
-            if (input.tecnico() != null) {
-                mantenimiento.setTecnico(input.tecnico().trim());
+            if (tecnicoActualizado != null) {
+                mantenimiento.setCodigoTecnico(tecnicoActualizado.codigo());
+                mantenimiento.setTecnico(tecnicoActualizado.nombre());
             }
             if (input.costo() != null) {
                 mantenimiento.setCosto(input.costo());
@@ -167,9 +170,8 @@ public class ServicioMantenimiento {
                 mantenimiento.setCompletado(input.completado());
             }
 
-            Lavadora lavadoraGuardada = almacen.guardar(lavadora);
-            Mantenimiento mantenimientoGuardado = buscarEnLavadora(lavadoraGuardada, id);
-            enriquecer(mantenimientoGuardado, lavadoraGuardada);
+            Mantenimiento mantenimientoGuardado = almacen.guardarMantenimiento(mantenimiento);
+            enriquecer(mantenimientoGuardado, lavadora);
             almacen.registrarCambio("Mantenimiento " + id + " de la lavadora " + lavadora.getCodigo() + " actualizado");
             return mantenimientoGuardado;
         }
@@ -184,10 +186,9 @@ public class ServicioMantenimiento {
         synchronized (almacen.candado()) {
             Mantenimiento mantenimiento = buscarEnTodas(id).orElseThrow(() ->
                     new IllegalArgumentException("No existe un mantenimiento con el ID " + id));
-            Lavadora lavadora = servicioLavadora.exigirPorCodigo(mantenimiento.getCodigoLavadora());
-            boolean eliminado = lavadora.quitarMantenimiento(mantenimiento);
-            almacen.guardar(lavadora);
-            almacen.registrarCambio("Mantenimiento " + id + " de la lavadora " + lavadora.getCodigo() + " eliminado");
+            servicioLavadora.exigirPorCodigo(mantenimiento.getCodigoLavadora());
+            boolean eliminado = almacen.eliminarMantenimiento(id);
+            almacen.registrarCambio("Mantenimiento " + id + " de la lavadora " + mantenimiento.getCodigoLavadora() + " eliminado");
             return eliminado;
         }
     }
@@ -196,17 +197,8 @@ public class ServicioMantenimiento {
     //  Apoyo interno
     // ==================================================================
 
-    private Mantenimiento buscarEnLavadora(Lavadora lavadora, int id) {
-        return lavadora.buscarMantenimiento(id)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "La lavadora " + lavadora.getCodigo() + " no tiene un mantenimiento con el id " + id));
-    }
-
     private Optional<Mantenimiento> buscarEnTodas(int id) {
-        return almacen.lavadoras().stream()
-                .flatMap(lavadora -> lavadora.getMantenimientos().stream())
-                .filter(mantenimiento -> mantenimiento.getId() == id)
-                .findFirst()
+        return almacen.buscarMantenimiento(id)
                 .map(mantenimiento -> {
                     almacen.buscarPorCodigo(mantenimiento.getCodigoLavadora())
                             .ifPresent(lavadora -> enriquecer(mantenimiento, lavadora));
@@ -219,8 +211,46 @@ public class ServicioMantenimiento {
         mantenimiento.setMarcaLavadora(lavadora.getMarca());
     }
 
-    private void validarDescripcionYTecnico(String descripcion, String tecnico) {
+    private void validarDescripcionYTecnico(String descripcion) {
         Validaciones.texto(descripcion, "La descripcion del mantenimiento");
-        Validaciones.texto(tecnico, "El tecnico");
+    }
+
+    public boolean tieneTecnico(int codigoTecnico) {
+        synchronized (almacen.candado()) {
+            return listarTodos().stream().anyMatch(m -> m.getCodigoTecnico() == codigoTecnico);
+        }
+    }
+
+    public List<Mantenimiento> deLavadora(int codigo) {
+        return listar(codigo);
+    }
+    public int cantidad(int codigo) { return listar(codigo).size(); }
+    public int pendientes(int codigo) { return (int) listar(codigo).stream().filter(m -> !m.isCompletado()).count(); }
+    public double costo(int codigo) { return listar(codigo).stream().mapToDouble(Mantenimiento::getCosto).sum(); }
+    public boolean tieneMantenimientos(int codigo) { return almacen.tieneMantenimientos(codigo); }
+    public void registrarCambio(String evento) { almacen.registrarCambio(evento); }
+    public List<Lavadora> lavadorasDeTecnico(int codigoTecnico) {
+        synchronized (almacen.candado()) {
+            return almacen.mantenimientos().stream()
+                    .filter(m -> m.getCodigoTecnico() == codigoTecnico)
+                    .map(Mantenimiento::getCodigoLavadora)
+                    .distinct()
+                    .map(servicioLavadora::buscarPorCodigo)
+                    .flatMap(Optional::stream)
+                    .toList();
+        }
+    }
+    public void actualizarNombreTecnico(int codigoTecnico, String nombre) {
+        synchronized (almacen.candado()) {
+            almacen.mantenimientos().stream()
+                    .filter(m -> m.getCodigoTecnico() == codigoTecnico)
+                    .forEach(m -> { m.setTecnico(nombre); almacen.guardarMantenimiento(m); });
+        }
+    }
+
+    private TecnicoDto exigirTecnicoActivo(int codigo) {
+        TecnicoDto tecnico = clienteTecnicos.buscar(codigo);
+        if (!tecnico.activo()) throw new IllegalArgumentException("El tecnico seleccionado esta inactivo.");
+        return tecnico;
     }
 }

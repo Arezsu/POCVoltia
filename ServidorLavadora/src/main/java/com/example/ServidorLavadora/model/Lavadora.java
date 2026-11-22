@@ -3,20 +3,15 @@ package com.example.ServidorLavadora.model;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.annotation.Transient;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Objeto MAESTRO del proyecto (lado 1..1 de la Figura 1) e hija de Electrodomestico.
  *
- * La lavadora es el objeto principal del sistema y cada lavadora tiene CERO, UNO
- * O MUCHOS mantenimientos (lado 0..*). Queda descartada la idea equivocada de que
- * una lavadora tiene un solo programa fijo: aqui la relacion maestro-detalle
- * permite cualquier cantidad de registros hijos, incluso cero.
+ * La lavadora es el objeto principal. Los mantenimientos se guardan en su propia
+ * coleccion y se relacionan por codigoLavadora; no se representa la relacion con
+ * un atributo tipo lista dentro de esta clase.
  */
 @Document(collection = "lavadoras")
 public class Lavadora extends Electrodomestico {
@@ -32,9 +27,6 @@ public class Lavadora extends Electrodomestico {
     private int velocidadCentrifugadoRPM;
     private boolean tecnologiaInverter;
     private int minutosLavado;
-
-    @Transient
-    private List<Mantenimiento> mantenimientos = new CopyOnWriteArrayList<>();
 
     public Lavadora() {
     }
@@ -57,43 +49,6 @@ public class Lavadora extends Electrodomestico {
 
     public void setMongoId(ObjectId mongoId) {
         this.mongoId = mongoId;
-    }
-
-    public void agregarMantenimiento(Mantenimiento mantenimiento) {
-        mantenimientos.add(mantenimiento);
-    }
-
-    public boolean quitarMantenimiento(Mantenimiento mantenimiento) {
-        return mantenimientos.remove(mantenimiento);
-    }
-
-    public Optional<Mantenimiento> buscarMantenimiento(int id) {
-        return mantenimientos.stream()
-                .filter(m -> m.getId() == id)
-                .findFirst();
-    }
-
-    public List<Mantenimiento> getMantenimientos() {
-        return List.copyOf(mantenimientos);
-    }
-
-    public void setMantenimientos(List<Mantenimiento> mantenimientos) {
-        this.mantenimientos.clear();
-        if (mantenimientos != null) {
-            this.mantenimientos.addAll(mantenimientos);
-        }
-    }
-
-    public int getCantidadMantenimientos() {
-        return mantenimientos.size();
-    }
-
-    public int getMantenimientosPendientes() {
-        return (int) mantenimientos.stream().filter(m -> !m.isCompletado()).count();
-    }
-
-    public double getCostoMantenimientos() {
-        return mantenimientos.stream().mapToDouble(Mantenimiento::getCosto).sum();
     }
 
     @Override

@@ -6,7 +6,7 @@ package com.example.ServidorLavadora.model;
  */
 public record MantenimientoUpdateInput(
         String descripcion,
-        String tecnico,
+        Integer codigoTecnico,
         Double costo,
         String fecha,
         Boolean completado

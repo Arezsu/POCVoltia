@@ -98,6 +98,12 @@ namespace ClienteLavadora.vista
                 CrearAccion("Consultar mantenimiento", AbrirConsultarMantenimiento),
                 CrearAccion("Actualizar mantenimiento", AbrirActualizarMantenimiento),
                 CrearAccion("Eliminar mantenimiento", AbrirEliminarMantenimiento)));
+            menu.Items.Add(CrearMenu("Técnico",
+                CrearAccion("Listar técnicos", AbrirListarTecnicos),
+                CrearAccion("Agregar técnico", AbrirAgregarTecnico),
+                CrearAccion("Consultar técnico", AbrirConsultarTecnico),
+                CrearAccion("Actualizar técnico", AbrirActualizarTecnico),
+                CrearAccion("Eliminar técnico", AbrirEliminarTecnico)));
             menu.Items.Add(CrearMenu("Ayuda",
                 CrearAccion("Acerca de", AbrirAcercaDe)));
 
@@ -411,6 +417,11 @@ namespace ClienteLavadora.vista
         private void AbrirConsultarMantenimiento() { Abrir(new VentanaConsultarMantenimiento()); }
         private void AbrirActualizarMantenimiento() { Abrir(new VentanaActualizarMantenimiento()); }
         private void AbrirEliminarMantenimiento() { Abrir(new VentanaEliminarMantenimiento()); }
+        private void AbrirListarTecnicos() { Abrir(new VentanaListarTecnicos()); }
+        private void AbrirAgregarTecnico() { Abrir(new VentanaAgregarTecnico()); }
+        private void AbrirConsultarTecnico() { Abrir(new VentanaConsultarTecnico()); }
+        private void AbrirActualizarTecnico() { Abrir(new VentanaActualizarTecnico()); }
+        private void AbrirEliminarTecnico() { Abrir(new VentanaEliminarTecnico()); }
 
         private void AbrirAcercaDe()
         {

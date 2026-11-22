@@ -39,6 +39,16 @@
       </div>
     </div>
     <div class="menu-item">
+      <span>Técnico</span>
+      <div class="submenu">
+        <button type="button" class="menu-button" data-tecnico-action="listar">Listar técnicos</button>
+        <button type="button" class="menu-button" data-tecnico-action="agregar">Agregar técnico</button>
+        <button type="button" class="menu-button" data-tecnico-action="consultar">Consultar técnico</button>
+        <button type="button" class="menu-button" data-tecnico-action="actualizar">Actualizar técnico</button>
+        <button type="button" class="menu-button" data-tecnico-action="eliminar">Eliminar técnico</button>
+      </div>
+    </div>
+    <div class="menu-item">
       <span>Ayuda</span>
       <div class="submenu">
         <button type="button" class="menu-button" data-action="acerca">Acerca de</button>
@@ -243,7 +253,9 @@
           </div>
           <div class="campo">
             <label for="ag-marca">Marca</label>
-            <input type="text" id="ag-marca" name="marca" placeholder="LG" autocomplete="off" required>
+            <select id="ag-marca" name="marca" required>
+              <option value="">Seleccione una marca</option>
+            </select>
             <span class="campo-error" id="error-ag-marca"></span>
           </div>
           <div class="campo">
@@ -527,7 +539,7 @@
         <p>Juan Andres Bermeo Alvarez</p>
         <p>Alejandro Sanchez Quimbayo</p>
         <p>David Arredondo</p>
-        <strong>Versión v4.5</strong>
+        <strong>Versión v5.0</strong>
       </div>
     </section>
   </div>
@@ -536,6 +548,7 @@
   <script src="js/modelo.js"></script>
   <script src="js/observador.js"></script>
   <script src="js/servicios/graphql.js"></script>
+  <script src="js/tecnicos.js"></script>
   <script src="js/controlador.js"></script>
   <script src="js/vista.js"></script>
   <script src="js/main.js"></script>

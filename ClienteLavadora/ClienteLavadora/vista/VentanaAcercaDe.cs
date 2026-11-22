@@ -59,7 +59,7 @@ namespace ClienteLavadora.vista
             contenido.Children.Add(NombreIntegrante("Alejandro Sanchez Quimbayo"));
             contenido.Children.Add(NombreIntegrante("David Arredondo"));
             contenido.Children.Add(Ui.Separador());
-            TextBlock version = Ui.Texto("Versión v4.5", 16, Tema.Cian);
+            TextBlock version = Ui.Texto("Versión v5.0", 16, Tema.Cian);
             version.FontFamily = Tema.Numeros;
             version.FontWeight = FontWeights.Bold;
             version.HorizontalAlignment = HorizontalAlignment.Center;

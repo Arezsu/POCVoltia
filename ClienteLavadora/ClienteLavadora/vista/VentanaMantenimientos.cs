@@ -592,7 +592,7 @@ namespace ClienteLavadora.vista
                 string resumen = "Se agregara a la lavadora " + lavadoraActual.Codigo + ":" +
                                  Environment.NewLine + Environment.NewLine +
                                  "Descripcion: " + previa.Descripcion + Environment.NewLine +
-                                 "Tecnico: " + previa.Tecnico + Environment.NewLine +
+                                 "Codigo de tecnico: " + input.CodigoTecnico + Environment.NewLine +
                                  "Costo: " + previa.CostoTexto + Environment.NewLine +
                                  "Fecha: " + previa.FechaTexto + Environment.NewLine +
                                  "Estado: " + previa.EstadoTexto;

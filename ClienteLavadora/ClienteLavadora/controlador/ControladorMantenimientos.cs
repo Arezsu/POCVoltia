@@ -91,7 +91,7 @@ namespace ClienteLavadora.controlador
         {
             MantenimientoData previa = new ConstructorMantenimiento()
                 .ConDescripcion(input.Descripcion)
-                .ConTecnico(input.Tecnico)
+                .ConTecnico("Codigo " + input.CodigoTecnico)
                 .ConCosto(input.Costo)
                 .ConFecha(input.Fecha)
                 .ConCompletado(input.Completado)

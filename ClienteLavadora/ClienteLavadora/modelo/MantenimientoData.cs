@@ -26,6 +26,9 @@ namespace ClienteLavadora.modelo
         [JsonPropertyName("tecnico")]
         public string Tecnico { get; set; }
 
+        [JsonPropertyName("codigoTecnico")]
+        public int CodigoTecnico { get; set; }
+
         [JsonPropertyName("costo")]
         public double Costo { get; set; }
 

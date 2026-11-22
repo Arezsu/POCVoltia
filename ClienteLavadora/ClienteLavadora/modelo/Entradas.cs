@@ -78,8 +78,8 @@ namespace ClienteLavadora.modelo
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; }
 
-        [JsonPropertyName("tecnico")]
-        public string Tecnico { get; set; }
+        [JsonPropertyName("codigoTecnico")]
+        public int CodigoTecnico { get; set; }
 
         [JsonPropertyName("costo")]
         public double Costo { get; set; }
@@ -97,8 +97,8 @@ namespace ClienteLavadora.modelo
         [JsonPropertyName("descripcion")]
         public string Descripcion { get; set; }
 
-        [JsonPropertyName("tecnico")]
-        public string Tecnico { get; set; }
+        [JsonPropertyName("codigoTecnico")]
+        public int? CodigoTecnico { get; set; }
 
         [JsonPropertyName("costo")]
         public double? Costo { get; set; }

@@ -1,6 +1,7 @@
 package com.example.ServidorLavadora.repositorio;
 
 import com.example.ServidorLavadora.model.Lavadora;
+import com.example.ServidorLavadora.model.Mantenimiento;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +22,7 @@ public interface AlmacenDatos {
     Object candado();
 
     /**
-     * Coleccion de lavadoras (los maestros). Cada lavadora lleva adentro su propia
-     * lista de mantenimientos (el detalle). Usar siempre dentro del candado.
+     * Lavadoras maestras. Los detalles se administran mediante operaciones separadas.
      */
     List<Lavadora> lavadoras();
 
@@ -50,4 +50,11 @@ public interface AlmacenDatos {
      * modifico algo y refrescar su ventana de listado.
      */
     int version();
+
+    List<Mantenimiento> mantenimientos();
+    List<Mantenimiento> mantenimientosPorLavadora(int codigoLavadora);
+    Optional<Mantenimiento> buscarMantenimiento(int id);
+    Mantenimiento guardarMantenimiento(Mantenimiento mantenimiento);
+    boolean eliminarMantenimiento(int id);
+    boolean tieneMantenimientos(int codigoLavadora);
 }

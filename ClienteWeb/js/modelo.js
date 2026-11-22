@@ -181,6 +181,7 @@
       this.id = aNumero(origen.id);
       this.descripcion = String(origen.descripcion || '').trim();
       this.tecnico = String(origen.tecnico || '').trim();
+      this.codigoTecnico = aNumero(origen.codigoTecnico);
       this.costo = aNumero(origen.costo);
       this.fecha = String(origen.fecha || '');
       this.completado = origen.completado === true;
@@ -214,6 +215,7 @@
         id: this.id,
         descripcion: this.descripcion,
         tecnico: this.tecnico,
+        codigoTecnico: this.codigoTecnico,
         costo: this.costo,
         fecha: this.fecha,
         completado: this.completado
@@ -521,8 +523,8 @@
       if (!String(datos.descripcion || '').trim()) {
         errores.descripcion = 'La descripcion es obligatoria.';
       }
-      if (!String(datos.tecnico || '').trim()) {
-        errores.tecnico = 'El nombre del tecnico es obligatorio.';
+      if (!Number.isInteger(Number(datos.codigoTecnico)) || Number(datos.codigoTecnico) < 1) {
+        errores.codigoTecnico = 'Escriba el código de un técnico registrado.';
       }
       if (!Number.isFinite(costo) || costo < 0) {
         errores.costo = 'El costo debe ser un numero mayor o igual a cero.';

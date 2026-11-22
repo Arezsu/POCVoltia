@@ -336,7 +336,7 @@
       const campos = (prefijo, soloLectura) => `
         <div class="rejilla-campos" data-detalle-mantenimiento hidden>
           <div class="campo"><label>Descripción</label><input name="descripcion" required maxlength="160" ${soloLectura ? 'readonly' : ''}></div>
-          <div class="campo"><label>Técnico</label><input name="tecnico" required maxlength="100" ${soloLectura ? 'readonly' : ''}></div>
+          <div class="campo"><label>Código de técnico</label><input name="codigoTecnico" type="number" min="1" step="1" required ${soloLectura ? 'readonly' : ''}></div>
           <div class="campo"><label>Costo (pesos)</label><input name="costo" type="number" min="0" step="0.01" required ${soloLectura ? 'readonly' : ''}></div>
           <div class="campo"><label>Fecha</label><input name="fecha" type="datetime-local" required ${soloLectura ? 'readonly' : ''}></div>
           <label class="casilla"><input name="completado" type="checkbox" ${soloLectura ? 'disabled' : ''}><span>Completado</span></label>
@@ -440,7 +440,7 @@
         const detalle = formulario.querySelector('[data-detalle-mantenimiento]');
         detalle.hidden = false;
         detalle.querySelector('[name="descripcion"]').value = mantenimiento.descripcion;
-        detalle.querySelector('[name="tecnico"]').value = mantenimiento.tecnico;
+        detalle.querySelector('[name="codigoTecnico"]').value = mantenimiento.codigoTecnico;
         detalle.querySelector('[name="costo"]').value = mantenimiento.costo;
         detalle.querySelector('[name="fecha"]').value = this.fechaCalendario(mantenimiento.fecha);
         detalle.querySelector('[name="completado"]').checked = mantenimiento.completado;
@@ -451,7 +451,7 @@
     leerDatosCasoMantenimiento(formulario) {
       return {
         descripcion: formulario.elements.descripcion.value.trim(),
-        tecnico: formulario.elements.tecnico.value.trim(),
+        codigoTecnico: Number(formulario.elements.codigoTecnico.value),
         costo: Number(formulario.elements.costo.value),
         fecha: this.fechaServidor(formulario.elements.fecha.value),
         completado: formulario.elements.completado.checked
@@ -924,6 +924,17 @@
       });
       selector.replaceChildren(...opciones);
       selector.value = this.marcasDisponibles.includes(seleccionada) ? seleccionada : '';
+      this.renderizarSelectorMarcaNueva();
+    }
+
+    renderizarSelectorMarcaNueva() {
+      const selector = this.refs.formAgregar && this.refs.formAgregar.elements.marca;
+      if (!selector) return;
+      const seleccionada = selector.value;
+      const marcas = this.marcasDisponibles.length ? this.marcasDisponibles :
+        ['LG', 'Samsung', 'Whirlpool', 'Mabe', 'Haceb', 'Electrolux', 'Bosch', 'Siemens'];
+      selector.replaceChildren(new Option('Seleccione una marca', ''), ...marcas.map((marca) => new Option(marca, marca)));
+      selector.value = marcas.includes(seleccionada) ? seleccionada : '';
     }
 
     registrarMarcaDisponible(marca) {
@@ -1227,7 +1238,13 @@
     // =================================================================
     //  Agregar lavadora
     // =================================================================
-    abrirAgregar() {
+    async abrirAgregar() {
+      try {
+        const marcas = await this.controladorLavadoras.listarMarcas();
+        this.marcasDisponibles = Array.from(new Set((marcas || []).map((marca) => String(marca).trim()).filter(Boolean)))
+          .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+      } catch (_) { /* Se conservan las opciones iniciales si el servidor no responde. */ }
+      this.renderizarSelectorMarcaNueva();
       this.refs.formAgregar.reset();
       this.limpiarErrores(this.refs.formAgregar);
       this.refs.agFecha.value = this.fechaCalendario(Voltia.formato.fechaActualTexto());
@@ -1701,7 +1718,7 @@
     leerFormularioMantenimiento() {
       return {
         descripcion: this.refs.matDescripcion.value.trim(),
-        tecnico: this.refs.matTecnico.value.trim(),
+        codigoTecnico: Number(this.refs.matTecnico.value),
         costo: Number(this.refs.matCosto.value),
         fecha: this.fechaServidor(this.refs.matFecha.value),
         completado: this.refs.matCompletado.checked

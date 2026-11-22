@@ -85,8 +85,9 @@ namespace ClienteLavadora.vista
             // Cada cambio en el formulario recalcula el precio final estimado.
             campos.Cambio += ActualizarVistaPrevia;
 
-            Loaded += (s, e) =>
+            Loaded += async (s, e) =>
             {
+                try { campos.EstablecerMarcas(await controlador.ListarMarcasAsync()); } catch { /* Mantiene las opciones iniciales si el servidor no responde. */ }
                 Anime.Escalonado(campos.Filas, 60, 260);
                 Anime.Escalonado(new UIElement[] { panelPrevio, botones }, 80, 620);
                 ActualizarVistaPrevia();

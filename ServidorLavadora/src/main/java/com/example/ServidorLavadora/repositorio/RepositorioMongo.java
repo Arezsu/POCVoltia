@@ -98,20 +98,7 @@ public class RepositorioMongo implements AlmacenDatos {
 
     @Override
     public Lavadora guardar(Lavadora lavadora) {
-        Lavadora guardada = mongoTemplate.save(lavadora, "lavadoras");
-        List<Mantenimiento> actuales = guardada.getMantenimientos();
-        for (Mantenimiento mantenimiento : actuales) {
-            mantenimiento.setCodigoLavadora(guardada.getCodigo());
-            mongoTemplate.save(mantenimiento, "mantenimientos");
-        }
-
-        Query filtroDetalle = Query.query(Criteria.where("codigoLavadora").is(guardada.getCodigo()));
-        if (!actuales.isEmpty()) {
-            filtroDetalle.addCriteria(Criteria.where("id")
-                    .nin(actuales.stream().map(Mantenimiento::getId).toList()));
-        }
-        mongoTemplate.remove(filtroDetalle, Mantenimiento.class, "mantenimientos");
-        return guardada;
+        return mongoTemplate.save(lavadora, "lavadoras");
     }
 
     @Override
@@ -133,24 +120,27 @@ public class RepositorioMongo implements AlmacenDatos {
         return version.get();
     }
 
+    @Override public List<Mantenimiento> mantenimientos() { return mongoTemplate.findAll(Mantenimiento.class, "mantenimientos"); }
+    @Override public List<Mantenimiento> mantenimientosPorLavadora(int codigo) {
+        return mongoTemplate.find(Query.query(Criteria.where("codigoLavadora").is(codigo)), Mantenimiento.class, "mantenimientos");
+    }
+    @Override public Optional<Mantenimiento> buscarMantenimiento(int id) {
+        return Optional.ofNullable(mongoTemplate.findOne(Query.query(Criteria.where("id").is(id)), Mantenimiento.class, "mantenimientos"));
+    }
+    @Override public Mantenimiento guardarMantenimiento(Mantenimiento m) { return mongoTemplate.save(m, "mantenimientos"); }
+    @Override public boolean eliminarMantenimiento(int id) {
+        return mongoTemplate.remove(Query.query(Criteria.where("id").is(id)), Mantenimiento.class, "mantenimientos").getDeletedCount() > 0;
+    }
+    @Override public boolean tieneMantenimientos(int codigo) {
+        return mongoTemplate.exists(Query.query(Criteria.where("codigoLavadora").is(codigo)), Mantenimiento.class, "mantenimientos");
+    }
+
     private List<Lavadora> cargarLavadoras(Query consultaLavadoras) {
         List<Lavadora> lavadoras = mongoTemplate.find(consultaLavadoras, Lavadora.class, "lavadoras");
         if (lavadoras.isEmpty()) {
             return lavadoras;
         }
 
-        List<Integer> codigos = lavadoras.stream().map(Lavadora::getCodigo).toList();
-        Query consultaDetalle = Query.query(Criteria.where("codigoLavadora").in(codigos));
-        List<Mantenimiento> mantenimientos = mongoTemplate.find(
-                consultaDetalle, Mantenimiento.class, "mantenimientos");
-        Map<Integer, List<Mantenimiento>> porLavadora = mantenimientos.stream()
-                .collect(Collectors.groupingBy(Mantenimiento::getCodigoLavadora));
-
-        for (Lavadora lavadora : lavadoras) {
-            List<Mantenimiento> detalle = porLavadora.getOrDefault(lavadora.getCodigo(), List.of());
-            detalle.forEach(mantenimiento -> mantenimiento.setMarcaLavadora(lavadora.getMarca()));
-            lavadora.setMantenimientos(detalle);
-        }
         return lavadoras;
     }
 }

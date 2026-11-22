@@ -1,6 +1,7 @@
 package com.example.ServidorLavadora.repositorio;
 
 import com.example.ServidorLavadora.model.Lavadora;
+import com.example.ServidorLavadora.model.Mantenimiento;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -26,6 +27,7 @@ public class RepositorioMemoria implements AlmacenDatos {
 
     // Lista concurrente: varias peticiones pueden leerla sin bloquearse.
     private final List<Lavadora> lavadoras = new CopyOnWriteArrayList<>();
+    private final List<Mantenimiento> mantenimientos = new CopyOnWriteArrayList<>();
     private final List<ObservadorRepositorio> observadores = new CopyOnWriteArrayList<>();
 
     // Version de los datos. AtomicInteger permite aumentarla sin candado.
@@ -64,7 +66,7 @@ public class RepositorioMemoria implements AlmacenDatos {
                 .filter(lavadora -> tecnologiaInverter == null
                         || lavadora.isTecnologiaInverter() == tecnologiaInverter)
                 .filter(lavadora -> conMantenimientos == null
-                        || (lavadora.getCantidadMantenimientos() > 0) == conMantenimientos)
+                        || mantenimientos.stream().anyMatch(m -> m.getCodigoLavadora() == lavadora.getCodigo()) == conMantenimientos)
                 .toList();
     }
 
@@ -93,6 +95,7 @@ public class RepositorioMemoria implements AlmacenDatos {
 
     @Override
     public boolean eliminar(int codigo) {
+        mantenimientos.removeIf(m -> m.getCodigoLavadora() == codigo);
         return lavadoras.removeIf(lavadora -> lavadora.getCodigo() == codigo);
     }
 
@@ -106,5 +109,18 @@ public class RepositorioMemoria implements AlmacenDatos {
         version.incrementAndGet();
         observadores.forEach(observador -> observador.alCambiar(evento));
     }
+
+    @Override public List<Mantenimiento> mantenimientos() { return mantenimientos; }
+    @Override public List<Mantenimiento> mantenimientosPorLavadora(int codigo) {
+        return mantenimientos.stream().filter(m -> m.getCodigoLavadora() == codigo).toList();
+    }
+    @Override public Optional<Mantenimiento> buscarMantenimiento(int id) {
+        return mantenimientos.stream().filter(m -> m.getId() == id).findFirst();
+    }
+    @Override public Mantenimiento guardarMantenimiento(Mantenimiento m) {
+        mantenimientos.removeIf(actual -> actual.getId() == m.getId()); mantenimientos.add(m); return m;
+    }
+    @Override public boolean eliminarMantenimiento(int id) { return mantenimientos.removeIf(m -> m.getId() == id); }
+    @Override public boolean tieneMantenimientos(int codigo) { return mantenimientos.stream().anyMatch(m -> m.getCodigoLavadora() == codigo); }
 
 }

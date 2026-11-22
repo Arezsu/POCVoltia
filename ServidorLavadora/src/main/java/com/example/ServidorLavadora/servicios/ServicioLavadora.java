@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.TreeSet;
 
 /**
  * Logica de negocio del objeto MAESTRO: la lavadora.
@@ -43,6 +44,17 @@ public class ServicioLavadora {
         synchronized (almacen.candado()) {
             return new ArrayList<>(almacen.lavadoras());
         }
+    }
+
+    /** Marcas existentes, sin duplicados, para los selectores de los clientes. */
+    public List<String> listarMarcas() {
+        TreeSet<String> marcas = new TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        for (Lavadora lavadora : listar()) {
+            if (lavadora.getMarca() != null && !lavadora.getMarca().isBlank()) {
+                marcas.add(lavadora.getMarca().trim());
+            }
+        }
+        return new ArrayList<>(marcas);
     }
 
     /** Busca una lavadora por su codigo. Devuelve Optional porque puede no existir. */

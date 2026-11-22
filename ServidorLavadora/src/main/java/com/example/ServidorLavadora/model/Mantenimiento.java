@@ -29,6 +29,7 @@ public class Mantenimiento {
     private String marcaLavadora;
     private String descripcion;
     private String tecnico;
+    private int codigoTecnico;
     private double costo;
     private LocalDateTime fecha;
     private boolean completado;
@@ -92,6 +93,9 @@ public class Mantenimiento {
     public String getTecnico() {
         return tecnico;
     }
+
+    public int getCodigoTecnico() { return codigoTecnico; }
+    public void setCodigoTecnico(int codigoTecnico) { this.codigoTecnico = codigoTecnico; }
 
     public void setTecnico(String tecnico) {
         this.tecnico = tecnico;

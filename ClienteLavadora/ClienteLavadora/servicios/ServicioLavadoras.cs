@@ -26,7 +26,7 @@ namespace ClienteLavadora.servicios
             "codigo marca precioBase fechaFabricacion capacidadCargaKilos velocidadCentrifugadoRPM " +
             "tecnologiaInverter minutosLavado precioFinal cantidadMantenimientos " +
             "mantenimientosPendientes costoMantenimientos " +
-            "mantenimientos { id descripcion tecnico costo fecha completado }";
+            "mantenimientos { id descripcion tecnico codigoTecnico costo fecha completado }";
         private const string CamposListadoLavadora =
             "codigo marca precioBase fechaFabricacion capacidadCargaKilos velocidadCentrifugadoRPM " +
             "tecnologiaInverter minutosLavado precioFinal";
@@ -39,6 +39,14 @@ namespace ClienteLavadora.servicios
             return respuesta == null || respuesta.Lavadoras == null
                 ? new List<LavadoraData>()
                 : respuesta.Lavadoras;
+        }
+
+        public async Task<List<string>> ListarMarcasAsync()
+        {
+            const string consulta = "query { marcasLavadoras }";
+            RespuestaMarcasLavadoras respuesta =
+                await ClienteGraphQL.Instancia.ConsultarAsync<RespuestaMarcasLavadoras>(consulta, new { });
+            return respuesta == null || respuesta.Marcas == null ? new List<string>() : respuesta.Marcas;
         }
 
         public async Task<List<LavadoraData>> ListarAsync(string marca, bool? tecnologiaInverter, bool? conMantenimientos)

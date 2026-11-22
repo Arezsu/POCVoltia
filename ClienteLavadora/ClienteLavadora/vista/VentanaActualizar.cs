@@ -66,8 +66,9 @@ namespace ClienteLavadora.vista
             NotificadorDatos.DatosCambiaron += AlCambiarDatos;
             Closed += AlCerrar;
 
-            Loaded += (s, e) =>
+            Loaded += async (s, e) =>
             {
+                try { campos.EstablecerMarcas(await controlador.ListarMarcasAsync()); } catch { /* Conserva las opciones iniciales si el servidor no responde. */ }
                 Anime.Escalonado(new UIElement[] { busqueda, formulario, botones }, 80, 240);
                 txtCodigo.Enfocar();
             };

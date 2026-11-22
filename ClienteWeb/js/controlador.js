@@ -128,6 +128,10 @@
       await this.recargar({ listarTodas: true });
     }
 
+    async listarMarcas() {
+      return await this.cliente.listarMarcasLavadoras();
+    }
+
     async aplicarFiltros(filtros) {
       this.filtros = {
         marca: String(filtros.marca || '').trim(),
@@ -419,7 +423,7 @@
     entradaMantenimiento(datos) {
       return {
         descripcion: String(datos.descripcion || '').trim(),
-        tecnico: String(datos.tecnico || '').trim(),
+        codigoTecnico: Number(datos.codigoTecnico),
         costo: Number(datos.costo),
         fecha: String(datos.fecha || ''),
         completado: datos.completado === true

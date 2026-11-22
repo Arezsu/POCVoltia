@@ -10,7 +10,7 @@ public record MantenimientoInput(
         int id,
         int codigoLavadora,
         String descripcion,
-        String tecnico,
+        int codigoTecnico,
         double costo,
         String fecha,
         boolean completado

@@ -1,6 +1,6 @@
 # =====================================================================
 #  PRUEBAS DEL SERVICIO GRAPHQL - PROYECTO VOLTIA
-#  Segundo Proyecto 2026B - Diseno de Soluciones
+#  Tercer Proyecto 2026B - Microservicios Voltia
 #
 #  Como usar este archivo:
 #   1. Arranque el servidor (ver README.md).
@@ -9,7 +9,7 @@
 #   4. Si la operacion usa variables, copie el bloque JSON de "VARIABLES"
 #      en la pestana de variables de GraphiQL y ejecute con el boton Play.
 #
-#  Relacion MAESTRO - DETALLE: Lavadora (1..1) *-- Mantenimiento (0..*)
+#  Relaciones: Lavadora -- Mantenimiento -- Tecnico (microservicio REST)
 #  Las fechas viajan como texto yyyy-MM-ddTHH:mm:ss.
 # =====================================================================
 
@@ -37,6 +37,7 @@ query TodasLasLavadoras {
       id
       descripcion
       tecnico
+      codigoTecnico
       costo
       fecha
       completado
@@ -121,7 +122,7 @@ query MantenimientosFiltrados {
 
 # 1.8 Un mantenimiento por su id dentro de la lavadora.
 query MantenimientoPorId {
-  mantenimientoPorId(codigoLavadora: 104, id: 2) {
+  mantenimientoPorId(id: 2) {
     id
     descripcion
     costo
@@ -132,6 +133,13 @@ query MantenimientoPorId {
 # 1.9 Version de los datos: sube cada vez que un cliente modifica algo.
 query VersionDeLosDatos {
   versionDatos
+}
+
+# 1.10 Listar Clase C con filtros opcionales.
+query Tecnicos {
+  tecnicos(texto: "Carlos", especialidad: "lavadoras", activo: true) {
+    codigo documento nombre especialidad telefono fechaIngreso activo
+  }
 }
 
 
@@ -188,11 +196,25 @@ mutation EliminarLavadora($codigo: Int!) {
 # VARIABLES:
 # { "codigo": 105 }
 
-# 2.4 Agregar un mantenimiento a una lavadora existente.
-#     El id NO se manda: el servidor calcula el siguiente numero libre.
-mutation AgregarMantenimiento($codigoLavadora: Int!, $entrada: MantenimientoInput!) {
-  addMantenimiento(codigoLavadora: $codigoLavadora, input: $entrada) {
+# 2.4 Registrar un tecnico (microservicio REST, base voltia_tecnicos).
+mutation AgregarTecnico {
+  addTecnico(input: {
+    codigo: 701
+    documento: "CC-701"
+    nombre: "Diana Torres"
+    especialidad: "Lavadoras industriales"
+    telefono: "3001234567"
+    fechaIngreso: "2026-01-15T10:00:00"
+    activo: true
+  }) { codigo nombre especialidad activo }
+}
+
+# 2.5 Agregar mantenimiento: lavadora y tecnico deben existir; el tecnico debe estar activo.
+mutation AgregarMantenimiento($entrada: MantenimientoInput!) {
+  addMantenimiento(input: $entrada) {
     id
+    codigoLavadora
+    codigoTecnico
     descripcion
     tecnico
     costo
@@ -202,19 +224,20 @@ mutation AgregarMantenimiento($codigoLavadora: Int!, $entrada: MantenimientoInpu
 }
 # VARIABLES:
 # {
-#   "codigoLavadora": 103,
 #   "entrada": {
+#     "id": 51,
+#     "codigoLavadora": 103,
+#     "codigoTecnico": 701,
 #     "descripcion": "Revision general de la bomba",
-#     "tecnico": "Diana Torres",
 #     "costo": 65000,
 #     "fecha": "2026-01-15T10:00:00",
 #     "completado": false
 #   }
 # }
 
-# 2.5 Actualizar un mantenimiento (parcial).
-mutation ActualizarMantenimiento($codigoLavadora: Int!, $id: Int!, $entrada: MantenimientoUpdateInput!) {
-  actualizarMantenimiento(codigoLavadora: $codigoLavadora, id: $id, input: $entrada) {
+# 2.6 Actualizar un mantenimiento (parcial).
+mutation ActualizarMantenimiento($id: Int!, $entrada: MantenimientoUpdateInput!) {
+  actualizarMantenimiento(id: $id, input: $entrada) {
     id
     descripcion
     completado
@@ -222,17 +245,16 @@ mutation ActualizarMantenimiento($codigoLavadora: Int!, $id: Int!, $entrada: Man
 }
 # VARIABLES:
 # {
-#   "codigoLavadora": 103,
 #   "id": 1,
-#   "entrada": { "completado": true, "costo": 70000 }
+#   "entrada": { "codigoTecnico": 701, "completado": true, "costo": 70000 }
 # }
 
-# 2.6 Eliminar un mantenimiento de una lavadora.
-mutation EliminarMantenimiento($codigoLavadora: Int!, $id: Int!) {
-  eliminarMantenimiento(codigoLavadora: $codigoLavadora, id: $id)
+# 2.7 Eliminar un mantenimiento.
+mutation EliminarMantenimiento($id: Int!) {
+  eliminarMantenimiento(id: $id)
 }
 # VARIABLES:
-# { "codigoLavadora": 103, "id": 1 }
+# { "id": 1 }
 
 
 # =====================================================================
@@ -280,7 +302,7 @@ mutation ErrorLavadoraInexistente {
 
 # 3.4 Mantenimiento inexistente en una lavadora existente.
 mutation ErrorMantenimientoInexistente {
-  eliminarMantenimiento(codigoLavadora: 101, id: 999)
+  eliminarMantenimiento(id: 999)
 }
 
 # 3.5 Consulta sin criterios (debe pedir al menos uno).

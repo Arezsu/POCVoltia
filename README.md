@@ -1,10 +1,10 @@
 # Voltia - Sistema Distribuido de Lavadoras (Maestro - Detalle)
 
-Segundo Proyecto 2026B - Diseno de Soluciones - Universidad de Ibague.
-Version de la aplicacion: **v4.5**.
+Tercer Proyecto 2026B - Desarrollo de Aplicaciones Empresariales - Universidad de Ibague.
+Version de la aplicacion: **v5.0**.
 
 <p align="center">
-  <img src="assets/readme-tambor.gif" alt="Tambor industrial VOLTIA en movimiento, sistema activo v4.5" width="600">
+  <img src="assets/readme-tambor.gif" alt="Tambor industrial VOLTIA en movimiento, sistema activo v5.0" width="600">
 </p>
 
 <p align="center"><b>Dos clientes, un servidor GraphQL y un tambor que nunca se queda quieto.</b></p>
@@ -15,7 +15,8 @@ consumen por la red, cada uno con su propia tecnologia.
 
 | Componente | Tecnologia | Carpeta |
 | :--- | :--- | :--- |
-| Servidor | Java 17-21, Spring Boot, Spring GraphQL | `ServidorLavadora` |
+| Microservicio principal | Java 17, Spring Boot, Spring GraphQL, MongoDB `voltia` | `ServidorLavadora` |
+| Microservicio Clase C | Java 17, Spring Boot REST, MongoDB independiente `voltia_tecnicos` | `ServidorTecnico` |
 | Cliente 1 | C# con WPF en puro codigo C# (sin un solo archivo XAML) | `ClienteLavadora` |
 | Cliente 2 | Aplicacion web con framework Express (Node.js + JavaScript) | `ClienteWeb` |
 
@@ -31,9 +32,9 @@ consumen por la red, cada uno con su propia tecnologia.
 
 ## 1. Que resuelve el sistema
 
-Voltia administra lavadoras industriales y los mantenimientos que se les hacen. Cada
-lavadora es un objeto principal que puede tener cero, uno o muchos mantenimientos
-asociados. El sistema permite:
+Voltia administra lavadoras industriales, sus mantenimientos y los tecnicos que los
+realizan. Los mantenimientos se relacionan por codigo con una lavadora y un tecnico,
+sin almacenar una lista de mantenimientos dentro de la clase Lavadora. El sistema permite:
 
 - Registrar lavadoras con sus siete datos tecnicos.
 - Consultar una lavadora individual por su codigo desde los clientes.
@@ -41,11 +42,13 @@ asociados. El sistema permite:
   tenencia de mantenimientos).
 - Actualizar y eliminar lavadoras con busqueda previa obligatoria.
 - Registrar, actualizar y eliminar los mantenimientos de cada lavadora.
+- Gestionar tecnicos en un microservicio REST con base MongoDB independiente.
+- Asociar cada mantenimiento con un tecnico activo registrado.
 
-La consulta individual de un mantenimiento requiere el codigo de su lavadora y el id
-del mantenimiento. El servidor tambien expone busquedas combinadas para lavadoras; la
-interfaz de usuario las busca por codigo. El PDF pide acordar los criterios con el
-docente, pero no especifica cuales se acordaron para este proyecto.
+Cada mantenimiento tiene un ID único en el sistema, por lo que se puede consultar,
+actualizar o eliminar usando solo ese ID. El registro conserva además el código de la
+lavadora a la que pertenece. El PDF pide acordar los criterios de búsqueda de
+lavadoras con el docente; la interfaz actual las busca por código.
 
 ---
 
@@ -63,14 +66,17 @@ docente, pero no especifica cuales se acordaron para este proyecto.
                   \                                    /
                    v                                  v
           +---------------------------------------------------+
-          |     Servidor Java Spring Boot (puerto 8081)        |
+          |     Servidor Java Spring Boot GraphQL (:8081)      |
           |                                                   |
           |  controller/  -> recibe queries y mutations       |
           |  servicios/   -> reglas de negocio y validaciones |
 |  repositorio/ -> MongoDB (colecciones lavadoras y mantenimientos) |
           |  model/       -> Lavadora y Mantenimiento         |
           +---------------------------------------------------+
-             MongoDB (colecciones relacionadas por codigoLavadora)
+             MongoDB `voltia` (lavadoras y mantenimientos)
+                 | REST HTTP :8082
+                 v
+          ServidorTecnico -> MongoDB independiente `voltia_tecnicos`
 ```
 
 Los dos clientes son independientes entre si: se pueden abrir al mismo tiempo y cada uno
@@ -78,8 +84,9 @@ ve los cambios que hace el otro gracias a la version de los datos (`versionDatos
 
 ## Inicio local (Windows PowerShell)
 
-Inicie MongoDB, el servidor GraphQL y cada cliente en terminales separadas. El servidor
-espera MongoDB en `localhost:27017` y usa la base `voltia`.
+Inicie MongoDB, ambos microservicios y cada cliente en terminales separadas. El servidor
+principal usa la base `voltia`; el servicio REST de tecnicos usa la base independiente
+`voltia_tecnicos`.
 Las colecciones principales son `lavadoras` y `mantenimientos`. Si el servidor ya estaba
 abierto antes de este cambio, detengalo y vuelva a iniciarlo para que use `voltia`.
 El servidor fija la base tanto en su `MongoTemplate` como en las operaciones de indices;
@@ -92,7 +99,16 @@ colecciones en `voltia` si todavía no existen.
    Start-Service MongoDB
    ```
 
-2. Inicie el servidor GraphQL desde la raiz del repositorio:
+2. Inicie el microservicio REST de técnicos en otra terminal:
+
+   ```powershell
+   cd .\ServidorTecnico
+   .\mvnw.cmd spring-boot:run
+   ```
+
+   Queda disponible en `http://localhost:8082/tecnicos`.
+
+3. Inicie el servidor GraphQL desde la raiz del repositorio:
 
    ```powershell
    cd .\ServidorLavadora
@@ -102,7 +118,7 @@ colecciones en `voltia` si todavía no existen.
    GraphQL queda disponible en `http://localhost:8081/graphql` y GraphiQL en
    `http://localhost:8081/graphiql`.
 
-3. Inicie el cliente web en otra terminal:
+4. Inicie el cliente web en otra terminal:
 
    ```powershell
    cd .\ClienteWeb
@@ -112,7 +128,7 @@ colecciones en `voltia` si todavía no existen.
 
    Abra `http://localhost:5501`.
 
-4. Inicie el cliente de escritorio en otra terminal. Si no existe el ejecutable, primero
+5. Inicie el cliente de escritorio en otra terminal. Si no existe el ejecutable, primero
    compílelo con `dotnet build`:
 
    ```powershell
@@ -121,8 +137,8 @@ colecciones en `voltia` si todavía no existen.
    .\ClienteLavadora\bin\Debug\net48\ClienteLavadora.exe
    ```
 
-En ambos clientes, las operaciones se abren desde los menús superiores **Lavadora** y
-**Mantenimiento**. El listado de mantenimientos carga todos los registros al abrirse; el
+En ambos clientes, las operaciones se abren desde los menús superiores **Lavadora**,
+**Mantenimiento** y **Técnico**. El listado de mantenimientos carga todos los registros al abrirse; el
 código de lavadora es un filtro opcional junto con técnico y estado. Para crear un
 mantenimiento se indica la lavadora a la que quedará asociado.
 
@@ -137,9 +153,12 @@ con su lavadora mediante `codigoLavadora`:
 - **Maestro (1..1): Lavadora.** Es el objeto principal del sistema.
 - **Detalle (0..*): Mantenimiento.** Cada lavadora puede tener cero, uno o muchos
   mantenimientos asociados en la coleccion independiente.
+- **Clase C: Tecnico.** Cada mantenimiento guarda `codigoTecnico` y queda asociado a un
+  tecnico administrado por el microservicio REST independiente.
 
-La lavadora hereda de `Electrodomestico` (herencia y polimorfismo) y la relacion con sus
-mantenimientos es de **composicion**: si se elimina la lavadora, desaparecen sus detalles.
+La lavadora hereda de `Electrodomestico`. Al eliminar una lavadora, tambien se eliminan
+sus detalles. Un tecnico asociado a mantenimientos no se puede eliminar hasta que estos
+se reasignen o eliminen.
 
 ```mermaid
 classDiagram
@@ -157,24 +176,29 @@ classDiagram
         -int velocidadCentrifugadoRPM
         -boolean tecnologiaInverter
         -int minutosLavado
-        -List~Mantenimiento~ mantenimientos (cargados para consulta)
-        +agregarMantenimiento(Mantenimiento) void
-        +buscarMantenimiento(int) Optional
-        +getCantidadMantenimientos() int
-        +getMantenimientosPendientes() int
-        +getCostoMantenimientos() double
         +builder() Builder
         +calcularPrecioFinal() double
     }
 
     class Mantenimiento {
         -int id
+        -int codigoLavadora
         -String descripcion
-        -String tecnico
+        -int codigoTecnico
         -double costo
         -LocalDateTime fecha
         -boolean completado
         +builder() Builder
+    }
+
+    class Tecnico {
+        -int codigo
+        -String documento
+        -String nombre
+        -String especialidad
+        -String telefono
+        -LocalDateTime fechaIngreso
+        -boolean activo
     }
 
     class RepositorioMongo {
@@ -201,12 +225,27 @@ classDiagram
         +eliminar(int) boolean
     }
 
+    class ServidorTecnico {
+        <<REST puerto 8082>>
+    }
+    class ServicioTecnico {
+        +listar(texto, especialidad, activo) List
+        +buscar(int) Tecnico
+        +crear(TecnicoInput) Tecnico
+        +actualizar(int, TecnicoInput) Tecnico
+        +eliminar(int) void
+    }
+
     Electrodomestico <|-- Lavadora : herencia
-    Lavadora "1..1" *-- "0..*" Mantenimiento : Maestro - Detalle
+    Lavadora "1" -- "0..*" Mantenimiento : codigoLavadora
+    Tecnico "1" -- "0..*" Mantenimiento : codigoTecnico
     RepositorioMongo --> Lavadora : coleccion lavadoras
     RepositorioMongo --> Mantenimiento : coleccion mantenimientos
     ServicioLavadora --> RepositorioMongo : usa por interfaz
     ServicioMantenimiento --> RepositorioMongo : usa por interfaz
+    Mantenimiento --> Tecnico : referencia por codigoTecnico
+    ServicioMantenimiento --> ServidorTecnico : REST transparente a los clientes
+    ServidorTecnico --> ServicioTecnico : controller
 ```
 
 ### 3.1 Atributos y tipos (requisito de cinco atributos variados)
@@ -214,8 +253,13 @@ classDiagram
 | Entidad | Atributos y tipos |
 | :--- | :--- |
 | `Electrodomestico` (abstracta) | `codigo` (int), `marca` (String), `precioBase` (double), `fechaFabricacion` (LocalDateTime) |
-| `Lavadora` (Maestro) | Hereda 4 + `capacidadCargaKilos` (double), `velocidadCentrifugadoRPM` (int), `tecnologiaInverter` (boolean), `minutosLavado` (int) + la lista de mantenimientos |
-| `Mantenimiento` (Detalle) | `id` (int), `descripcion` (String), `tecnico` (String), `costo` (double), `fecha` (LocalDateTime), `completado` (boolean) |
+| `Lavadora` (Maestro) | Hereda 4 + `capacidadCargaKilos` (double), `velocidadCentrifugadoRPM` (int), `tecnologiaInverter` (boolean), `minutosLavado` (int); no incluye una lista de detalles |
+| `Mantenimiento` (Detalle) | `id` (int), `codigoLavadora` (int), `codigoTecnico` (int), `descripcion` (String), `costo` (double), `fecha` (LocalDateTime), `completado` (boolean) |
+| `Tecnico` (Clase C) | `codigo` (int), `documento` (String), `nombre` (String), `especialidad` (String), `telefono` (String), `fechaIngreso` (LocalDateTime), `activo` (boolean) |
+
+Los mantenimientos que ya existían antes de esta versión no tienen `codigoTecnico`.
+Después de registrar los técnicos, asígnales el código correspondiente desde la opción
+**Actualizar mantenimiento**; los registros anteriores se conservan.
 
 Las dos entidades de la relacion superan los cinco atributos y cubren los cinco tipos
 pedidos: int, double, String, LocalDateTime y boolean.
@@ -247,6 +291,9 @@ lleva la consulta y, opcionalmente, variables.
 | Query | `mantenimientos(codigoLavadora)` | Detalle de una lavadora |
 | Query | `mantenimientoPorId(id)` | Un mantenimiento puntual por su ID único |
 | Query | `mantenimientosPorFiltro(codigoLavadora, tecnico, completado)` | Filtros del detalle en el servidor |
+| Query | `tecnicos(texto, especialidad, activo)` | Lista técnicos con filtros |
+| Query | `tecnicosConLavadoras(texto, especialidad, activo)` | Lista Clase C con código y marca de cada lavadora relacionada |
+| Query | `tecnicoPorCodigo(codigo)` | Consulta un técnico |
 | Query | `versionDatos` | Numero que sube cuando un cliente cambia algo |
 | Mutation | `addLavadora(input)` | Crea una lavadora (nace con cero mantenimientos) |
 | Mutation | `actualizarLavadora(codigo, input)` | Actualiza previa busqueda; solo cambia lo enviado |
@@ -254,6 +301,7 @@ lleva la consulta y, opcionalmente, variables.
 | Mutation | `addMantenimiento(input)` | Agrega un detalle con ID elegido por el usuario y lavadora asociada |
 | Mutation | `actualizarMantenimiento(id, input)` | Actualiza previa busqueda por ID |
 | Mutation | `eliminarMantenimiento(id)` | Elimina previa busqueda por ID |
+| Mutation | `addTecnico`, `actualizarTecnico`, `eliminarTecnico` | CRUD de técnicos a través del servicio REST |
 
 Detalles importantes del contrato:
 
@@ -400,6 +448,8 @@ oscuro y la simulación de tambor se mantiene como indicador secundario.
   superficies planas, bordes finos y radios pequeños.
 - **C#:** cada caso abre una ventana independiente con el marco nativo de Windows. La
   ventana principal ofrece el menú de navegación y una simulación compacta de la lavadora.
+- **Técnicos:** cada acción CRUD tiene una ventana o modal dedicado. La grilla muestra los
+  datos del técnico y, para cada lavadora relacionada, su código y marca (dos datos de A).
 - **Listados:** el listado de lavadoras conserva sus filtros. El listado de mantenimientos
   muestra todos los registros de forma predeterminada, con código y marca de la lavadora,
   y permite filtrar sin tener que buscar primero una lavadora.
@@ -413,6 +463,10 @@ oscuro y la simulación de tambor se mantiene como indicador secundario.
 
 ```text
 POCVoltiaV4/
+├── ServidorTecnico/                   Microservicio REST para Clase C y MongoDB independiente
+│   └── src/main/java/com/voltia/tecnicos/
+│       ├── model/                     Tecnico y entrada validada
+│       └── controller/                CRUD REST `/tecnicos` en puerto 8082
 ├── ServidorLavadora/                  Servidor Java Spring Boot GraphQL
 │   ├── src/main/java/com/example/ServidorLavadora/
 │   │   ├── model/                     Electrodomestico, Lavadora, Mantenimiento e inputs
@@ -464,6 +518,15 @@ este caso; esa parte debe validarse con el docente.
   .NET Framework 4.8).
 
 ### 1. Servidor Java (desde IntelliJ o consola)
+
+Antes de iniciar el servidor GraphQL, inicia el servicio REST de Técnicos en otra terminal:
+
+```powershell
+cd ServidorTecnico
+.\mvnw.cmd spring-boot:run
+```
+
+Usa MongoDB `localhost:27017`, base `voltia_tecnicos` y puerto `8082`.
 
 - **Desde IntelliJ IDEA:**
   1. Abrir la carpeta `ServidorLavadora`.
@@ -534,7 +597,7 @@ mvnw.cmd test
 Las pruebas cubren:
 
 - El Builder y el calculo del precio final.
-- La cardinalidad 0..* (cero, uno y varios mantenimientos en una lavadora).
+- La relación maestro-detalle mediante claves `codigoLavadora` en colecciones separadas.
 - Las validaciones de datos.
 - El Singleton del repositorio.
 - El arranque completo del contexto de Spring con el esquema GraphQL.
@@ -548,12 +611,12 @@ casos de error para demostrar el sistema en GraphiQL.
 
 | Caso de uso | Ventana en C# | Vista en el cliente web | Porcentaje |
 | :--- | :--- | :--- | :--- |
-| Adicionar | `VentanaAgregar` | Modal "Agregar lavadora" | 20% |
-| Consultar | `VentanaConsultar` | Modal "Consultar" | 20% |
-| Actualizar | `VentanaActualizar` | Modal "Actualizar" (con busqueda previa) | 20% |
-| Eliminar | `VentanaEliminar` | Modal "Eliminar" (con busqueda y confirmacion) | 20% |
-| Listar con filtro | `VentanaListar` | Panel principal con filtros y detalle | 20% |
-| Mantenimientos (detalle) | `VentanaMantenimientos` | Modal "Mantenimientos" | Complementario |
+| Insertar Técnico (C) | `VentanaAgregarTecnico` | Modal "Agregar técnico" | 20% |
+| Consultar Técnico (C) | `VentanaConsultarTecnico` | Modal "Consultar técnico" | 20% |
+| Actualizar Técnico (C) | `VentanaActualizarTecnico` | Modal "Actualizar técnico" (con búsqueda previa) | 20% |
+| Eliminar Técnico (C) | `VentanaEliminarTecnico` | Modal "Eliminar técnico" (con búsqueda y confirmación) | 20% |
+| Listar Técnico con filtro (C) | `VentanaListarTecnicos` | Modal "Listar técnicos" con filtros | 20% |
+| Lavadoras y mantenimientos (A/B) | Ventanas existentes por caso | Vistas y modales existentes | Complementario |
 | Acerca de | `VentanaAcercaDe` | Modal desde Ayuda | Complementario |
 
 Cada caso de uso tiene su propia ventana independiente en C# y su propio modal en la web.

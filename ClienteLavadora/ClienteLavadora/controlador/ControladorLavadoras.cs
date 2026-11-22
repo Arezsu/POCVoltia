@@ -52,6 +52,11 @@ namespace ClienteLavadora.controlador
             return await servicio.ListarTodasAsync();
         }
 
+        public Task<List<string>> ListarMarcasAsync()
+        {
+            return servicio.ListarMarcasAsync();
+        }
+
         /// <summary>
         /// Busca UNA lavadora por codigo y/o marca.
         /// Si no hay criterios o no existe, lanza ArgumentException con un mensaje

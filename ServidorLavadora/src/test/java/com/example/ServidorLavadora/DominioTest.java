@@ -39,9 +39,9 @@ class DominioTest {
         assertEquals(1370000.0, lavadora.calcularPrecioFinal());
     }
 
-    /** Una lavadora puede tener CERO, UNO o MUCHOS mantenimientos (relacion 0..*). */
+    /** La relacion maestro-detalle se guarda por clave, no como una lista en Lavadora. */
     @Test
-    void unaLavadoraAdmiteCeroUnoOVariosMantenimientos() {
+    void elMantenimientoSeRelacionaConLaLavadoraPorCodigo() {
         Lavadora lavadora = Lavadora.builder()
                 .codigo(901)
                 .marca("Samsung")
@@ -52,34 +52,32 @@ class DominioTest {
                 .tecnologiaInverter(false)
                 .minutosLavado(30)
                 .build();
-
-        // Cero mantenimientos
-        assertEquals(0, lavadora.getCantidadMantenimientos());
-
-        // Uno
-        lavadora.agregarMantenimiento(Mantenimiento.builder()
+        RepositorioMemoria repositorio = RepositorioMemoria.getInstance();
+        repositorio.guardar(lavadora);
+        Mantenimiento primero = Mantenimiento.builder()
                 .id(1)
                 .descripcion("Limpieza de filtro")
                 .tecnico("Carlos Perez")
                 .costo(50000)
                 .fecha(LocalDateTime.of(2025, 2, 1, 9, 0))
                 .completado(true)
-                .build());
-        assertEquals(1, lavadora.getCantidadMantenimientos());
-
-        // Varios
-        lavadora.agregarMantenimiento(Mantenimiento.builder()
+                .build();
+        primero.setCodigoLavadora(lavadora.getCodigo());
+        repositorio.guardarMantenimiento(primero);
+        Mantenimiento segundo = Mantenimiento.builder()
                 .id(2)
                 .descripcion("Revision de mangueras")
                 .tecnico("Laura Gomez")
                 .costo(70000)
                 .fecha(LocalDateTime.of(2025, 3, 1, 9, 0))
                 .completado(false)
-                .build());
-        assertEquals(2, lavadora.getCantidadMantenimientos());
-        assertEquals(1, lavadora.getMantenimientosPendientes());
-        assertEquals(120000.0, lavadora.getCostoMantenimientos());
-        assertTrue(lavadora.buscarMantenimiento(2).isPresent());
+                .build();
+        segundo.setCodigoLavadora(lavadora.getCodigo());
+        repositorio.guardarMantenimiento(segundo);
+
+        assertEquals(2, repositorio.mantenimientosPorLavadora(lavadora.getCodigo()).size());
+        assertTrue(repositorio.buscarMantenimiento(2).isPresent());
+        repositorio.eliminar(lavadora.getCodigo());
     }
 
     /** Las validaciones responden con un mensaje claro cuando el dato esta mal. */

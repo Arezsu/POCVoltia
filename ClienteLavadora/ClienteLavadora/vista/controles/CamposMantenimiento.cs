@@ -33,7 +33,7 @@ namespace ClienteLavadora.vista.controles
 
             filas[0] = Ui.Fila(Ui.Celda("ID del mantenimiento", txtId), null);
             filas[1] = Ui.Fila(Ui.Celda("Descripcion del trabajo", txtDescripcion), null);
-            filas[2] = Ui.Fila(Ui.Celda("Tecnico", txtTecnico), Ui.Celda("Costo (pesos)", txtCosto));
+            filas[2] = Ui.Fila(Ui.Celda("Codigo de tecnico registrado", txtTecnico), Ui.Celda("Costo (pesos)", txtCosto));
             filas[3] = Ui.Fila(Ui.Celda("Fecha", txtFecha), null);
             filas[4] = Ui.Fila(Ui.Celda(null, chkCompletado), null);
 
@@ -78,7 +78,7 @@ namespace ClienteLavadora.vista.controles
             idBloqueado = true;
             txtId.SoloLectura = true;
             txtDescripcion.Texto = mantenimiento.Descripcion ?? "";
-            txtTecnico.Texto = mantenimiento.Tecnico ?? "";
+            txtTecnico.Texto = mantenimiento.CodigoTecnico.ToString();
             txtCosto.Texto = mantenimiento.Costo.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
             txtFecha.Texto = mantenimiento.Fecha ?? "";
             chkCompletado.IsChecked = mantenimiento.Completado;
@@ -101,11 +101,14 @@ namespace ClienteLavadora.vista.controles
         public MantenimientoInput LeerInput()
         {
             MantenimientoInput input = new MantenimientoInput();
-            if (!int.TryParse(txtId.Texto, out input.Id) || input.Id < 1)
+            if (!int.TryParse(txtId.Texto, out int id) || id < 1)
                 throw new ArgumentException("Escriba un ID de mantenimiento mayor que cero.");
+            input.Id = id;
             input.Descripcion = Formato.LeerTexto(txtDescripcion.Texto,
                 "Escriba la descripcion del mantenimiento.");
-            input.Tecnico = Formato.LeerTexto(txtTecnico.Texto, "Escriba el nombre del tecnico.");
+            if (!int.TryParse(txtTecnico.Texto, out int codigoTecnico) || codigoTecnico < 1)
+                throw new ArgumentException("Escriba el codigo de un tecnico registrado.");
+            input.CodigoTecnico = codigoTecnico;
             input.Costo = Formato.LeerDecimalCeroPermitido(txtCosto.Texto,
                 "El costo debe ser un numero mayor o igual a cero (por ejemplo 185000).");
             input.Fecha = Formato.LeerFechaServidor(txtFecha.Texto,
@@ -121,7 +124,7 @@ namespace ClienteLavadora.vista.controles
 
             MantenimientoUpdateInput input = new MantenimientoUpdateInput();
             input.Descripcion = completo.Descripcion;
-            input.Tecnico = completo.Tecnico;
+            input.CodigoTecnico = completo.CodigoTecnico;
             input.Costo = completo.Costo;
             input.Fecha = completo.Fecha;
             input.Completado = completo.Completado;
