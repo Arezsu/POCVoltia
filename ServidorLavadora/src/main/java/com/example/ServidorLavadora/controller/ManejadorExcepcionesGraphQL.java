@@ -20,10 +20,11 @@ public class ManejadorExcepcionesGraphQL extends DataFetcherExceptionResolverAda
     @Override
     protected GraphQLError resolveToSingleError(Throwable ex, DataFetchingEnvironment env) {
         boolean esValidacion = ex instanceof IllegalArgumentException;
-        String mensaje = esValidacion
+        boolean servicioNoDisponible = ex instanceof IllegalStateException;
+        String mensaje = esValidacion || servicioNoDisponible
                 ? (ex.getMessage() == null ? "Los datos enviados no son válidos." : ex.getMessage())
                 : "Ocurrió un error interno al procesar la operación.";
-        String codigo = esValidacion ? "VALIDACION" : "ERROR_INTERNO";
+        String codigo = esValidacion ? "VALIDACION" : servicioNoDisponible ? "SERVICIO_NO_DISPONIBLE" : "ERROR_INTERNO";
         return GraphqlErrorBuilder.newError(env)
                 .message(mensaje)
                 .errorType(esValidacion ? ErrorType.BAD_REQUEST : ErrorType.INTERNAL_ERROR)

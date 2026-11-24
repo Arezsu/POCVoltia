@@ -3,27 +3,43 @@ package com.voltia.tecnicos.controller;
 import com.voltia.tecnicos.model.Tecnico;
 import com.voltia.tecnicos.model.TecnicoInput;
 import com.voltia.tecnicos.servicios.ServicioTecnico;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.graphql.data.method.annotation.SchemaMapping;
+import org.springframework.stereotype.Controller;
 
-@RestController
-@RequestMapping("/tecnicos")
+@Controller
 public class TecnicoController {
+    private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
     private final ServicioTecnico servicio;
+
     public TecnicoController(ServicioTecnico servicio) { this.servicio = servicio; }
 
-    @GetMapping
-    public List<Tecnico> listar(@RequestParam(required = false) String texto,
-                                @RequestParam(required = false) String especialidad,
-                                @RequestParam(required = false) Boolean activo) {
+    @QueryMapping
+    public List<Tecnico> tecnicos(@Argument String texto, @Argument String especialidad, @Argument Boolean activo) {
         return servicio.listar(texto, especialidad, activo);
     }
-    @GetMapping("/{codigo}") public Tecnico buscar(@PathVariable int codigo) { return servicio.buscar(codigo); }
-    @PostMapping @ResponseStatus(HttpStatus.CREATED)
-    public Tecnico crear(@RequestBody TecnicoInput input) { return servicio.crear(input); }
-    @PutMapping("/{codigo}")
-    public Tecnico actualizar(@PathVariable int codigo, @RequestBody TecnicoInput input) { return servicio.actualizar(codigo, input); }
-    @DeleteMapping("/{codigo}") @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void eliminar(@PathVariable int codigo) { servicio.eliminar(codigo); }
+
+    @QueryMapping
+    public Tecnico tecnicoPorCodigo(@Argument int codigo) { return servicio.buscarSiExiste(codigo); }
+
+    @MutationMapping
+    public Tecnico addTecnico(@Argument("input") TecnicoInput input) { return servicio.crear(input); }
+
+    @MutationMapping
+    public Tecnico actualizarTecnico(@Argument int codigo, @Argument("input") TecnicoInput input) {
+        return servicio.actualizar(codigo, input);
+    }
+
+    @MutationMapping
+    public boolean eliminarTecnico(@Argument int codigo) {
+        servicio.eliminar(codigo);
+        return true;
+    }
+
+    @SchemaMapping(typeName = "Tecnico", field = "fechaIngreso")
+    public String fechaIngreso(Tecnico tecnico) { return tecnico.getFechaIngreso().format(FECHA); }
 }

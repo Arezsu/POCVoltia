@@ -8,6 +8,7 @@ import com.example.ServidorLavadora.model.TecnicoDto;
 import com.example.ServidorLavadora.repositorio.AlmacenDatos;
 import com.example.ServidorLavadora.util.Validaciones;
 import org.springframework.stereotype.Service;
+import org.springframework.graphql.client.GraphQlTransportException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -249,7 +250,14 @@ public class ServicioMantenimiento {
     }
 
     private TecnicoDto exigirTecnicoActivo(int codigo) {
-        TecnicoDto tecnico = clienteTecnicos.buscar(codigo);
+        if (codigo < 1) throw new IllegalArgumentException("El codigo del tecnico debe ser un entero mayor que cero.");
+        TecnicoDto tecnico;
+        try {
+            tecnico = clienteTecnicos.buscar(codigo);
+        } catch (GraphQlTransportException ex) {
+            throw new IllegalStateException("No se pudo conectar con el microservicio de tecnicos. Verifique que este iniciado en el puerto 8082.", ex);
+        }
+        if (tecnico == null) throw new IllegalArgumentException("No existe un tecnico registrado con el codigo " + codigo + ".");
         if (!tecnico.activo()) throw new IllegalArgumentException("El tecnico seleccionado esta inactivo.");
         return tecnico;
     }

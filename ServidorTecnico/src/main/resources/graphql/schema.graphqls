@@ -1,0 +1,31 @@
+type Query {
+    tecnicos(texto: String, especialidad: String, activo: Boolean): [Tecnico!]!
+    tecnicoPorCodigo(codigo: Int!): Tecnico
+}
+
+type Mutation {
+    addTecnico(input: TecnicoInput!): Tecnico
+    actualizarTecnico(codigo: Int!, input: TecnicoInput!): Tecnico
+    eliminarTecnico(codigo: Int!): Boolean!
+}
+
+type Tecnico {
+    id: ID
+    codigo: Int
+    documento: String
+    nombre: String
+    especialidad: String
+    telefono: String
+    fechaIngreso: String
+    activo: Boolean
+}
+
+input TecnicoInput {
+    codigo: Int!
+    documento: String!
+    nombre: String!
+    especialidad: String!
+    telefono: String!
+    fechaIngreso: String!
+    activo: Boolean!
+}

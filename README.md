@@ -16,7 +16,7 @@ consumen por la red, cada uno con su propia tecnologia.
 | Componente | Tecnologia | Carpeta |
 | :--- | :--- | :--- |
 | Microservicio principal | Java 17, Spring Boot, Spring GraphQL, MongoDB `voltia` | `ServidorLavadora` |
-| Microservicio Clase C | Java 17, Spring Boot REST, MongoDB independiente `voltia_tecnicos` | `ServidorTecnico` |
+| Microservicio Clase C | Java 17, Spring Boot GraphQL, MongoDB independiente `voltia_tecnicos` | `ServidorTecnico` |
 | Cliente 1 | C# con WPF en puro codigo C# (sin un solo archivo XAML) | `ClienteLavadora` |
 | Cliente 2 | Aplicacion web con framework Express (Node.js + JavaScript) | `ClienteWeb` |
 
@@ -42,7 +42,7 @@ sin almacenar una lista de mantenimientos dentro de la clase Lavadora. El sistem
   tenencia de mantenimientos).
 - Actualizar y eliminar lavadoras con busqueda previa obligatoria.
 - Registrar, actualizar y eliminar los mantenimientos de cada lavadora.
-- Gestionar tecnicos en un microservicio REST con base MongoDB independiente.
+- Gestionar tecnicos en un microservicio GraphQL con base MongoDB independiente.
 - Asociar cada mantenimiento con un tecnico activo registrado.
 
 Cada mantenimiento tiene un ID único en el sistema, por lo que se puede consultar,
@@ -74,7 +74,7 @@ lavadoras con el docente; la interfaz actual las busca por código.
           |  model/       -> Lavadora y Mantenimiento         |
           +---------------------------------------------------+
              MongoDB `voltia` (lavadoras y mantenimientos)
-                 | REST HTTP :8082
+                 | GraphQL HTTP :8082/graphql
                  v
           ServidorTecnico -> MongoDB independiente `voltia_tecnicos`
 ```
@@ -85,7 +85,7 @@ ve los cambios que hace el otro gracias a la version de los datos (`versionDatos
 ## Inicio local (Windows PowerShell)
 
 Inicie MongoDB, ambos microservicios y cada cliente en terminales separadas. El servidor
-principal usa la base `voltia`; el servicio REST de tecnicos usa la base independiente
+principal usa la base `voltia`; el servicio GraphQL de tecnicos usa la base independiente
 `voltia_tecnicos`.
 Las colecciones principales son `lavadoras` y `mantenimientos`. Si el servidor ya estaba
 abierto antes de este cambio, detengalo y vuelva a iniciarlo para que use `voltia`.
@@ -99,14 +99,15 @@ colecciones en `voltia` si todavía no existen.
    Start-Service MongoDB
    ```
 
-2. Inicie el microservicio REST de técnicos en otra terminal:
+2. Inicie el microservicio GraphQL de técnicos en otra terminal:
 
    ```powershell
    cd .\ServidorTecnico
    .\mvnw.cmd spring-boot:run
    ```
 
-   Queda disponible en `http://localhost:8082/tecnicos`.
+   Queda disponible en `http://localhost:8082/graphql`; para probar sus consultas y mutations,
+   abre GraphiQL en `http://localhost:8082/graphiql`.
 
 3. Inicie el servidor GraphQL desde la raiz del repositorio:
 
@@ -154,7 +155,7 @@ con su lavadora mediante `codigoLavadora`:
 - **Detalle (0..*): Mantenimiento.** Cada lavadora puede tener cero, uno o muchos
   mantenimientos asociados en la coleccion independiente.
 - **Clase C: Tecnico.** Cada mantenimiento guarda `codigoTecnico` y queda asociado a un
-  tecnico administrado por el microservicio REST independiente.
+  tecnico administrado por el microservicio GraphQL independiente.
 
 La lavadora hereda de `Electrodomestico`. Al eliminar una lavadora, tambien se eliminan
 sus detalles. Un tecnico asociado a mantenimientos no se puede eliminar hasta que estos
@@ -226,7 +227,7 @@ classDiagram
     }
 
     class ServidorTecnico {
-        <<REST puerto 8082>>
+        <<GraphQL puerto 8082>>
     }
     class ServicioTecnico {
         +listar(texto, especialidad, activo) List
@@ -244,7 +245,7 @@ classDiagram
     ServicioLavadora --> RepositorioMongo : usa por interfaz
     ServicioMantenimiento --> RepositorioMongo : usa por interfaz
     Mantenimiento --> Tecnico : referencia por codigoTecnico
-    ServicioMantenimiento --> ServidorTecnico : REST transparente a los clientes
+    ServicioMantenimiento --> ServidorTecnico : GraphQL transparente a los clientes
     ServidorTecnico --> ServicioTecnico : controller
 ```
 
@@ -301,7 +302,7 @@ lleva la consulta y, opcionalmente, variables.
 | Mutation | `addMantenimiento(input)` | Agrega un detalle con ID elegido por el usuario y lavadora asociada |
 | Mutation | `actualizarMantenimiento(id, input)` | Actualiza previa busqueda por ID |
 | Mutation | `eliminarMantenimiento(id)` | Elimina previa busqueda por ID |
-| Mutation | `addTecnico`, `actualizarTecnico`, `eliminarTecnico` | CRUD de técnicos a través del servicio REST |
+| Mutation | `addTecnico`, `actualizarTecnico`, `eliminarTecnico` | CRUD de técnicos en el segundo servicio GraphQL |
 
 Detalles importantes del contrato:
 
@@ -463,10 +464,10 @@ oscuro y la simulación de tambor se mantiene como indicador secundario.
 
 ```text
 POCVoltiaV4/
-├── ServidorTecnico/                   Microservicio REST para Clase C y MongoDB independiente
+├── ServidorTecnico/                   Microservicio GraphQL para Clase C y MongoDB independiente
 │   └── src/main/java/com/voltia/tecnicos/
 │       ├── model/                     Tecnico y entrada validada
-│       └── controller/                CRUD REST `/tecnicos` en puerto 8082
+│       └── controller/                Queries y mutations GraphQL en puerto 8082
 ├── ServidorLavadora/                  Servidor Java Spring Boot GraphQL
 │   ├── src/main/java/com/example/ServidorLavadora/
 │   │   ├── model/                     Electrodomestico, Lavadora, Mantenimiento e inputs
@@ -519,14 +520,15 @@ este caso; esa parte debe validarse con el docente.
 
 ### 1. Servidor Java (desde IntelliJ o consola)
 
-Antes de iniciar el servidor GraphQL, inicia el servicio REST de Técnicos en otra terminal:
+Antes de iniciar el servidor GraphQL principal, inicia el microservicio GraphQL de Técnicos en otra terminal:
 
 ```powershell
 cd ServidorTecnico
 .\mvnw.cmd spring-boot:run
 ```
 
-Usa MongoDB `localhost:27017`, base `voltia_tecnicos` y puerto `8082`.
+Usa MongoDB `localhost:27017`, base `voltia_tecnicos` y puerto `8082`. Su endpoint GraphQL es
+`http://localhost:8082/graphql` y GraphiQL está en `http://localhost:8082/graphiql`.
 
 - **Desde IntelliJ IDEA:**
   1. Abrir la carpeta `ServidorLavadora`.

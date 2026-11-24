@@ -107,7 +107,7 @@ namespace ClienteLavadora.vista.controles
             input.Descripcion = Formato.LeerTexto(txtDescripcion.Texto,
                 "Escriba la descripcion del mantenimiento.");
             if (!int.TryParse(txtTecnico.Texto, out int codigoTecnico) || codigoTecnico < 1)
-                throw new ArgumentException("Escriba el codigo de un tecnico registrado.");
+                throw new ArgumentException("El codigo del tecnico debe ser un entero mayor que cero.");
             input.CodigoTecnico = codigoTecnico;
             input.Costo = Formato.LeerDecimalCeroPermitido(txtCosto.Texto,
                 "El costo debe ser un numero mayor o igual a cero (por ejemplo 185000).");

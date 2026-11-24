@@ -9,7 +9,7 @@
 #   4. Si la operacion usa variables, copie el bloque JSON de "VARIABLES"
 #      en la pestana de variables de GraphiQL y ejecute con el boton Play.
 #
-#  Relaciones: Lavadora -- Mantenimiento -- Tecnico (microservicio REST)
+#  Relaciones: Lavadora -- Mantenimiento -- Tecnico (segundo microservicio GraphQL)
 #  Las fechas viajan como texto yyyy-MM-ddTHH:mm:ss.
 # =====================================================================
 
@@ -196,7 +196,7 @@ mutation EliminarLavadora($codigo: Int!) {
 # VARIABLES:
 # { "codigo": 105 }
 
-# 2.4 Registrar un tecnico (microservicio REST, base voltia_tecnicos).
+# 2.4 Registrar un tecnico en el segundo microservicio GraphQL (base voltia_tecnicos).
 mutation AgregarTecnico {
   addTecnico(input: {
     codigo: 701

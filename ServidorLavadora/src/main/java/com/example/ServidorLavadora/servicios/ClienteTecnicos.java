@@ -2,46 +2,61 @@ package com.example.ServidorLavadora.servicios;
 
 import com.example.ServidorLavadora.model.TecnicoDto;
 import com.example.ServidorLavadora.model.TecnicoInput;
-import java.util.Arrays;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.graphql.client.HttpSyncGraphQlClient;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestClientResponseException;
 
-/** Adaptador HTTP: el microservicio GraphQL oculta a sus clientes que Tecnico vive en otro servicio. */
+/** Cliente GraphQL del microservicio independiente de técnicos. */
 @Component
 public class ClienteTecnicos {
-    private final RestClient http;
-    public ClienteTecnicos(@Value("${voltia.tecnicos.url:http://localhost:8082}") String url) {
-        this.http = RestClient.builder().baseUrl(url).build();
+    private static final String CAMPOS = "id codigo documento nombre especialidad telefono fechaIngreso activo";
+    private final HttpSyncGraphQlClient graphql;
+
+    public ClienteTecnicos(@Value("${voltia.tecnicos.graphql-url:http://localhost:8082/graphql}") String url) {
+        // RestClient solo es el transporte HTTP usado internamente por el cliente GraphQL síncrono.
+        // Las operaciones enviadas aquí son documentos GraphQL al endpoint /graphql.
+        this.graphql = HttpSyncGraphQlClient.create(RestClient.create(url));
     }
+
     public List<TecnicoDto> listar(String texto, String especialidad, Boolean activo) {
-        TecnicoDto[] datos = http.get().uri(uri -> uri.path("/tecnicos")
-                .queryParamIfPresent("texto", java.util.Optional.ofNullable(texto).filter(s -> !s.isBlank()))
-                .queryParamIfPresent("especialidad", java.util.Optional.ofNullable(especialidad).filter(s -> !s.isBlank()))
-                .queryParamIfPresent("activo", java.util.Optional.ofNullable(activo)).build())
-                .retrieve().body(TecnicoDto[].class);
-        return datos == null ? List.of() : Arrays.asList(datos);
+        return graphql.document("query Tecnicos($texto:String,$especialidad:String,$activo:Boolean) { " +
+                        "tecnicos(texto:$texto,especialidad:$especialidad,activo:$activo) { " + CAMPOS + " } }")
+                .variable("texto", texto)
+                .variable("especialidad", especialidad)
+                .variable("activo", activo)
+                .retrieveSync("tecnicos")
+                .toEntityList(TecnicoDto.class);
     }
+
     public TecnicoDto buscar(int codigo) {
-        try { return http.get().uri("/tecnicos/{codigo}", codigo).retrieve().body(TecnicoDto.class); }
-        catch (RestClientResponseException ex) { throw error(ex); }
+        return graphql.document("query TecnicoPorCodigo($codigo:Int!) { tecnicoPorCodigo(codigo:$codigo) { " + CAMPOS + " } }")
+                .variable("codigo", codigo)
+                .retrieveSync("tecnicoPorCodigo")
+                .toEntity(TecnicoDto.class);
     }
+
     public TecnicoDto crear(TecnicoInput input) {
-        try { return http.post().uri("/tecnicos").body(input).retrieve().body(TecnicoDto.class); }
-        catch (RestClientResponseException ex) { throw error(ex); }
+        return graphql.document("mutation AgregarTecnico($input:TecnicoInput!) { addTecnico(input:$input) { " + CAMPOS + " } }")
+                .variable("input", input)
+                .retrieveSync("addTecnico")
+                .toEntity(TecnicoDto.class);
     }
+
     public TecnicoDto actualizar(int codigo, TecnicoInput input) {
-        try { return http.put().uri("/tecnicos/{codigo}", codigo).body(input).retrieve().body(TecnicoDto.class); }
-        catch (RestClientResponseException ex) { throw error(ex); }
+        return graphql.document("mutation ActualizarTecnico($codigo:Int!,$input:TecnicoInput!) { " +
+                        "actualizarTecnico(codigo:$codigo,input:$input) { " + CAMPOS + " } }")
+                .variable("codigo", codigo)
+                .variable("input", input)
+                .retrieveSync("actualizarTecnico")
+                .toEntity(TecnicoDto.class);
     }
+
     public void eliminar(int codigo) {
-        try { http.delete().uri("/tecnicos/{codigo}", codigo).retrieve().toBodilessEntity(); }
-        catch (RestClientResponseException ex) { throw error(ex); }
-    }
-    private IllegalArgumentException error(RestClientResponseException ex) {
-        String cuerpo = ex.getResponseBodyAsString();
-        return new IllegalArgumentException(cuerpo.isBlank() ? "No fue posible comunicarse con el servicio de tecnicos." : cuerpo);
+        graphql.document("mutation EliminarTecnico($codigo:Int!) { eliminarTecnico(codigo:$codigo) }")
+                .variable("codigo", codigo)
+                .retrieveSync("eliminarTecnico")
+                .toEntity(Boolean.class);
     }
 }

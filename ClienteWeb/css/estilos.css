@@ -2072,6 +2072,123 @@ body[data-tema="claro"] .tabla-scroll {
   border-radius: 3px;
 }
 
+/* ---------------------------------------------------------------
+   Gestión de técnicos: ficha coherente con los demás modales Voltia
+   --------------------------------------------------------------- */
+.modal.ancho.modal-tecnico {
+  width: min(1160px, 96vw);
+  max-height: calc(100vh - 32px);
+}
+
+.filtros-tecnicos {
+  align-items: end;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid var(--borde-suave);
+  border-radius: 12px;
+  background: var(--cristal);
+}
+
+.tabla-scroll-tecnicos {
+  max-width: 100%;
+  max-height: min(56vh, 520px);
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid var(--borde-suave);
+}
+
+.tabla-tecnicos {
+  min-width: 1120px;
+}
+
+.tabla-tecnicos th,
+.tabla-tecnicos td {
+  padding: 10px 9px;
+}
+
+.tecnico-estado {
+  min-height: 22px;
+  margin: 10px 0;
+  color: var(--secundario);
+  font-size: 0.82rem;
+  overflow-wrap: anywhere;
+}
+
+.tecnico-estado:empty,
+.tecnico-estado[hidden] {
+  display: none;
+}
+
+.tecnico-estado.exito {
+  color: var(--exito);
+}
+
+.tecnico-estado.error {
+  color: var(--error);
+}
+
+.ficha-tecnico {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.7fr) minmax(0, 1.3fr);
+  gap: 0;
+  margin: 16px 0;
+  overflow: hidden;
+  border: 1px solid var(--borde-suave);
+  border-radius: 12px;
+  background: var(--cristal-fuerte);
+}
+
+.ficha-tecnico dt,
+.ficha-tecnico dd {
+  margin: 0;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--borde-suave);
+}
+
+.ficha-tecnico dt {
+  color: var(--secundario);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ficha-tecnico dd {
+  color: var(--texto);
+  overflow-wrap: anywhere;
+}
+
+.tecnico-confirmacion {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--error);
+  border-radius: 12px;
+  background: rgba(224, 108, 108, 0.08);
+}
+
+.formulario-busqueda-tecnico {
+  display: grid;
+  grid-template-columns: minmax(180px, 320px) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.formulario-busqueda-tecnico [data-estado-tecnico] {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 720px) {
+  .ficha-tecnico {
+    grid-template-columns: minmax(105px, 0.75fr) minmax(0, 1.25fr);
+  }
+
+  .formulario-busqueda-tecnico {
+    grid-template-columns: 1fr;
+  }
+
+  .formulario-busqueda-tecnico [data-estado-tecnico] {
+    grid-column: auto;
+  }
+}
+
 body[data-tema="claro"] .tabla thead th:first-child,
 body[data-tema="claro"] .tabla thead th:last-child {
   border-radius: 0;

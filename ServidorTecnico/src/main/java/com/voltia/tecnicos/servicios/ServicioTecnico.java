@@ -8,9 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Locale;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ServicioTecnico {
@@ -29,28 +27,29 @@ public class ServicioTecnico {
                 .toList();
     }
     public Tecnico buscar(int codigo) { return repositorio.findByCodigo(codigo).orElseThrow(() ->
-            new ResponseStatusException(HttpStatus.NOT_FOUND, "No existe un tecnico con ese codigo.")); }
+            new IllegalArgumentException("No existe un tecnico con ese codigo.")); }
+    public Tecnico buscarSiExiste(int codigo) { return repositorio.findByCodigo(codigo).orElse(null); }
     public Tecnico crear(TecnicoInput input) {
         validar(input);
-        if (repositorio.existsByCodigo(input.codigo())) throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un tecnico con ese codigo.");
-        if (repositorio.existsByDocumento(input.documento().trim())) throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe un tecnico con ese documento.");
+        if (repositorio.existsByCodigo(input.codigo())) throw new IllegalArgumentException("Ya existe un tecnico con ese codigo.");
+        if (repositorio.existsByDocumento(input.documento().trim())) throw new IllegalArgumentException("Ya existe un tecnico con ese documento.");
         return repositorio.save(convertir(input));
     }
     public Tecnico actualizar(int codigo, TecnicoInput input) {
         Tecnico actual = buscar(codigo); validar(input);
-        if (input.codigo() != codigo) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El codigo no se puede cambiar.");
-        if (repositorio.existsByDocumentoAndCodigoNot(input.documento().trim(), codigo)) throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe otro tecnico con ese documento.");
+        if (input.codigo() != codigo) throw new IllegalArgumentException("El codigo no se puede cambiar.");
+        if (repositorio.existsByDocumentoAndCodigoNot(input.documento().trim(), codigo)) throw new IllegalArgumentException("Ya existe otro tecnico con ese documento.");
         Tecnico nuevo = convertir(input); nuevo.setId(actual.getId()); return repositorio.save(nuevo);
     }
     public void eliminar(int codigo) { repositorio.delete(buscar(codigo)); }
 
     private void validar(TecnicoInput i) {
-        if (i == null || i.codigo() < 1) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El codigo debe ser positivo.");
+        if (i == null || i.codigo() < 1) throw new IllegalArgumentException("El codigo debe ser positivo.");
         requerido(i.documento(), "documento"); requerido(i.nombre(), "nombre"); requerido(i.especialidad(), "especialidad"); requerido(i.telefono(), "telefono");
-        if (i.activo() == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Indique si el tecnico esta activo.");
+        if (i.activo() == null) throw new IllegalArgumentException("Indique si el tecnico esta activo.");
         try { LocalDateTime.parse(i.fechaIngreso(), FECHA); }
-        catch (DateTimeParseException | NullPointerException ex) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La fecha debe tener formato yyyy-MM-ddTHH:mm:ss."); }
+        catch (DateTimeParseException | NullPointerException ex) { throw new IllegalArgumentException("La fecha debe tener formato yyyy-MM-ddTHH:mm:ss."); }
     }
-    private void requerido(String s, String nombre) { if (s == null || s.isBlank()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El campo " + nombre + " es obligatorio."); }
+    private void requerido(String s, String nombre) { if (s == null || s.isBlank()) throw new IllegalArgumentException("El campo " + nombre + " es obligatorio."); }
     private Tecnico convertir(TecnicoInput i) { return new Tecnico(i.codigo(), i.documento().trim(), i.nombre().trim(), i.especialidad().trim(), i.telefono().trim(), LocalDateTime.parse(i.fechaIngreso(), FECHA), i.activo()); }
 }

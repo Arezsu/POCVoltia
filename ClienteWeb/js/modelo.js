@@ -524,7 +524,7 @@
         errores.descripcion = 'La descripcion es obligatoria.';
       }
       if (!Number.isInteger(Number(datos.codigoTecnico)) || Number(datos.codigoTecnico) < 1) {
-        errores.codigoTecnico = 'Escriba el código de un técnico registrado.';
+        errores.codigoTecnico = 'El código del técnico debe ser un entero mayor que cero.';
       }
       if (!Number.isFinite(costo) || costo < 0) {
         errores.costo = 'El costo debe ser un numero mayor o igual a cero.';
